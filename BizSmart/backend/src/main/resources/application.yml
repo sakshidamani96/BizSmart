@@ -1,0 +1,90 @@
+# =============================================================================
+# BizSmart backend configuration
+#
+#   default profile -> local development (in-memory H2, H2 console enabled)
+#   prod profile    -> Render / any cloud Postgres (activated via SPRING_PROFILES_ACTIVE=prod)
+# =============================================================================
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+  # Render terminates TLS at its proxy; trust X-Forwarded-* headers
+  forward-headers-strategy: framework
+  compression:
+    enabled: true
+    mime-types: application/json,text/html,text/css,application/javascript,image/svg+xml
+    min-response-size: 1024
+  error:
+    include-message: always
+    include-stacktrace: never
+
+spring:
+  application:
+    name: bizsmart-backend
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+  datasource:
+    url: jdbc:h2:mem:bizsmartdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+bizsmart:
+  app:
+    # Override JWT_SECRET in every non-local environment (render.yaml generates one)
+    jwtSecret: ${JWT_SECRET:bizSmartLocalDevSecretKeyForJwtSigningMustBeAtLeast32Bytes}
+    jwtExpirationMs: ${JWT_EXPIRATION_MS:86400000} # 24 hours
+    # Comma-separated list of allowed browser origins for CORS. "*" allows any origin.
+    # When the frontend is served by this same service (the Render setup), CORS is not needed at all.
+    cors-allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
+    # Seeds demo users/products/customers on first start (only when tables are empty)
+    seed-demo-data: ${SEED_DEMO_DATA:true}
+    # Allow anyone to self-register as a store owner via /api/auth/signup
+    public-signup-enabled: ${PUBLIC_SIGNUP_ENABLED:true}
+  ml-service:
+    # Optional external forecasting service. Leave empty to use the built-in heuristic forecast.
+    url: ${ML_SERVICE_URL:}
+
+logging:
+  level:
+    root: INFO
+    com.bizsmart: INFO
+
+---
+# =============================================================================
+# Production profile (Render). Connection parts are injected by render.yaml
+# from the managed Postgres instance, so no URL parsing is required.
+# =============================================================================
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}${DB_URL_PARAMS:}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      # Render free Postgres allows a small number of connections; keep the pool modest
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+      minimum-idle: 1
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 30000
+  h2:
+    console:
+      enabled: false

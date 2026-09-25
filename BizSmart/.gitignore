@@ -1,0 +1,21 @@
+# Dependencies & builds
+node_modules/
+dist/
+target/
+*.jar
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# Old Vercel link
+.vercel/
