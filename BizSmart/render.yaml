@@ -19,8 +19,8 @@ services:
     runtime: docker
     plan: free
     region: singapore
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    dockerfilePath: ./BizSmart/Dockerfile
+    dockerContext: ./BizSmart
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
