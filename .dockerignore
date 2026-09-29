@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+**/target
+**/.git
+**/.vercel
+**/*.log
+**/.env
+**/.env.local
+docs
+*.md
