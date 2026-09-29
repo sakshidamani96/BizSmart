@@ -62,7 +62,8 @@ import {
   Phone,
   MapPin,
   Check,
-  Briefcase
+  Briefcase,
+  Percent
 } from 'lucide-react';
 import api, { API_ENABLED, portalForRoles } from './api';
 import rawProducts60 from './products60.json';
