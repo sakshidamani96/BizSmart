@@ -819,7 +819,7 @@ export default function App() {
       }
       return p;
     }));
-    alert(Success: Applied % clearance promotional markdown to  near-expiry items to prevent dead inventory!);
+    alert(`Success: Applied ${discountPct}% clearance promotional markdown to ${nearExpiryIds.size} near-expiry items to prevent dead inventory!`);
   };
 
   // Cart operations
