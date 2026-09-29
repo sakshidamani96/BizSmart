@@ -332,7 +332,10 @@ export default function App() {
   const [selectedCustomerId, setSelectedCustomerId] = useState(1);
   const [cart, setCart] = useState([]);
   const [discountAmount, setDiscountAmount] = useState(0);
-  const [paymentMode, setPaymentMode] = useState('UPI');
+  const [paymentMode, setPaymentMode] = useState('UPI'); // 'UPI' | 'CASH' | 'SPLIT' | 'CREDIT'
+  const [splitCashAmount, setSplitCashAmount] = useState('');
+  const [splitUpiAmount, setSplitUpiAmount] = useState('');
+  const [tenderCashGiven, setTenderCashGiven] = useState('');
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [lastGeneratedBill, setLastGeneratedBill] = useState(null);
 
@@ -481,15 +484,6 @@ export default function App() {
     phone: '',
     address: '',
     dues: '0'
-  });
-
-  const [showAddStoreModal, setShowAddStoreModal] = useState(false);
-  const [newStore, setNewStore] = useState({
-    name: '',
-    owner: '',
-    city: '',
-    phone: '',
-    gmv: '₹0'
   });
 
   // Modal: Add Expense (Nice Box with Title, Category, Date calendar, Amount, Note)
@@ -772,33 +766,7 @@ export default function App() {
       return;
     }
 
-    // 3. Demo or Fallback Supplier & Admin
-    if (cleanEmail.includes('supplier') || cleanEmail.includes('itc') || suppliers.some(s => s.email === cleanEmail)) {
-      const suppFound = suppliers.find(s => s.email === cleanEmail);
-      setCurrentUser({
-        email: cleanEmail,
-        name: suppFound ? suppFound.contact : 'Sunil Kumar (ITC Distributor)',
-        role: 'SUPPLIER',
-        roleTitle: 'Wholesale Supplier'
-      });
-      setIsAuthenticated(true);
-      setActiveTab('supplier-portal');
-      setLoginError('');
-      return;
-    }
 
-    if (cleanEmail.includes('admin')) {
-      setCurrentUser({
-        email: cleanEmail,
-        name: 'Platform Super Administrator',
-        role: 'ADMIN',
-        roleTitle: 'Platform Admin'
-      });
-      setIsAuthenticated(true);
-      setActiveTab('platform-admin');
-      setLoginError('');
-      return;
-    }
 
     setLoginError('Unrecognized credentials. Store Owners can register their store on the registration page. Employees must be added by their Store Owner in the Owner Dashboard.');
   };
@@ -811,6 +779,47 @@ export default function App() {
     setLoginPassword('');
     setLoginError('');
     setViewMode('landing'); // Return to the Opening Page
+  };
+
+  // Clearance Promotional Markdown Trigger (15% Off Near-Expiry Stock)
+  const handleApplyClearanceMarkdown = (productId, discountPct = 15) => {
+    setProducts(prevProducts => prevProducts.map(p => {
+      if (p.id === productId) {
+        const discountedPrice = Math.max(1, Math.round(p.sellingPrice * (1 - discountPct / 100)));
+        return {
+          ...p,
+          sellingPrice: discountedPrice,
+          clearanceMarkdown: discountPct,
+          originalPrice: p.originalPrice || p.sellingPrice
+        };
+      }
+      return p;
+    }));
+  };
+
+  const handleApplyClearanceMarkdownToAllNearExpiry = (discountPct = 15) => {
+    const nearExpiryIds = new Set(
+      products
+        .filter(p => calculateDaysToExpiry(p.expiryDate) <= 15)
+        .map(p => p.id)
+    );
+    if (nearExpiryIds.size === 0) {
+      alert('No products currently expiring within 15 days.');
+      return;
+    }
+    setProducts(prevProducts => prevProducts.map(p => {
+      if (nearExpiryIds.has(p.id)) {
+        const discountedPrice = Math.max(1, Math.round(p.sellingPrice * (1 - discountPct / 100)));
+        return {
+          ...p,
+          sellingPrice: discountedPrice,
+          clearanceMarkdown: discountPct,
+          originalPrice: p.originalPrice || p.sellingPrice
+        };
+      }
+      return p;
+    }));
+    alert(Success: Applied % clearance promotional markdown to  near-expiry items to prevent dead inventory!);
   };
 
   // Cart operations
@@ -906,6 +915,18 @@ export default function App() {
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10);
     const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    // Split Payment Calculations
+    const finalCashPart = paymentMode === 'SPLIT'
+      ? Math.min(cartFinalTotal, Number(splitCashAmount) || 0)
+      : (paymentMode === 'CASH' ? cartFinalTotal : 0);
+    const finalUpiPart = paymentMode === 'SPLIT'
+      ? Math.max(0, cartFinalTotal - finalCashPart)
+      : (paymentMode === 'UPI' ? cartFinalTotal : 0);
+    const tenderGivenNum = Number(tenderCashGiven) || 0;
+    const changeToReturn = (paymentMode === 'CASH' || paymentMode === 'SPLIT') && tenderGivenNum > finalCashPart
+      ? tenderGivenNum - finalCashPart
+      : 0;
+
     const bill = {
       id: Date.now(),
       billNo: `INV-${Date.now().toString().slice(-6)}`,
@@ -922,6 +943,10 @@ export default function App() {
       pointsRedeemed: loyaltyDiscount,
       total: cartFinalTotal,
       paymentMode,
+      splitCash: paymentMode === 'SPLIT' ? finalCashPart : 0,
+      splitUpi: paymentMode === 'SPLIT' ? finalUpiPart : 0,
+      tenderGiven: tenderGivenNum > 0 ? tenderGivenNum : finalCashPart,
+      changeReturned: changeToReturn,
       cashier: currentUser ? currentUser.name : 'Ajay Sharma',
       shiftId: activeShift ? activeShift.id : 'SHIFT-101'
     };
@@ -982,8 +1007,12 @@ export default function App() {
       ...prev,
       todayBills: prev.todayBills + 1,
       counterSales: prev.counterSales + cartFinalTotal,
-      cashCollected: paymentMode === 'CASH' ? prev.cashCollected + cartFinalTotal : prev.cashCollected,
-      upiCollected: paymentMode === 'UPI' ? prev.upiCollected + cartFinalTotal : prev.upiCollected
+      cashCollected: paymentMode === 'CASH'
+        ? prev.cashCollected + cartFinalTotal
+        : (paymentMode === 'SPLIT' ? prev.cashCollected + finalCashPart : prev.cashCollected),
+      upiCollected: paymentMode === 'UPI'
+        ? prev.upiCollected + cartFinalTotal
+        : (paymentMode === 'SPLIT' ? prev.upiCollected + finalUpiPart : prev.upiCollected)
     }));
 
     setBills(prev => [bill, ...prev]);
@@ -992,6 +1021,9 @@ export default function App() {
     setCart([]);
     setDiscountAmount(0);
     setRedeemLoyaltyPoints(false);
+    setSplitCashAmount('');
+    setSplitUpiAmount('');
+    setTenderCashGiven('');
 
     // Sync order to Cloud Database if connected
     if (API_ENABLED && isAuthenticated) {
@@ -1650,24 +1682,7 @@ export default function App() {
     alert(`Success: Added supplier "${s.name}"!`);
   };
 
-  const handleAddStoreSubmit = (e) => {
-    e.preventDefault();
-    if (!newStore.name || !newStore.owner) return;
-    const store = {
-      id: Date.now(),
-      name: newStore.name,
-      owner: newStore.owner,
-      city: newStore.city || 'Delhi NCR',
-      phone: newStore.phone,
-      gmv: newStore.gmv,
-      skus: products.length,
-      status: 'ACTIVE'
-    };
-    setPlatformStores([...platformStores, store]);
-    setShowAddStoreModal(false);
-    setNewStore({ name: '', owner: '', city: '', phone: '', gmv: '₹0' });
-    alert(`Success: Registered store "${store.name}" on BizSmart Platform!`);
-  };
+
 
   // ADD EXPENSE HANDLER (Nice Box Modal Submission)
   const handleAddExpenseSubmit = (e) => {
@@ -1797,6 +1812,9 @@ export default function App() {
         if (inventoryExpiryFilter === 'expired') {
           return days <= 0;
         }
+        if (inventoryExpiryFilter === 'near-15') {
+          return days > 0 && days <= 15;
+        }
         if (inventoryExpiryFilter === 'near-30') {
           return days > 0 && days <= 30;
         }
@@ -1912,25 +1930,27 @@ export default function App() {
     // -----------------------------------------------------------
     if (viewMode === 'landing') {
       return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500 selection:text-white flex flex-col relative overflow-hidden">
-          {/* Ambient Background Glows */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-indigo-600/25 via-indigo-900/10 to-transparent blur-3xl pointer-events-none rounded-full" />
-          <div className="absolute bottom-1/3 left-[-100px] w-96 h-96 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute top-1/2 right-[-100px] w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="min-h-screen bg-gradient-to-br from-violet-950 via-purple-900 to-emerald-950 text-white font-sans selection:bg-fuchsia-500 selection:text-white flex flex-col relative overflow-hidden">
+          {/* Ambient Vibrant Mesh Glows */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[850px] h-[450px] bg-gradient-to-r from-fuchsia-600/35 via-violet-600/30 to-emerald-500/25 blur-3xl pointer-events-none rounded-full" />
+          <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-emerald-500/25 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/3 -right-20 w-96 h-96 bg-fuchsia-500/25 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-10 right-1/3 w-80 h-80 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Navigation Bar */}
-          <header className="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-50">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+          {/* Top Glassmorphic Navigation */}
+          <header className="border-b border-white/10 bg-black/30 backdrop-blur-2xl sticky top-0 z-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
               {/* Logo */}
               <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setViewMode('landing')}>
-                <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
-                  <Building2 className="w-5 h-5" />
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-fuchsia-500 to-emerald-400 flex items-center justify-center text-white shadow-xl shadow-fuchsia-500/30 ring-2 ring-white/20">
+                  <Building2 className="w-6 h-6" />
                 </div>
                 <div>
-                  <div className="flex items-center">
-                    <span className="text-xl font-black tracking-tight text-white">Biz<span className="text-indigo-400">Smart</span></span>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-2xl font-black tracking-tight text-white">Biz<span className="bg-gradient-to-r from-fuchsia-400 via-pink-300 to-emerald-300 bg-clip-text text-transparent">Smart</span></span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Retail 2.0</span>
                   </div>
-                  <p className="text-[11px] text-slate-400 font-medium">Smart SME &amp; Kirana Supermarket Platform</p>
+                  <p className="text-[11px] text-purple-200/70 font-medium">Unified Kirana, Supermarket & Retail POS Platform</p>
                 </div>
               </div>
 
@@ -1941,9 +1961,9 @@ export default function App() {
                     setLoginError('');
                     setViewMode('login');
                   }}
-                  className="px-4 py-2 text-xs font-bold text-slate-300 hover:text-white hover:bg-slate-900 rounded-xl transition flex items-center space-x-1.5 border border-transparent hover:border-slate-800"
+                  className="px-5 py-2.5 text-xs font-bold text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-2xl backdrop-blur-md transition flex items-center space-x-2 border border-white/15 shadow-sm"
                 >
-                  <LogIn className="w-3.5 h-3.5" />
+                  <LogIn className="w-4 h-4 text-emerald-300" />
                   <span>Sign In</span>
                 </button>
                 <button
@@ -1951,9 +1971,9 @@ export default function App() {
                     setRegisterError('');
                     setViewMode('register');
                   }}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center space-x-1.5"
+                  className="px-5 py-2.5 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-emerald-500 hover:from-fuchsia-600 hover:to-emerald-600 text-white text-xs font-black rounded-2xl transition shadow-xl shadow-fuchsia-500/30 flex items-center space-x-1.5 ring-2 ring-white/20"
                 >
-                  <Store className="w-3.5 h-3.5" />
+                  <Store className="w-4 h-4" />
                   <span>Register Store (Owner) &rarr;</span>
                 </button>
               </div>
@@ -1961,29 +1981,35 @@ export default function App() {
           </header>
 
           {/* Hero Section */}
-          <section className="max-w-5xl mx-auto px-4 pt-16 pb-12 text-center relative z-10">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight sm:leading-none mb-6">
-              Run Your Retail Store Smarter, <br className="hidden sm:inline" />
-              <span className="bg-gradient-to-r from-indigo-400 via-sky-300 to-indigo-200 bg-clip-text text-transparent">
-                Faster &amp; With Zero Discrepancy
+          <section className="max-w-5xl mx-auto px-4 pt-16 pb-14 text-center relative z-10">
+            {/* Pill Announcement */}
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-xs font-bold text-emerald-300 mb-6 shadow-lg">
+              <Sparkles className="w-4 h-4 text-amber-300 animate-spin" />
+              <span>Next-Gen Counter Billing &amp; Expiry Defense System</span>
+            </div>
+
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-tight sm:leading-none mb-6">
+              Run Your Retail Store With <br className="hidden sm:inline" />
+              <span className="bg-gradient-to-r from-fuchsia-400 via-amber-300 to-emerald-300 bg-clip-text text-transparent">
+                Vibrant Speed &amp; Zero Wastage
               </span>
             </h1>
 
-            <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
-              BizSmart brings instant POS billing with Queue Buster multi-cart hold, First-In-First-Out (FIFO) expiry defense, foolproof cash drawer float reconciliation, and strict owner-governed staff delegation to your retail counter.
+            <p className="text-purple-100/90 text-sm sm:text-lg max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
+              BizSmart powers daily kirana and retail stores with instant thermal barcode POS, Queue Buster multi-cart hold, split cash/UPI tender calculator, 15-day promotional clearance triggers, and foolproof cashier cash-drawer reconciliation.
             </p>
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 mb-8">
+            {/* Hero CTAs */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
               <button
                 onClick={() => {
                   setRegisterError('');
                   setViewMode('register');
                 }}
-                className="w-full sm:w-auto px-7 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-xl shadow-indigo-600/40 hover:shadow-indigo-500/50 transition flex items-center justify-center space-x-2"
+                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-fuchsia-500 to-emerald-500 hover:from-fuchsia-600 hover:to-emerald-600 text-white font-black text-sm rounded-2xl shadow-2xl shadow-fuchsia-500/40 transition flex items-center justify-center space-x-2 ring-2 ring-white/30 transform hover:-translate-y-0.5"
               >
                 <Store className="w-4 h-4" />
-                <span>Register Your Store (Owners Only)</span>
+                <span>Register Store (Owner Portal)</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
@@ -1991,173 +2017,193 @@ export default function App() {
                   setLoginError('');
                   setViewMode('login');
                 }}
-                className="w-full sm:w-auto px-6 py-3.5 bg-slate-900 hover:bg-slate-800 text-slate-200 hover:text-white font-bold text-xs sm:text-sm rounded-2xl border border-slate-700/80 transition flex items-center justify-center space-x-2"
+                className="w-full sm:w-auto px-8 py-4 bg-black/40 hover:bg-black/60 text-white font-extrabold text-sm rounded-2xl border border-white/20 backdrop-blur-xl transition flex items-center justify-center space-x-2 shadow-lg hover:border-white/40"
               >
-                <LogIn className="w-4 h-4 text-indigo-400" />
-                <span>Staff &amp; Owner Sign In</span>
+                <LogIn className="w-4 h-4 text-emerald-400" />
+                <span>Launch Counter / Staff Sign In</span>
               </button>
+            </div>
+
+            {/* Quick Live Highlight Badges */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-4xl mx-auto text-xs font-bold">
+              <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex flex-col items-center">
+                <span className="text-emerald-300 text-lg font-black">60 Items</span>
+                <span className="text-purple-200/80 text-[11px]">Daily Essentials Preloaded</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex flex-col items-center">
+                <span className="text-amber-300 text-lg font-black">15% Off</span>
+                <span className="text-purple-200/80 text-[11px]">Near-Expiry Markdown Radar</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex flex-col items-center">
+                <span className="text-fuchsia-300 text-lg font-black">Split POS</span>
+                <span className="text-purple-200/80 text-[11px]">Cash + UPI + Tender Return</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex flex-col items-center">
+                <span className="text-sky-300 text-lg font-black">100% Audit</span>
+                <span className="text-purple-200/80 text-[11px]">Float &amp; Till Reconciliation</span>
+              </div>
             </div>
           </section>
 
-          {/* 6 Key Architectural Capabilities Grid */}
+          {/* 6 Modern Vibrant Architectural Highlights */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="text-center max-w-2xl mx-auto mb-12">
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-                Core Capabilities
+              <span className="text-xs font-extrabold uppercase tracking-widest bg-gradient-to-r from-fuchsia-300 to-emerald-300 bg-clip-text text-transparent">
+                Store-Ready Capabilities
               </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-white mt-1">
-                Engineered for High-Volume Counter Billing
+              <h2 className="text-3xl sm:text-4xl font-black text-white mt-2">
+                Designed for Ultra-Fast Checkout &amp; Maximum Profits
               </h2>
-              <p className="text-xs sm:text-sm text-slate-400 mt-2">
-                Everything small supermarkets, grocery stores, pharmacies, and retail chains need to operate smoothly every day.
+              <p className="text-xs sm:text-sm text-purple-200/80 mt-2">
+                Everything Indian retailers and supermarket cashiers need for peak holiday rushes and everyday billing.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Feature 1 */}
-              <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 hover:border-slate-700 transition">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center mb-4">
+              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 hover:bg-white/15 transition shadow-xl">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-fuchsia-500 to-pink-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-fuchsia-500/30">
                   <Receipt className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Ultra-Fast POS &amp; Queue Buster</h3>
-                <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  Park carts on hold when a customer steps away for extra items. Instant barcode scanning, 1-click loyalty redemption, and thermal receipt printouts.
+                <h3 className="text-base font-extrabold text-white mb-2">Split Payment &amp; Change Tender</h3>
+                <p className="text-xs text-purple-100/80 leading-relaxed mb-3">
+                  Accept hybrid payments (₹500 Cash + ₹300 UPI) in a single bill with an automated Cash Tender calculator computing exact customer change to return.
                 </p>
-                <div className="text-[11px] text-indigo-400 font-semibold flex items-center space-x-1">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 mr-1" />
-                  <span>WhatsApp E-Bills + UPI QR generator</span>
+                <div className="text-[11px] text-emerald-300 font-bold flex items-center">
+                  <Check className="w-3.5 h-3.5 mr-1 text-emerald-400" />
+                  <span>Dynamic QR Generator + WhatsApp e-Invoices</span>
                 </div>
               </div>
 
               {/* Feature 2 */}
-              <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 hover:border-slate-700 transition">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mb-4">
-                  <Clock className="w-6 h-6" />
+              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 hover:bg-white/15 transition shadow-xl">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-amber-500/30">
+                  <Percent className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">FIFO Expiry Radar &amp; Batch Control</h3>
-                <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  System tracks multi-batch inventory. Items nearest to expiry date are automatically suggested and dispatched first, preventing stock spoilage losses.
+                <h3 className="text-base font-extrabold text-white mb-2">15-Day Clearance Markdown Radar</h3>
+                <p className="text-xs text-purple-100/80 leading-relaxed mb-3">
+                  Early detection system warns when stock is within 15 days of expiry. Trigger instant 15% clearance promotional markdowns with 1 click to clear dead stock.
                 </p>
-                <div className="text-[11px] text-emerald-400 font-semibold flex items-center space-x-1">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 mr-1" />
-                  <span>30/60/90 day expiry radar filters</span>
+                <div className="text-[11px] text-amber-300 font-bold flex items-center">
+                  <Check className="w-3.5 h-3.5 mr-1 text-amber-400" />
+                  <span>FIFO Multi-Batch dispatch ensures fresh goods</span>
                 </div>
               </div>
 
               {/* Feature 3 */}
-              <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 hover:border-slate-700 transition">
-                <div className="w-12 h-12 rounded-2xl bg-amber-600/20 text-amber-400 border border-amber-500/30 flex items-center justify-center mb-4">
-                  <Landmark className="w-6 h-6" />
+              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 hover:bg-white/15 transition shadow-xl">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30">
+                  <FileSpreadsheet className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Cash Drawer Shift Hisab-Kitab</h3>
-                <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  Track opening float, mid-day vendor payouts (milk/bread), and closing physical notes. The system detects any shortage or excess with 100% precision.
+                <h3 className="text-base font-extrabold text-white mb-2">Bulk CSV &amp; Excel Product Sync</h3>
+                <p className="text-xs text-purple-100/80 leading-relaxed mb-3">
+                  Export all 60 store items with full batch numbers and expiry dates to CSV, edit in Excel, and re-import bulk updates instantly with zero downtime.
                 </p>
-                <div className="text-[11px] text-amber-400 font-semibold flex items-center space-x-1">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 mr-1" />
-                  <span>Physical denomination breakdown counter</span>
+                <div className="text-[11px] text-emerald-300 font-bold flex items-center">
+                  <Check className="w-3.5 h-3.5 mr-1 text-emerald-400" />
+                  <span>Sample template download &amp; error-free upload</span>
                 </div>
               </div>
 
               {/* Feature 4 */}
-              <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 hover:border-slate-700 transition">
-                <div className="w-12 h-12 rounded-2xl bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center mb-4">
-                  <ShieldCheck className="w-6 h-6" />
+              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 hover:bg-white/15 transition shadow-xl">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-500 to-indigo-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30">
+                  <Landmark className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Strict Owner-Controlled Delegation</h3>
-                <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  Only Business Owners can register stores. Owners onboard cashiers and staff inside their dashboard with custom login email and password.
+                <h3 className="text-base font-extrabold text-white mb-2">Shift Float &amp; Cash Till Hisab-Kitab</h3>
+                <p className="text-xs text-purple-100/80 leading-relaxed mb-3">
+                  Track starting morning float, record mid-day cash drops (milk/bread payouts), and match evening physical notes. Zero-discrepancy daily balance audits.
                 </p>
-                <div className="text-[11px] text-purple-400 font-semibold flex items-center space-x-1">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 mr-1" />
-                  <span>Sensitive profits hidden from cashiers</span>
+                <div className="text-[11px] text-purple-300 font-bold flex items-center">
+                  <Check className="w-3.5 h-3.5 mr-1 text-purple-400" />
+                  <span>Physical denomination breakdown counter</span>
                 </div>
               </div>
 
               {/* Feature 5 */}
-              <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 hover:border-slate-700 transition">
-                <div className="w-12 h-12 rounded-2xl bg-sky-600/20 text-sky-400 border border-sky-500/30 flex items-center justify-center mb-4">
+              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 hover:bg-white/15 transition shadow-xl">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/30">
                   <Users className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Customer Udhar Khata Ledger</h3>
-                <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  Digital ledger with credit limits, payment tracking, balance reminders, and instant bill history lookup for loyal neighborhood customers.
+                <h3 className="text-base font-extrabold text-white mb-2">Customer Khata &amp; Loyalty CRM</h3>
+                <p className="text-xs text-purple-100/80 leading-relaxed mb-3">
+                  Digital customer ledger with credit limits, payment tracking, balance reminders, and instant bill history lookup for loyal neighborhood customers.
                 </p>
-                <div className="text-[11px] text-sky-400 font-semibold flex items-center space-x-1">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 mr-1" />
-                  <span>Settlement via Cash, UPI or Cheque</span>
+                <div className="text-[11px] text-cyan-300 font-bold flex items-center">
+                  <Check className="w-3.5 h-3.5 mr-1 text-cyan-400" />
+                  <span>Automatic 1% loyalty point rewards on bills</span>
                 </div>
               </div>
 
               {/* Feature 6 */}
-              <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-6 hover:border-slate-700 transition">
-                <div className="w-12 h-12 rounded-2xl bg-rose-600/20 text-rose-400 border border-rose-500/30 flex items-center justify-center mb-4">
-                  <BarChart3 className="w-6 h-6" />
+              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 hover:bg-white/15 transition shadow-xl">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 to-rose-600 text-white flex items-center justify-center mb-4 shadow-lg shadow-pink-500/30">
+                  <ShieldCheck className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Multi-Period Sales &amp; P&amp;L Analytics</h3>
-                <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  Real-time sales velocity charts, AOV metrics, gross margins, store overhead expenses, and live valuation of remaining retail inventory.
+                <h3 className="text-base font-extrabold text-white mb-2">Strict Owner &amp; Cashier Separation</h3>
+                <p className="text-xs text-purple-100/80 leading-relaxed mb-3">
+                  Store Owners manage overhead expenses, staff salaries (e.g. ₹25,000 for Ajay Sharma), and catalog pricing while Cashiers run focused POS billing desks.
                 </p>
-                <div className="text-[11px] text-rose-400 font-semibold flex items-center space-x-1">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 mr-1" />
-                  <span>Weekly, monthly &amp; annual reporting</span>
+                <div className="text-[11px] text-pink-300 font-bold flex items-center">
+                  <Check className="w-3.5 h-3.5 mr-1 text-pink-400" />
+                  <span>Sensitive store profits hidden from terminal</span>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* How the System Works (Workflow Diagram) */}
-          <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-slate-800/80">
+          {/* Simple 3-Step Store Setup Workflow */}
+          <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-white/10">
             <div className="text-center mb-10">
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-                Simple &amp; Secure Architecture
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
+                Simple &amp; Fast Onboarding
               </span>
               <h2 className="text-2xl font-black text-white mt-1">
-                How Owner-Employee Role Routing Works
+                How Damani Retails &amp; Retailers Get Started
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative">
-                <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center mb-3">
+              <div className="bg-white/10 backdrop-blur-xl border border-white/15 p-5 rounded-3xl relative">
+                <div className="w-8 h-8 rounded-xl bg-fuchsia-500 text-white font-black text-xs flex items-center justify-center mb-3 shadow-md">
                   1
                 </div>
                 <h4 className="text-sm font-bold text-white mb-1">Owner Registers Store</h4>
-                <p className="text-xs text-slate-400">
-                  Business owner registers their store on this portal with business name, address, category, and master credentials.
+                <p className="text-xs text-purple-200/80">
+                  Store Owner sets up the business profile with name, address, and master password credentials.
                 </p>
               </div>
 
-              <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative">
-                <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center mb-3">
+              <div className="bg-white/10 backdrop-blur-xl border border-white/15 p-5 rounded-3xl relative">
+                <div className="w-8 h-8 rounded-xl bg-purple-500 text-white font-black text-xs flex items-center justify-center mb-3 shadow-md">
                   2
                 </div>
-                <h4 className="text-sm font-bold text-white mb-1">Owner Adds Staff &amp; Passwords</h4>
-                <p className="text-xs text-slate-400">
-                  From the Owner Dashboard, the owner creates cashier accounts specifying shift, salary, login Email ID, and Password.
+                <h4 className="text-sm font-bold text-white mb-1">Owner Assigns Staff</h4>
+                <p className="text-xs text-purple-200/80">
+                  From the Owner Dashboard, create staff logins with custom email, password, and monthly salary.
                 </p>
               </div>
 
-              <div className="bg-slate-900/80 border border-slate-800 p-5 rounded-2xl relative">
-                <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white font-black text-xs flex items-center justify-center mb-3">
+              <div className="bg-white/10 backdrop-blur-xl border border-white/15 p-5 rounded-3xl relative">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white font-black text-xs flex items-center justify-center mb-3 shadow-md">
                   3
                 </div>
-                <h4 className="text-sm font-bold text-white mb-1">Staff Logs In Directly</h4>
-                <p className="text-xs text-slate-400">
-                  Staff signs in with their assigned credentials. System automatically routes them to their POS terminal with zero financial access.
+                <h4 className="text-sm font-bold text-white mb-1">Cashier Fires Up POS</h4>
+                <p className="text-xs text-purple-200/80">
+                  Cashier signs in directly to POS billing with Queue Buster hold, Split payments, and live barcode scanning.
                 </p>
               </div>
             </div>
           </section>
 
-          {/* Bottom CTA Banner */}
+          {/* Bottom Call to Action */}
           <section className="max-w-4xl mx-auto px-4 py-12 text-center">
-            <div className="bg-gradient-to-r from-indigo-900/60 via-indigo-800/40 to-slate-900/80 border border-indigo-500/30 rounded-3xl p-8 backdrop-blur-xl">
-              <h3 className="text-2xl font-black text-white mb-2">
-                Ready to Upgrade Your Store Management?
+            <div className="bg-gradient-to-r from-fuchsia-600/40 via-purple-600/30 to-emerald-600/40 border-2 border-white/20 rounded-3xl p-8 backdrop-blur-2xl shadow-2xl">
+              <h3 className="text-2xl sm:text-3xl font-black text-white mb-2">
+                Ready to Upgrade Your Retail Billing?
               </h3>
-              <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto mb-6">
-                Join modern retailers managing POS billing, inventory batches, and cash drawer reconciliations seamlessly with BizSmart.
+              <p className="text-xs sm:text-sm text-purple-100 max-w-xl mx-auto mb-6">
+                Start managing sales, FIFO batch expiry defense, and cash reconciliations with BizSmart.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <button
@@ -2165,46 +2211,46 @@ export default function App() {
                     setRegisterError('');
                     setViewMode('register');
                   }}
-                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center space-x-2"
+                  className="px-6 py-3.5 bg-gradient-to-r from-fuchsia-500 to-emerald-500 hover:from-fuchsia-600 hover:to-emerald-600 text-white text-xs font-black rounded-2xl transition shadow-xl shadow-fuchsia-500/30 flex items-center space-x-2 ring-2 ring-white/20"
                 >
                   <Store className="w-4 h-4" />
-                  <span>Register Your Store (Owner) &rarr;</span>
+                  <span>Register Store (Owner Portal) &rarr;</span>
                 </button>
                 <button
                   onClick={() => {
                     setLoginError('');
                     setViewMode('login');
                   }}
-                  className="px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl border border-slate-700 transition flex items-center space-x-2"
+                  className="px-6 py-3.5 bg-white/15 hover:bg-white/25 text-white text-xs font-extrabold rounded-2xl border border-white/20 backdrop-blur-md transition flex items-center space-x-2"
                 >
-                  <LogIn className="w-4 h-4" />
-                  <span>Sign In to Existing Account</span>
+                  <LogIn className="w-4 h-4 text-emerald-300" />
+                  <span>Sign In to Terminal</span>
                 </button>
               </div>
             </div>
           </section>
 
           {/* Footer */}
-          <footer className="mt-auto border-t border-slate-800/80 py-6 text-center text-xs text-slate-500">
+          <footer className="mt-auto border-t border-white/10 py-6 text-center text-xs text-purple-300/70 bg-black/20">
             <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div>
-                &copy; {new Date().getFullYear()} BizSmart Retail Platform. Engineered for Indian SMEs &amp; Retailers.
+                &copy; {new Date().getFullYear()} BizSmart Retail Platform. Engineered for Indian Retailers.
               </div>
               <div className="flex items-center space-x-4">
-                <span className="flex items-center text-emerald-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1.5" />
+                <span className="flex items-center text-emerald-400 font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-1.5 shadow-sm shadow-emerald-400" />
                   Cloud Database Live (PostgreSQL)
                 </span>
-                <span className="text-slate-600">&bull;</span>
+                <span className="text-white/20">&bull;</span>
                 <button
                   onClick={() => setViewMode('login')}
-                  className="text-indigo-400 hover:underline"
+                  className="text-fuchsia-300 hover:underline font-bold"
                 >
-                  Staff Portal
+                  Terminal Login
                 </button>
                 <button
                   onClick={() => setViewMode('register')}
-                  className="text-indigo-400 hover:underline"
+                  className="text-emerald-300 hover:underline font-bold"
                 >
                   Owner Registration
                 </button>
@@ -2287,7 +2333,7 @@ export default function App() {
                     <input
                       type="email"
                       required
-                      placeholder="e.g. rajesh@mystore.in"
+                      placeholder="Enter your store email address"
                       value={ownerRegisterForm.email}
                       onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, email: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -2486,7 +2532,7 @@ export default function App() {
                 <input
                   type="email"
                   required
-                  placeholder="damani@gmail.com or ajaysharma@gmail.com"
+                  placeholder="Enter your registered login email"
                   value={loginEmail}
                   onChange={e => setLoginEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
@@ -2715,25 +2761,7 @@ export default function App() {
             </button>
           )}
 
-          {(currentUser.role === 'OWNER' || currentUser.role === 'ADMIN') && (
-            <button
-              onClick={() => setActiveTab('platform-admin')}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'platform-admin' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
-            >
-              <Building2 className="w-4 h-4" />
-              <span>Platform ({platformStores.length} Stores)</span>
-            </button>
-          )}
 
-          {currentUser.role === 'SUPPLIER' && (
-            <button
-              onClick={() => setActiveTab('supplier-portal')}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'supplier-portal' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
-            >
-              <Truck className="w-4 h-4" />
-              <span>Supplier Vendor Portal</span>
-            </button>
-          )}
         </div>
 
         {/* ============================================================== */}
@@ -3716,30 +3744,158 @@ export default function App() {
                   <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block mb-1.5">
                     Payment Method
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-4 gap-2">
                     <button
-                      onClick={() => setPaymentMode('CASH')}
-                      className={`p-2 rounded-xl text-xs font-bold border flex flex-col items-center justify-center transition ${paymentMode === 'CASH' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-700 border-slate-200'}`}
+                      onClick={() => {
+                        setPaymentMode('CASH');
+                        setSplitCashAmount('');
+                        setSplitUpiAmount('');
+                      }}
+                      className={`p-2 rounded-xl text-xs font-bold border flex flex-col items-center justify-center transition ${paymentMode === 'CASH' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}`}
                     >
                       <Banknote className="w-4 h-4 mb-1" />
                       <span>Cash</span>
                     </button>
                     <button
-                      onClick={() => setPaymentMode('UPI')}
-                      className={`p-2 rounded-xl text-xs font-bold border flex flex-col items-center justify-center transition ${paymentMode === 'UPI' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-700 border-slate-200'}`}
+                      onClick={() => {
+                        setPaymentMode('UPI');
+                        setSplitCashAmount('');
+                        setSplitUpiAmount('');
+                      }}
+                      className={`p-2 rounded-xl text-xs font-bold border flex flex-col items-center justify-center transition ${paymentMode === 'UPI' ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}`}
                     >
                       <Smartphone className="w-4 h-4 mb-1" />
                       <span>UPI</span>
                     </button>
                     <button
-                      onClick={() => setPaymentMode('CREDIT')}
-                      className={`p-2 rounded-xl text-xs font-bold border flex flex-col items-center justify-center transition ${paymentMode === 'CREDIT' ? 'bg-rose-600 text-white border-rose-600' : 'bg-slate-50 text-slate-700 border-slate-200'}`}
+                      onClick={() => {
+                        setPaymentMode('SPLIT');
+                        const halfCash = Math.floor(cartFinalTotal / 2);
+                        setSplitCashAmount(halfCash.toString());
+                        setSplitUpiAmount((cartFinalTotal - halfCash).toString());
+                      }}
+                      className={`p-2 rounded-xl text-xs font-bold border flex flex-col items-center justify-center transition ${paymentMode === 'SPLIT' ? 'bg-purple-600 text-white border-purple-600 shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}`}
+                    >
+                      <Coins className="w-4 h-4 mb-1" />
+                      <span>Split</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setPaymentMode('CREDIT');
+                        setSplitCashAmount('');
+                        setSplitUpiAmount('');
+                      }}
+                      className={`p-2 rounded-xl text-xs font-bold border flex flex-col items-center justify-center transition ${paymentMode === 'CREDIT' ? 'bg-rose-600 text-white border-rose-600 shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}`}
                     >
                       <CreditCard className="w-4 h-4 mb-1" />
                       <span>Udhaar</span>
                     </button>
                   </div>
                 </div>
+
+                {/* SPLIT PAYMENT BREAKDOWN INPUTS */}
+                {paymentMode === 'SPLIT' && (
+                  <div className="mt-3 p-3 bg-purple-50/80 rounded-2xl border border-purple-200 text-xs space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-purple-900">
+                      <span className="flex items-center space-x-1">
+                        <Coins className="w-3.5 h-3.5 text-purple-600" />
+                        <span>Split Payment Breakdown</span>
+                      </span>
+                      <span className="font-mono text-purple-700">Total: ₹{cartFinalTotal}</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-600 block mb-1">Cash Part (₹)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max={cartFinalTotal}
+                          value={splitCashAmount}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSplitCashAmount(val);
+                            const num = Number(val) || 0;
+                            setSplitUpiAmount(Math.max(0, cartFinalTotal - num).toString());
+                          }}
+                          placeholder="e.g. 500"
+                          className="w-full px-2.5 py-1.5 bg-white border border-purple-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold text-slate-600 block mb-1">UPI Part (₹)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max={cartFinalTotal}
+                          value={splitUpiAmount}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setSplitUpiAmount(val);
+                            const num = Number(val) || 0;
+                            setSplitCashAmount(Math.max(0, cartFinalTotal - num).toString());
+                          }}
+                          placeholder="e.g. 300"
+                          className="w-full px-2.5 py-1.5 bg-white border border-purple-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="text-[10px] flex items-center justify-between font-semibold pt-1 border-t border-purple-100 text-purple-800">
+                      <span>Recorded: ₹{(Number(splitCashAmount) || 0) + (Number(splitUpiAmount) || 0)}</span>
+                      <span>{(Number(splitCashAmount) || 0) + (Number(splitUpiAmount) || 0) === cartFinalTotal ? '✅ Balanced' : '⚠️ Must equal total'}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* CASH TENDER & CHANGE CALCULATOR */}
+                {(paymentMode === 'CASH' || paymentMode === 'SPLIT') && (
+                  <div className="mt-3 p-3 bg-emerald-50/70 rounded-2xl border border-emerald-200 text-xs space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-emerald-900">
+                      <span className="flex items-center space-x-1">
+                        <Banknote className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Cash Tender & Change Calculator</span>
+                      </span>
+                      <span className="text-[10px] text-emerald-700 font-medium">Due Cash: ₹{paymentMode === 'SPLIT' ? (Number(splitCashAmount) || 0) : cartFinalTotal}</span>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <div className="flex-1">
+                        <input
+                          type="number"
+                          min="0"
+                          value={tenderCashGiven}
+                          onChange={(e) => setTenderCashGiven(e.target.value)}
+                          placeholder="Customer gave ₹ (e.g. 2000)"
+                          className="w-full px-2.5 py-1.5 bg-white border border-emerald-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono"
+                        />
+                      </div>
+                      <div className="flex space-x-1">
+                        {[100, 200, 500, 2000].map(val => (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => setTenderCashGiven(val.toString())}
+                            className="px-2 py-1 bg-white hover:bg-emerald-100 border border-emerald-200 rounded-lg text-[10px] font-bold text-emerald-800 transition"
+                          >
+                            ₹{val}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {Number(tenderCashGiven) > 0 && (
+                      <div className="pt-1.5 border-t border-emerald-200/80 flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-emerald-900">Change to Return Customer:</span>
+                        <span className={`text-sm font-black font-mono ${Number(tenderCashGiven) >= (paymentMode === 'SPLIT' ? (Number(splitCashAmount) || 0) : cartFinalTotal) ? 'text-emerald-700' : 'text-rose-600'}`}>
+                          {Number(tenderCashGiven) >= (paymentMode === 'SPLIT' ? (Number(splitCashAmount) || 0) : cartFinalTotal)
+                            ? `₹${Number(tenderCashGiven) - (paymentMode === 'SPLIT' ? (Number(splitCashAmount) || 0) : cartFinalTotal)}`
+                            : `Short by ₹${(paymentMode === 'SPLIT' ? (Number(splitCashAmount) || 0) : cartFinalTotal) - Number(tenderCashGiven)}`}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* POS Dynamic Bill Payment QR Scanner Preview */}
                 {cart.length > 0 && (
@@ -3883,7 +4039,47 @@ export default function App() {
               </div>
             </div>
 
-            {/* Near-Expiry Warning Banner */}
+            {/* Near-Expiry Warning & Promotional Clearance Markdown Trigger */}
+            {products.some(p => calculateDaysToExpiry(p.expiryDate) <= 15) && (
+              <div className="bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border-2 border-rose-300 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-md">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-rose-300">
+                    <Percent className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-black text-rose-900 flex items-center space-x-1.5">
+                      <span>⚡ Clearance Discount Trigger:</span>
+                      <span className="bg-rose-600 text-white px-2 py-0.5 rounded-full text-[10px] font-black uppercase">
+                        {products.filter(p => calculateDaysToExpiry(p.expiryDate) <= 15).length} Items Expiring in &le;15 Days
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-rose-700 font-medium mt-0.5">
+                      Automatically apply a 15% clearance promotional markdown to sell out stock before it becomes dead inventory and causes spoilage losses.
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => handleApplyClearanceMarkdownToAllNearExpiry(15)}
+                    className="px-3.5 py-2 bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white rounded-xl text-xs font-black transition shadow-sm flex items-center space-x-1 whitespace-nowrap"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Apply 15% Clearance to All (&le;15d)</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setInventoryExpiryFilter('near-15');
+                      setInventorySortBy('expiry-asc');
+                    }}
+                    className="px-3 py-2 bg-white hover:bg-rose-50 text-rose-800 border border-rose-200 rounded-xl text-xs font-bold transition whitespace-nowrap"
+                  >
+                    View &le;15d Stock
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* General Near-Expiry Warning Banner (30 days) */}
             {nearExpiryProductsList.length > 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shadow-sm">
                 <div className="flex items-center space-x-3">
@@ -3952,6 +4148,7 @@ export default function App() {
                     className="w-full bg-indigo-50/50 border border-indigo-200 rounded-xl px-3 py-2 text-xs font-bold text-indigo-950 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="all">📅 All Expiry Dates</option>
+                    <option value="near-15">🔥 Urgent Clearance (&le; 15 Days)</option>
                     <option value="near-30">⚠️ Near Expiry (&lt; 30 Days)</option>
                     <option value="near-60">⏳ Expiring Soon (&lt; 60 Days)</option>
                     <option value="near-90">📆 Expiring (&lt; 90 Days)</option>
@@ -4160,7 +4357,19 @@ export default function App() {
                               </button>
                             </td>
                             <td className="py-3 px-4 text-right font-medium text-slate-600">₹{p.purchasePrice}</td>
-                            <td className="py-3 px-4 text-right font-black text-slate-900">₹{p.sellingPrice}</td>
+                            <td className="py-3 px-4 text-right">
+                              <span className="font-black text-slate-900">₹{p.sellingPrice}</span>
+                              {p.clearanceMarkdown && (
+                                <span className="block text-[10px] text-rose-600 font-extrabold line-through opacity-75">
+                                  ₹{p.originalPrice}
+                                </span>
+                              )}
+                              {p.clearanceMarkdown && (
+                                <span className="inline-block mt-0.5 px-1.5 py-0.2 rounded bg-rose-100 text-rose-800 text-[9px] font-black">
+                                  {p.clearanceMarkdown}% OFF
+                                </span>
+                              )}
+                            </td>
                             <td className="py-3 px-4 text-center">
                               <span className={`px-2.5 py-1 rounded-full font-black ${isLow ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-800'}`}>
                                 {p.quantity} units
@@ -4237,6 +4446,17 @@ export default function App() {
                                       title="Auto-Draft Wholesale PO to Supplier"
                                     >
                                       <Share2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
+                                  {/* 15% Clearance Markdown Trigger for <= 15 days */}
+                                  {days > 0 && days <= 15 && (
+                                    <button
+                                      onClick={() => handleApplyClearanceMarkdown(p.id, 15)}
+                                      className="px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] flex items-center space-x-0.5 shadow-sm transition"
+                                      title="Apply 15% Clearance Markdown Discount"
+                                    >
+                                      <Percent className="w-3 h-3" />
+                                      <span>-15%</span>
                                     </button>
                                   )}
                                   {/* Delete Item */}
@@ -5012,105 +5232,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ============================================================== */}
-        {/* VIEW 9: PLATFORM ADMIN (Owner & Admin) */}
-        {/* ============================================================== */}
-        {activeTab === 'platform-admin' && (currentUser.role === 'OWNER' || currentUser.role === 'ADMIN') && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">BizSmart Multi-Store Platform Administration</h3>
-                <p className="text-xs text-slate-500">Register new businesses and store branches on the platform</p>
-              </div>
-              <button
-                onClick={() => setShowAddStoreModal(true)}
-                className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                <span>+ Register New Business Store</span>
-              </button>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {platformStores.map(store => (
-                <div key={store.id} className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start">
-                      <h4 className="text-sm font-bold text-slate-900">{store.name}</h4>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
-                        {store.status}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-500 mt-1">Owner: {store.owner}</p>
-                    <p className="text-xs text-slate-400">City: {store.city} &bull; Ph: {store.phone}</p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-                    <span className="text-slate-500">Monthly GMV:</span>
-                    <span className="font-black text-indigo-600">{store.gmv}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ============================================================== */}
-        {/* VIEW 10: SUPPLIER PORTAL */}
-        {/* ============================================================== */}
-        {activeTab === 'supplier-portal' && currentUser.role === 'SUPPLIER' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">Supplier Vendor Portal</span>
-                  <h3 className="text-xl font-bold text-slate-900 mt-1">ITC Consumer Goods Distribution</h3>
-                  <p className="text-xs text-slate-500">View Purchase Orders, payment status, and store product requirements</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-xs text-slate-500">Pending Receivables:</span>
-                  <div className="text-2xl font-black text-indigo-600">₹45,000</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                <h4 className="text-sm font-bold text-slate-900 mb-3">Incoming Store Product Restock Orders</h4>
-                <div className="space-y-3">
-                  <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl flex justify-between items-center">
-                    <div>
-                      <div className="text-xs font-bold text-slate-900">Aashirvaad Atta 5kg</div>
-                      <div className="text-[11px] text-rose-700 font-semibold">Store has only 8 units left (Breached min stock 10)</div>
-                    </div>
-                    <span className="px-2 py-1 rounded bg-rose-600 text-white text-xs font-black">
-                      Request: 180 Units
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                <h4 className="text-sm font-bold text-slate-900 mb-3">Active PO Status</h4>
-                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                  <div className="flex justify-between text-xs font-bold">
-                    <span>PO-2026-081</span>
-                    <span className="text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">CONFIRMED</span>
-                  </div>
-                  <div className="text-xs text-slate-600 mt-1">Aashirvaad Atta 5kg (50 units) &bull; ₹12,000</div>
-                  <div className="mt-3 flex justify-between items-center pt-2 border-t border-slate-200 text-xs">
-                    <span className="text-slate-500">Payment: Partial (₹6,000 paid)</span>
-                    <button
-                      onClick={() => alert("Marked PO-2026-081 as Shipped.")}
-                      className="px-3 py-1 bg-indigo-600 text-white font-bold rounded-lg text-[11px]"
-                    >
-                      Mark Shipped
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ============================================================== */}
@@ -5493,104 +5615,6 @@ export default function App() {
         </div>
       )}
 
-      {/* ============================================================== */}
-      {/* OWNER MODAL 4: ADD PLATFORM STORE */}
-      {/* ============================================================== */}
-      {showAddStoreModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center">
-                  <Store className="w-4 h-4 mr-1 text-indigo-600" /> Register Business Store
-                </h3>
-                <p className="text-xs text-slate-500">Platform multi-business franchise</p>
-              </div>
-              <button onClick={() => setShowAddStoreModal(false)} className="text-slate-400 hover:text-slate-700">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddStoreSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Business Store Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Agarwal Daily Mart..."
-                  value={newStore.name}
-                  onChange={e => setNewStore({ ...newStore, name: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Proprietor / Owner *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Suresh Agarwal"
-                    value={newStore.owner}
-                    onChange={e => setNewStore({ ...newStore, owner: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">City / Region *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Lucknow, Noida..."
-                    value={newStore.city}
-                    onChange={e => setNewStore({ ...newStore, city: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Store Phone</label>
-                  <input
-                    type="tel"
-                    placeholder="+91-98777-66554"
-                    value={newStore.phone}
-                    onChange={e => setNewStore({ ...newStore, phone: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Monthly GMV Target</label>
-                  <input
-                    type="text"
-                    placeholder="₹5,00,000"
-                    value={newStore.gmv}
-                    onChange={e => setNewStore({ ...newStore, gmv: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex space-x-2">
-                <button
-                  type="submit"
-                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-sm transition"
-                >
-                  Register Store on Platform
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAddStoreModal(false)}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* ============================================================== */}
       {/* INVOICE PRINT MODAL */}
@@ -5670,8 +5694,28 @@ export default function App() {
               </div>
               <div className="flex justify-between text-[11px] font-bold text-slate-600 pt-1">
                 <span>Payment Mode</span>
-                <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">{lastGeneratedBill.paymentMode}</span>
+                <span className={`px-2 py-0.5 rounded ${lastGeneratedBill.paymentMode === 'SPLIT' ? 'bg-purple-100 text-purple-800' : 'bg-indigo-50 text-indigo-700'}`}>
+                  {lastGeneratedBill.paymentMode}
+                </span>
               </div>
+              {lastGeneratedBill.paymentMode === 'SPLIT' && (
+                <div className="p-2 bg-purple-50/80 rounded-xl border border-purple-100 text-[11px] space-y-1">
+                  <div className="flex justify-between text-purple-900 font-semibold">
+                    <span>💵 Paid in Cash:</span>
+                    <span className="font-mono font-bold">₹{lastGeneratedBill.splitCash || 0}</span>
+                  </div>
+                  <div className="flex justify-between text-purple-900 font-semibold">
+                    <span>📱 Paid via UPI:</span>
+                    <span className="font-mono font-bold">₹{lastGeneratedBill.splitUpi || 0}</span>
+                  </div>
+                </div>
+              )}
+              {lastGeneratedBill.changeReturned > 0 && (
+                <div className="flex justify-between text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2 py-1 rounded-lg">
+                  <span>Change Returned to Customer</span>
+                  <span className="font-mono">₹{lastGeneratedBill.changeReturned}</span>
+                </div>
+              )}
               <div className="flex justify-between text-[11px] font-bold text-emerald-700 pt-1 bg-emerald-50/70 p-2 rounded-lg">
                 <span className="flex items-center">
                   <Sparkles className="w-3 h-3 mr-1 text-emerald-600" /> Points Earned on this Bill

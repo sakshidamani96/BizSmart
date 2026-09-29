@@ -98,8 +98,6 @@ public class DataSeeder implements ApplicationRunner {
     private void seedUsers(Map<ERole, Role> roles) {
         createUserIfMissing("damani", "damani@gmail.com", "Damani Retails Owner", "Store Owner", roles.get(ERole.ROLE_BUSINESS_OWNER), BigDecimal.valueOf(100000));
         createUserIfMissing("ajaysharma", "ajaysharma@gmail.com", "Ajay Sharma", "Cashier & POS Operator", roles.get(ERole.ROLE_EMPLOYEE), BigDecimal.valueOf(25000));
-        createUserIfMissing("supplier", "supplier@itc.in", "Sunil Kumar", "ITC Distributor", roles.get(ERole.ROLE_SUPPLIER), BigDecimal.valueOf(35000));
-        createUserIfMissing("admin", "admin@bizsmart.in", "Platform Administrator", "Platform Admin", roles.get(ERole.ROLE_PLATFORM_ADMIN), BigDecimal.valueOf(80000));
     }
 
     private void createUserIfMissing(String username, String email, String fullName, String title, Role role, BigDecimal salary) {
