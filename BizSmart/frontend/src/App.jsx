@@ -319,13 +319,17 @@ export default function App() {
   // BILLS / TRANSACTIONS HISTORY (Default empty / ₹0)
   // -------------------------------------------------------------
   const [bills, setBills] = useState(() => {
+    let rawBills = [];
     try {
       const saved = localStorage.getItem('bizsmart_bills_v2');
-      if (saved) return JSON.parse(saved);
+      if (saved) rawBills = JSON.parse(saved);
+      else rawBills = seedData1Year.bills || [];
     } catch (e) {
       console.warn('Failed to parse bills', e);
+      rawBills = seedData1Year.bills || [];
     }
-    return seedData1Year.bills || [];
+    // Sanitize: No credit/udhaar in system, strictly CASH or UPI
+    return (rawBills || []).map(b => (b.paymentMode === 'CREDIT' ? { ...b, paymentMode: 'UPI' } : b));
   });
 
   // -------------------------------------------------------------
@@ -343,7 +347,7 @@ export default function App() {
   const [selectedCustomerId, setSelectedCustomerId] = useState(1);
   const [cart, setCart] = useState([]);
   const [discountAmount, setDiscountAmount] = useState(0);
-  const [paymentMode, setPaymentMode] = useState('UPI'); // 'UPI' | 'CASH' | 'SPLIT' | 'CREDIT'
+  const [paymentMode, setPaymentMode] = useState('UPI'); // 'UPI' | 'CASH' | 'SPLIT'
   const [splitCashAmount, setSplitCashAmount] = useState('');
   const [splitUpiAmount, setSplitUpiAmount] = useState('');
   const [tenderCashGiven, setTenderCashGiven] = useState('');
@@ -382,9 +386,7 @@ export default function App() {
     notes: ''
   });
 
-  // 6. Customer Purchase History State
-  const [showCustomerHistoryModal, setShowCustomerHistoryModal] = useState(false);
-  const [selectedCustomerForHistory, setSelectedCustomerForHistory] = useState(null);
+
 
   // -------------------------------------------------------------
   // 7. CASH DRAWER & SHIFT RECONCILER STATE (Hisab-Kitab)
@@ -512,21 +514,7 @@ export default function App() {
   const [selectedExpenseForNote, setSelectedExpenseForNote] = useState(null);
   const [expenseNoteText, setExpenseNoteText] = useState('');
 
-  // Modal: Add Customer (Clean Tailwind Modal)
-  const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
-  const [newCustomer, setNewCustomer] = useState({
-    name: '',
-    phone: '',
-    limit: '5000',
-    city: 'Delhi NCR'
-  });
 
-  // Modal: Receive Khata Payment (Clean Tailwind Modal)
-  const [showKhataPaymentModal, setShowKhataPaymentModal] = useState(false);
-  const [selectedKhataCustomer, setSelectedKhataCustomer] = useState(null);
-  const [khataPaymentAmount, setKhataPaymentAmount] = useState('');
-  const [khataPaymentMode, setKhataPaymentMode] = useState('UPI');
-  const [khataPaymentNote, setKhataPaymentNote] = useState('');
 
   // -------------------------------------------------------------
   // OWNER REGISTRATION HANDLER (Exclusive for Store Owners)
@@ -758,16 +746,21 @@ export default function App() {
       return;
     }
 
-    // 2. Check Employees Added by Owner (Strict password check)
+    // 2. Check Employees Added by Owner (Strict password check & Cashier role restriction)
     const empMatch = employees.find(emp => emp.email && emp.email.toLowerCase() === cleanEmail);
     if (empMatch) {
       if (empMatch.password && empMatch.password !== cleanPassword) {
         setLoginError('Incorrect employee password. Please verify the password set by your Store Owner.');
         return;
       }
+      const roleLower = (empMatch.role || '').toLowerCase();
+      if (!roleLower.includes('cashier')) {
+        setLoginError('Access restricted: Only employees with the Cashier role are permitted to sign in to the terminal.');
+        return;
+      }
       setCurrentUser({
         email: empMatch.email,
-        name: `${empMatch.name} (${empMatch.role || 'Staff'})`,
+        name: `${empMatch.name} (${empMatch.role || 'Cashier'})`,
         role: 'EMPLOYEE',
         roleTitle: empMatch.role || 'Store Cashier'
       });
@@ -1040,7 +1033,7 @@ export default function App() {
         if (c.id === cust.id) {
           return {
             ...c,
-            balance: paymentMode === 'CREDIT' ? c.balance + cartFinalTotal : c.balance,
+            balance: c.balance,
             loyaltyPoints: newPoints,
             totalVisits: (c.totalVisits || 0) + 1,
             lifetimeSpent: (c.lifetimeSpent || 0) + cartFinalTotal,
@@ -1477,11 +1470,7 @@ export default function App() {
     e.target.value = '';
   };
 
-  // 6. CUSTOMER PROFILE & PURCHASE HISTORY HANDLER
-  const handleOpenCustomerHistory = (customer) => {
-    setSelectedCustomerForHistory(customer);
-    setShowCustomerHistoryModal(true);
-  };
+
 
   // -------------------------------------------------------------
   // 7. CASH DRAWER & SHIFT RECONCILER COMPUTATIONS (Hisab-Kitab)
@@ -1489,7 +1478,6 @@ export default function App() {
   const activeShiftBills = bills.filter(b => b.shiftId === activeShift?.id || (b.dateStr >= activeShift?.startDate && b.cashier === activeShift?.cashierName));
   const currentShiftCashSales = activeShiftBills.filter(b => b.paymentMode === 'CASH').reduce((acc, b) => acc + b.total, 0);
   const currentShiftUpiSales = activeShiftBills.filter(b => b.paymentMode === 'UPI').reduce((acc, b) => acc + b.total, 0);
-  const currentShiftCreditSales = activeShiftBills.filter(b => b.paymentMode === 'CREDIT').reduce((acc, b) => acc + b.total, 0);
   const currentShiftTotalSales = activeShiftBills.reduce((acc, b) => acc + b.total, 0);
 
   const currentShiftCashDrops = cashDrops.filter(cd => cd.shiftId === activeShift?.id);
@@ -1525,7 +1513,6 @@ export default function App() {
       const totalSales = empBills.reduce((acc, b) => acc + b.total, 0);
       const cashSales = empBills.filter(b => b.paymentMode === 'CASH').reduce((acc, b) => acc + b.total, 0);
       const upiSales = empBills.filter(b => b.paymentMode === 'UPI').reduce((acc, b) => acc + b.total, 0);
-      const creditSales = empBills.filter(b => b.paymentMode === 'CREDIT').reduce((acc, b) => acc + b.total, 0);
       const aov = totalBills > 0 ? Math.round(totalSales / totalBills) : 0;
       // Realistic average billing time in seconds: base 45s, decreases with experience
       const avgSpeedSeconds = totalBills > 0 ? Math.max(30, 48 - Math.min(15, totalBills * 2)) : 45;
@@ -1541,7 +1528,6 @@ export default function App() {
         totalSales,
         cashSales,
         upiSales,
-        creditSales,
         aov,
         avgSpeedSeconds,
         incentiveBonus
@@ -1610,7 +1596,6 @@ export default function App() {
       openingFloat: activeShift.openingFloat,
       cashSales: currentShiftCashSales,
       upiSales: currentShiftUpiSales,
-      creditSales: currentShiftCreditSales,
       totalSales: currentShiftTotalSales,
       billsCount: activeShiftBills.length,
       cashIn: currentShiftCashIn,
@@ -1767,45 +1752,7 @@ export default function App() {
     setExpenseNoteText('');
   };
 
-  // ADD CUSTOMER HANDLER (Replacing prompt)
-  const handleAddCustomerSubmit = (e) => {
-    e.preventDefault();
-    if (!newCustomer.name || !newCustomer.phone) return;
-    const cust = {
-      id: Date.now(),
-      name: newCustomer.name.trim(),
-      phone: newCustomer.phone.trim(),
-      balance: 0,
-      limit: Number(newCustomer.limit) || 5000,
-      city: newCustomer.city.trim() || 'Delhi NCR',
-      lastBillDate: '-'
-    };
-    setCustomers(prev => [...prev, cust]);
-    if (API_ENABLED && isAuthenticated) {
-      api.createCustomer({ name: cust.name, phone: cust.phone, city: cust.city, creditLimit: cust.limit })
-        .then(saved => setCustomers(prev => prev.map(c => (c.id === cust.id ? { ...c, id: saved.id } : c))))
-        .catch(e => notifySyncError('Customer saved locally but not synced to the server', e));
-    }
-    setShowAddCustomerModal(false);
-    setNewCustomer({ name: '', phone: '', limit: '5000', city: 'Delhi NCR' });
-  };
 
-  // RECEIVE KHATA PAYMENT HANDLER (Replacing prompt)
-  const handleKhataPaymentSubmit = (e) => {
-    e.preventDefault();
-    if (!selectedKhataCustomer) return;
-    const amt = Number(khataPaymentAmount) || 0;
-    if (amt <= 0) return;
-    if (API_ENABLED && isAuthenticated) {
-      api.recordKhataPayment(selectedKhataCustomer.id, Math.min(amt, selectedKhataCustomer.balance), khataPaymentMode, khataPaymentNote)
-        .catch(e => notifySyncError('Khata payment not synced to the server', e));
-    }
-    setCustomers(customers.map(c => c.id === selectedKhataCustomer.id ? { ...c, balance: Math.max(0, c.balance - amt), lastBillDate: 'Today (Repaid)' } : c));
-    setShowKhataPaymentModal(false);
-    setSelectedKhataCustomer(null);
-    setKhataPaymentAmount('');
-    setKhataPaymentNote('');
-  };
 
   // DYNAMIC METRICS FOR DASHBOARD & FINANCIALS (Starts at default 0)
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -1993,7 +1940,6 @@ export default function App() {
   };
 
   const ownerProfileBillsList = getOwnerProfileBills();
-  const ownerProfileTotalRevenue = ownerProfileBillsList.reduce((acc, b) => acc + b.total, 0);
   const ownerProfileCashTotal = ownerProfileBillsList.reduce((acc, b) => {
     if (b.paymentMode === 'CASH') return acc + b.total;
     if (b.paymentMode === 'SPLIT') return acc + (b.splitCash || 0);
@@ -2004,10 +1950,8 @@ export default function App() {
     if (b.paymentMode === 'SPLIT') return acc + (b.splitUpi || 0);
     return acc;
   }, 0);
-  const ownerProfileCreditTotal = ownerProfileBillsList.reduce((acc, b) => {
-    if (b.paymentMode === 'CREDIT') return acc + b.total;
-    return acc;
-  }, 0);
+  // Total Revenue strictly equals Cash + UPI (Zero Udhaar/Credit)
+  const ownerProfileTotalRevenue = ownerProfileCashTotal + ownerProfileUpiTotal;
 
   const analyticsCash = analyticsBillsList.reduce((acc, b) => {
     if (b.paymentMode === 'CASH') return acc + b.total;
@@ -2019,7 +1963,6 @@ export default function App() {
     if (b.paymentMode === 'SPLIT') return acc + (b.splitUpi || 0);
     return acc;
   }, 0);
-  const analyticsCredit = analyticsBillsList.filter(b => b.paymentMode === 'CREDIT').reduce((acc, b) => acc + b.total, 0);
 
   // =============================================================
   // SCREEN 1: REAL LOGIN SCREEN (When Not Authenticated)
@@ -2224,9 +2167,9 @@ export default function App() {
                 <div className="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-700 flex items-center justify-center mb-4 shadow-sm">
                   <Users className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-extrabold text-slate-900 mb-2">Customer Khata &amp; Loyalty CRM</h3>
+                <h3 className="text-base font-extrabold text-slate-900 mb-2">Instant Digital Invoicing &amp; Loyalty</h3>
                 <p className="text-xs text-slate-600 leading-relaxed mb-3">
-                  Digital customer ledger with credit limits, payment tracking, balance reminders, and instant bill history lookup for loyal neighborhood customers.
+                  Direct customer name entry, transparent 100% Cash &amp; UPI reconciliation, and automatic loyalty point accrual for every verified customer transaction.
                 </p>
                 <div className="text-[11px] text-cyan-700 font-bold flex items-center">
                   <Check className="w-3.5 h-3.5 mr-1 text-cyan-600" />
@@ -2616,7 +2559,7 @@ export default function App() {
             </div>
             <div className="flex items-start space-x-2">
               <span className="text-blue-600 font-bold">🧑‍💼</span>
-              <span><strong>Cashiers &amp; Staff:</strong> Sign in with the email &amp; password given by your Store Owner.</span>
+              <span><strong>Cashiers:</strong> Sign in with the cashier email &amp; password given by your Store Owner (Only cashier role employees have terminal login access).</span>
             </div>
           </div>
 
@@ -2848,15 +2791,7 @@ export default function App() {
             </button>
           )}
 
-          {(currentUser.role === 'OWNER' || currentUser.role === 'EMPLOYEE') && (
-            <button
-              onClick={() => setActiveTab('customers')}
-              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'customers' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
-            >
-              <Users className="w-4 h-4" />
-              <span>Customers & Khata</span>
-            </button>
-          )}
+
 
           {currentUser.role === 'OWNER' && (
             <button
@@ -3226,10 +3161,6 @@ export default function App() {
                   <div className="flex justify-between">
                     <span className="text-slate-500 font-medium">UPI:</span>
                     <span className="font-bold text-emerald-600">₹{analyticsUPI.toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500 font-medium">Udhaar (Khata):</span>
-                    <span className="font-bold text-rose-600">₹{analyticsCredit.toLocaleString('en-IN')}</span>
                   </div>
                 </div>
               </div>
@@ -3792,7 +3723,7 @@ export default function App() {
                   <div>
                     <input
                       type="tel"
-                      placeholder="Customer phone (optional for WhatsApp bill / khata)"
+                      placeholder="Customer phone (optional for digital bill receipt)"
                       value={customerPhoneInput}
                       onChange={(e) => setCustomerPhoneInput(e.target.value)}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -3901,7 +3832,7 @@ export default function App() {
                   <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block mb-1.5">
                     Payment Method
                   </label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => {
                         setPaymentMode('CASH');
@@ -3935,17 +3866,6 @@ export default function App() {
                     >
                       <Coins className="w-4 h-4 mb-1" />
                       <span>Split</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setPaymentMode('CREDIT');
-                        setSplitCashAmount('');
-                        setSplitUpiAmount('');
-                      }}
-                      className={`p-2 rounded-xl text-xs font-bold border flex flex-col items-center justify-center transition ${paymentMode === 'CREDIT' ? 'bg-rose-600 text-white border-rose-600 shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'}`}
-                    >
-                      <CreditCard className="w-4 h-4 mb-1" />
-                      <span>Udhaar</span>
                     </button>
                   </div>
                 </div>
@@ -5105,93 +5025,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ============================================================== */}
-        {/* VIEW 7: CUSTOMERS, KHATA & LOYALTY */}
-        {/* ============================================================== */}
-        {activeTab === 'customers' && (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">Customer CRM, Loyalty Points &amp; Khata Ledger</h3>
-                <p className="text-xs text-slate-500">Track customer credit balances, loyalty points, lifetime spend, and purchase history</p>
-              </div>
-              <button
-                onClick={() => setShowAddCustomerModal(true)}
-                className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Customer</span>
-              </button>
-            </div>
 
-            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                    <th className="py-3 px-4">Customer Name &amp; Area</th>
-                    <th className="py-3 px-4">Phone</th>
-                    <th className="py-3 px-4 text-center">Loyalty Points</th>
-                    <th className="py-3 px-4 text-center">Visits</th>
-                    <th className="py-3 px-4 text-right">Lifetime Spend</th>
-                    <th className="py-3 px-4 text-right">Credit Limit</th>
-                    <th className="py-3 px-4 text-right">Current Udhaar (Due)</th>
-                    <th className="py-3 px-4 text-center">Profile &amp; Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {customers.map(c => (
-                    <tr key={c.id} className="hover:bg-slate-50 transition">
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-slate-900">{c.name}</div>
-                        <div className="text-[11px] text-slate-400">{c.city}</div>
-                      </td>
-                      <td className="py-3.5 px-4 text-slate-600 font-mono">{c.phone}</td>
-                      <td className="py-3.5 px-4 text-center">
-                        <span className="px-2.5 py-1 rounded-full text-[11px] font-black bg-amber-100 text-amber-900 inline-flex items-center space-x-1 border border-amber-200">
-                          <Award className="w-3 h-3 text-amber-600" />
-                          <span>{c.loyaltyPoints || 0} pts</span>
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-center font-bold text-slate-700">{c.totalVisits || 0} bills</td>
-                      <td className="py-3.5 px-4 text-right font-black text-slate-900">₹{(c.lifetimeSpent || 0).toLocaleString('en-IN')}</td>
-                      <td className="py-3.5 px-4 text-right text-slate-500 font-medium">₹{c.limit.toLocaleString('en-IN')}</td>
-                      <td className="py-3.5 px-4 text-right">
-                        <span className={`font-black ${c.balance > 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                          ₹{c.balance.toLocaleString('en-IN')}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-center">
-                        <div className="inline-flex items-center space-x-1.5">
-                          <button
-                            onClick={() => handleOpenCustomerHistory(c)}
-                            className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold transition flex items-center space-x-1"
-                            title="View Purchase History & Analytics"
-                          >
-                            <Eye className="w-3 h-3" />
-                            <span>History</span>
-                          </button>
-                          {c.balance > 0 && (
-                            <button
-                              onClick={() => {
-                                setSelectedKhataCustomer(c);
-                                setKhataPaymentAmount(c.balance.toString());
-                                setKhataPaymentNote('');
-                                setShowKhataPaymentModal(true);
-                              }}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[11px] font-bold transition"
-                            >
-                              Receive
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
 
         {/* ============================================================== */}
         {/* VIEW 8: EXPENSES & PROFIT (Owner Only) */}
@@ -5809,6 +5643,9 @@ export default function App() {
                   <option value="Inventory & Stock In-charge">Inventory &amp; Stock In-charge</option>
                   <option value="Store Helper & Logistics">Store Helper &amp; Logistics</option>
                 </select>
+                <p className="text-[10px] text-amber-700 font-semibold mt-1">
+                  ⚠️ Note: Only employees with the Cashier role can sign in to the terminal. Other staff roles are strictly blocked from logging in.
+                </p>
               </div>
 
               {/* Login Credentials for Staff */}
@@ -6343,175 +6180,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ============================================================== */}
-      {/* MODAL: ADD CUSTOMER TO KHATA */}
-      {/* ============================================================== */}
-      {showAddCustomerModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center">
-                  <Users className="w-4 h-4 mr-1.5 text-indigo-600" /> Add Customer to Udhaar Khata
-                </h3>
-                <p className="text-xs text-slate-500">Register customer profile and credit limit</p>
-              </div>
-              <button onClick={() => setShowAddCustomerModal(false)} className="text-slate-400 hover:text-slate-700">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            <form onSubmit={handleAddCustomerSubmit} className="space-y-3.5 text-xs">
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Customer Full Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Rakesh Gupta, Priya Sharma..."
-                  value={newCustomer.name}
-                  onChange={e => setNewCustomer({ ...newCustomer, name: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-900"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Phone Number *</label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="+91-98765-43210"
-                    value={newCustomer.phone}
-                    onChange={e => setNewCustomer({ ...newCustomer, phone: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-900"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">Credit Limit (₹)</label>
-                  <input
-                    type="number"
-                    placeholder="5000"
-                    value={newCustomer.limit}
-                    onChange={e => setNewCustomer({ ...newCustomer, limit: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-900 font-bold"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Area / City</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Sector 15 Market, Delhi"
-                  value={newCustomer.city}
-                  onChange={e => setNewCustomer({ ...newCustomer, city: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-900"
-                />
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex space-x-2">
-                <button
-                  type="submit"
-                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-sm transition"
-                >
-                  Save Customer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAddCustomerModal(false)}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================== */}
-      {/* MODAL: RECEIVE KHATA PAYMENT */}
-      {/* ============================================================== */}
-      {showKhataPaymentModal && selectedKhataCustomer && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center">
-                  <Banknote className="w-4 h-4 mr-1.5 text-emerald-600" /> Record Khata Repayment
-                </h3>
-                <p className="text-xs text-slate-500">Customer: <span className="font-bold">{selectedKhataCustomer.name}</span></p>
-              </div>
-              <button onClick={() => setShowKhataPaymentModal(false)} className="text-slate-400 hover:text-slate-700">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleKhataPaymentSubmit} className="space-y-3.5 text-xs">
-              <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl flex justify-between items-center">
-                <span className="text-rose-700 font-semibold">Total Outstanding Udhaar:</span>
-                <span className="text-base font-black text-rose-700">₹{selectedKhataCustomer.balance.toLocaleString('en-IN')}</span>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Repayment Amount Received (₹) *</label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  max={selectedKhataCustomer.balance}
-                  value={khataPaymentAmount}
-                  onChange={e => setKhataPaymentAmount(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-900 font-bold"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Payment Channel</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['UPI', 'CASH'].map(m => (
-                    <button
-                      type="button"
-                      key={m}
-                      onClick={() => setKhataPaymentMode(m)}
-                      className={`py-2 rounded-xl border text-xs font-bold transition ${khataPaymentMode === m ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-slate-50 text-slate-700 border-slate-200'}`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 block mb-1">Payment Note / Receipt (by typing)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Paid via GooglePay, transaction ID..."
-                  value={khataPaymentNote}
-                  onChange={e => setKhataPaymentNote(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-900"
-                />
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex space-x-2">
-                <button
-                  type="submit"
-                  className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition"
-                >
-                  Confirm Payment Received
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowKhataPaymentModal(false)}
-                  className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* ============================================================== */}
       {/* MODAL: PARKED / HELD CARTS (Queue Buster) */}
@@ -6947,122 +6616,7 @@ export default function App() {
         </div>
       )}
 
-      {/* ============================================================== */}
-      {/* MODAL: CUSTOMER PURCHASE HISTORY & PROFILE */}
-      {/* ============================================================== */}
-      {showCustomerHistoryModal && selectedCustomerForHistory && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-3xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
-              <div>
-                <h3 className="text-base font-bold text-slate-900 flex items-center">
-                  <Eye className="w-5 h-5 mr-1.5 text-indigo-600" /> Customer Profile & History
-                </h3>
-                <p className="text-xs text-slate-500">
-                  <span className="font-bold text-slate-900">{selectedCustomerForHistory.name}</span> &bull; {selectedCustomerForHistory.phone} &bull; {selectedCustomerForHistory.city || 'Local'}
-                </p>
-              </div>
-              <button onClick={() => setShowCustomerHistoryModal(false)} className="text-slate-400 hover:text-slate-700">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            {/* KPI Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 text-xs">
-              <div className="p-3 bg-emerald-50/70 border border-emerald-100 rounded-2xl">
-                <div className="text-[10px] uppercase font-bold text-emerald-700">Lifetime Spend</div>
-                <div className="text-lg font-black text-emerald-900 mt-1">₹{(selectedCustomerForHistory.lifetimeSpent || 0).toLocaleString('en-IN')}</div>
-              </div>
-              <div className="p-3 bg-indigo-50/70 border border-indigo-100 rounded-2xl">
-                <div className="text-[10px] uppercase font-bold text-indigo-700">Store Visits</div>
-                <div className="text-lg font-black text-indigo-900 mt-1">{selectedCustomerForHistory.totalVisits || 1}</div>
-              </div>
-              <div className="p-3 bg-amber-50/70 border border-amber-100 rounded-2xl">
-                <div className="text-[10px] uppercase font-bold text-amber-700 flex items-center">
-                  <Coins className="w-3 h-3 mr-1" /> Loyalty Points
-                </div>
-                <div className="text-lg font-black text-amber-900 mt-1">{selectedCustomerForHistory.loyaltyPoints || 0} pts</div>
-              </div>
-              <div className="p-3 bg-rose-50/70 border border-rose-100 rounded-2xl">
-                <div className="text-[10px] uppercase font-bold text-rose-700">Udhaar Due</div>
-                <div className="text-lg font-black text-rose-900 mt-1">₹{(selectedCustomerForHistory.balance || 0).toLocaleString('en-IN')}</div>
-              </div>
-            </div>
-
-            {/* Purchase History / Past Invoices */}
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center">
-                  <Receipt className="w-3.5 h-3.5 mr-1 text-slate-500" /> Past Bills & Receipts
-                </h4>
-                {bills.filter(b => b.customer?.id === selectedCustomerForHistory.id || b.customer?.phone === selectedCustomerForHistory.phone).length === 0 ? (
-                  <div className="py-8 text-center text-slate-400 bg-slate-50 border border-dashed border-slate-200 rounded-2xl text-xs">
-                    <Receipt className="w-8 h-8 mx-auto mb-1.5 text-slate-300" />
-                    <p className="font-semibold text-slate-600">No transactions recorded in this session</p>
-                    <p className="text-[11px]">Completed bills for this customer will be archived here.</p>
-                  </div>
-                ) : (
-                  <div className="border border-slate-200 rounded-2xl overflow-hidden text-xs">
-                    <table className="w-full text-left">
-                      <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase border-b border-slate-200">
-                        <tr>
-                          <th className="py-2.5 px-3">Bill #</th>
-                          <th className="py-2.5 px-3">Date & Time</th>
-                          <th className="py-2.5 px-3">Items</th>
-                          <th className="py-2.5 px-3">Mode</th>
-                          <th className="py-2.5 px-3">Points</th>
-                          <th className="py-2.5 px-3 text-right">Amount</th>
-                          <th className="py-2.5 px-3 text-center">Receipt</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {bills
-                          .filter(b => b.customer?.id === selectedCustomerForHistory.id || b.customer?.phone === selectedCustomerForHistory.phone)
-                          .map((b) => (
-                            <tr key={b.id} className="hover:bg-slate-50">
-                              <td className="py-2 px-3 font-mono font-bold text-indigo-700">{b.billNo}</td>
-                              <td className="py-2 px-3 text-slate-600">{b.date}</td>
-                              <td className="py-2 px-3 text-slate-700">{b.items.reduce((s, it) => s + it.quantity, 0)} items</td>
-                              <td className="py-2 px-3">
-                                <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-semibold text-[10px]">
-                                  {b.paymentMode}
-                                </span>
-                              </td>
-                              <td className="py-2 px-3 text-emerald-700 font-bold">+{b.pointsEarned || 0}</td>
-                              <td className="py-2 px-3 text-right font-black text-slate-900">₹{b.total.toLocaleString('en-IN')}</td>
-                              <td className="py-2 px-3 text-center">
-                                <button
-                                  onClick={() => {
-                                    setLastGeneratedBill(b);
-                                    setShowInvoiceModal(true);
-                                  }}
-                                  className="p-1 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
-                                  title="View Receipt"
-                                >
-                                  <Receipt className="w-4 h-4" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-100 mt-6 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowCustomerHistoryModal(false)}
-                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition"
-              >
-                Close Profile
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ============================================================== */}
       {/* MODAL: SET / EDIT OPENING CASH FLOAT */}
