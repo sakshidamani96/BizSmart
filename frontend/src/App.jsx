@@ -2365,21 +2365,21 @@ export default function App() {
     // -----------------------------------------------------------
     if (viewMode === 'register') {
       return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center p-4 font-sans relative overflow-hidden">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-sky-100/50 text-slate-800 flex flex-col justify-center items-center p-4 font-sans relative overflow-hidden">
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-sky-200/50 rounded-full blur-3xl pointer-events-none" />
 
-          <div className="max-w-xl w-full bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10 my-8">
+          <div className="max-w-xl w-full bg-white border border-sky-200/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-xl shadow-sky-100 relative z-10 my-8">
             {/* Top Back Link */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+            <div className="flex items-center justify-between pb-4 border-b border-sky-100 mb-6">
               <button
                 onClick={() => setViewMode('landing')}
-                className="text-xs font-bold text-slate-400 hover:text-white flex items-center space-x-1 transition"
+                className="text-xs font-bold text-slate-500 hover:text-sky-600 flex items-center space-x-1 transition"
               >
                 <span>&larr; Back to Home</span>
               </button>
               <button
                 onClick={() => setViewMode('login')}
-                className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition"
+                className="text-xs font-bold text-sky-600 hover:text-sky-700 transition"
               >
                 Already have a store? Sign In &rarr;
               </button>
@@ -2387,19 +2387,19 @@ export default function App() {
 
             {/* Header */}
             <div className="text-center mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white mx-auto shadow-lg shadow-indigo-500/30 mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white mx-auto shadow-md shadow-sky-300 mb-3">
                 <Store className="w-6 h-6" />
               </div>
-              <h1 className="text-2xl font-black tracking-tight text-white">
+              <h1 className="text-2xl font-black tracking-tight text-slate-900">
                 Register Your Business &amp; Store
               </h1>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 Exclusive for Business &amp; Store Owners. Setup your retail management system in seconds.
               </p>
 
               {/* Owner Exclusivity Notice */}
-              <div className="mt-3.5 p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[11px] font-medium flex items-center justify-center space-x-1.5 text-left">
-                <ShieldCheck className="w-4 h-4 text-indigo-400 flex-shrink-0" />
+              <div className="mt-3.5 p-2.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-900 text-[11px] font-medium flex items-center justify-center space-x-1.5 text-left">
+                <ShieldCheck className="w-4 h-4 text-sky-600 flex-shrink-0" />
                 <span>
                   <strong>Owner Registration Only:</strong> Staff &amp; cashiers do not register here. You will add employees and assign them passwords from your Owner Dashboard.
                 </span>
@@ -2409,100 +2409,100 @@ export default function App() {
             {/* Registration Form */}
             <form onSubmit={handleOwnerRegister} className="space-y-4 text-xs">
               {/* Owner Details */}
-              <div className="p-3.5 bg-slate-950/60 border border-slate-800/80 rounded-2xl space-y-3">
-                <div className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center">
-                  <Briefcase className="w-3.5 h-3.5 mr-1.5 text-indigo-400" />
+              <div className="p-3.5 bg-sky-50/50 border border-sky-100 rounded-2xl space-y-3">
+                <div className="text-[11px] font-bold text-sky-700 uppercase tracking-wider flex items-center">
+                  <Briefcase className="w-3.5 h-3.5 mr-1.5 text-sky-600" />
                   Business Owner Credentials
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Owner Full Name *</label>
+                    <label className="block text-slate-700 font-bold mb-1">Owner Full Name *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. Damani Retails Owner"
                       value={ownerRegisterForm.ownerName}
                       onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, ownerName: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Owner Email Address *</label>
+                    <label className="block text-slate-700 font-bold mb-1">Owner Email Address *</label>
                     <input
                       type="email"
                       required
                       placeholder="Enter your store email address"
                       value={ownerRegisterForm.email}
                       onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, email: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Create Password * (min 6 chars)</label>
+                    <label className="block text-slate-700 font-bold mb-1">Create Password * (min 6 chars)</label>
                     <input
                       type="password"
                       required
                       placeholder="Enter strong password"
                       value={ownerRegisterForm.password}
                       onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, password: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Confirm Password *</label>
+                    <label className="block text-slate-700 font-bold mb-1">Confirm Password *</label>
                     <input
                       type="password"
                       required
                       placeholder="Re-type password"
                       value={ownerRegisterForm.confirmPassword}
                       onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, confirmPassword: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-bold mb-1">Owner Contact Phone *</label>
+                  <label className="block text-slate-700 font-bold mb-1">Owner Contact Phone *</label>
                   <input
                     type="tel"
                     required
                     placeholder="+91-98100-22334"
                     value={ownerRegisterForm.phone}
                     onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, phone: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
                   />
                 </div>
               </div>
 
               {/* Store Details */}
-              <div className="p-3.5 bg-slate-950/60 border border-slate-800/80 rounded-2xl space-y-3">
-                <div className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center">
-                  <Store className="w-3.5 h-3.5 mr-1.5 text-indigo-400" />
+              <div className="p-3.5 bg-sky-50/50 border border-sky-100 rounded-2xl space-y-3">
+                <div className="text-[11px] font-bold text-sky-700 uppercase tracking-wider flex items-center">
+                  <Store className="w-3.5 h-3.5 mr-1.5 text-sky-600" />
                   Store / Retail Business Details
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Store / Business Name *</label>
+                    <label className="block text-slate-700 font-bold mb-1">Store / Business Name *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. Sharma Superstore, City Mart"
                       value={ownerRegisterForm.storeName}
                       onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, storeName: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Business Category *</label>
+                    <label className="block text-slate-700 font-bold mb-1">Business Category *</label>
                     <select
                       value={ownerRegisterForm.category}
                       onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, category: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
                     >
                       <option value="Kirana & Supermarket">Kirana &amp; Supermarket</option>
                       <option value="Departmental Store">Departmental Store</option>
@@ -2516,50 +2516,50 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-bold mb-1">Store Tagline / Slogan</label>
+                  <label className="block text-slate-700 font-bold mb-1">Store Tagline / Slogan</label>
                   <input
                     type="text"
                     placeholder="e.g. Quality Groceries & Daily Needs"
                     value={ownerRegisterForm.tagline}
                     onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, tagline: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Store Address &amp; City *</label>
+                    <label className="block text-slate-700 font-bold mb-1">Store Address &amp; City *</label>
                     <input
                       type="text"
                       required
                       placeholder="Shop 12-14, Main Market, New Delhi"
                       value={ownerRegisterForm.address}
                       onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, address: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">GSTIN Number (Optional)</label>
+                    <label className="block text-slate-700 font-bold mb-1">GSTIN Number (Optional)</label>
                     <input
                       type="text"
                       placeholder="07AABCS1429B1Z8"
                       value={ownerRegisterForm.gstin}
                       onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, gstin: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+                      className="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 font-mono shadow-sm"
                     />
                   </div>
                 </div>
               </div>
 
               {registerError && (
-                <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs font-semibold">
+                <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-xs font-semibold">
                   {registerError}
                 </div>
               )}
 
               <button
                 type="submit"
-                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2"
+                className="w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold rounded-xl transition shadow-lg shadow-sky-500/20 flex items-center justify-center space-x-2"
               >
                 <Store className="w-4 h-4" />
                 <span>Create Store Account &amp; Enter Dashboard &rarr;</span>
@@ -2574,22 +2574,22 @@ export default function App() {
     // VIEW 1C: UNIFIED LOGIN SCREEN (For Owners & Employees)
     // -----------------------------------------------------------
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-center items-center p-4 font-sans relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-sky-100/50 text-slate-800 flex flex-col justify-center items-center p-4 font-sans relative overflow-hidden">
         {/* Background glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-sky-200/50 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-md w-full bg-slate-900/90 border border-slate-800 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-2xl relative z-10">
+        <div className="max-w-md w-full bg-white border border-sky-200/80 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-xl shadow-sky-100 relative z-10">
           {/* Top navigation */}
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800 mb-6">
+          <div className="flex items-center justify-between pb-3 border-b border-sky-100 mb-6">
             <button
               onClick={() => setViewMode('landing')}
-              className="text-xs font-bold text-slate-400 hover:text-white flex items-center space-x-1 transition"
+              className="text-xs font-bold text-slate-500 hover:text-sky-600 flex items-center space-x-1 transition"
             >
               <span>&larr; Back to Home</span>
             </button>
             <button
               onClick={() => setViewMode('register')}
-              className="text-xs font-bold text-indigo-400 hover:text-indigo-300 transition"
+              className="text-xs font-bold text-sky-600 hover:text-sky-700 transition"
             >
               New Owner? Register Store &rarr;
             </button>
@@ -2597,25 +2597,25 @@ export default function App() {
 
           {/* Logo & Title */}
           <div className="text-center mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white mx-auto shadow-lg shadow-indigo-500/30 mb-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white mx-auto shadow-md shadow-sky-300 mb-3">
               <Building2 className="w-6 h-6" />
             </div>
-            <h1 className="text-2xl font-black tracking-tight text-white">
-              Biz<span className="text-indigo-400">Smart</span>
+            <h1 className="text-2xl font-black tracking-tight text-slate-900">
+              Biz<span className="text-sky-500">Smart</span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Sign In to Your Store Dashboard or Cashier Terminal
             </p>
           </div>
 
           {/* Role Explainer Tips */}
-          <div className="mb-5 p-3 rounded-2xl bg-slate-950/70 border border-slate-800 text-[11px] space-y-1.5 text-slate-300">
+          <div className="mb-5 p-3 rounded-2xl bg-sky-50/70 border border-sky-100 text-[11px] space-y-1.5 text-slate-600">
             <div className="flex items-start space-x-2">
-              <span className="text-indigo-400 font-bold">👑</span>
+              <span className="text-sky-600 font-bold">👑</span>
               <span><strong>Store Owners:</strong> Sign in with your registered email and password to manage store &amp; staff.</span>
             </div>
             <div className="flex items-start space-x-2">
-              <span className="text-amber-400 font-bold">🧑‍💼</span>
+              <span className="text-blue-600 font-bold">🧑‍💼</span>
               <span><strong>Cashiers &amp; Staff:</strong> Sign in with the email &amp; password given by your Store Owner.</span>
             </div>
           </div>
@@ -2623,48 +2623,48 @@ export default function App() {
           {/* Login Form */}
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                 Login Email ID
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="email"
                   required
                   placeholder="Enter your registered login email"
                   value={loginEmail}
                   onChange={e => setLoginEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-sky-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm transition"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                 Password
               </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-sky-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="password"
                   required
                   placeholder="Enter your password"
                   value={loginPassword}
                   onChange={e => setLoginPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white border border-sky-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm transition"
                 />
               </div>
             </div>
 
             {loginError && (
-              <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs font-semibold">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-600 text-xs font-semibold">
                 {loginError}
               </div>
             )}
 
             <button
               type="submit"
-              className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2"
+              className="w-full py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-xs font-bold rounded-xl transition shadow-lg shadow-sky-500/20 flex items-center justify-center space-x-2"
             >
               <LogIn className="w-4 h-4" />
               <span>Sign In to Dashboard / Terminal</span>
