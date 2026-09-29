@@ -266,6 +266,30 @@ export default function App() {
     }
   }, [business]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('bizsmart_cash_drops', JSON.stringify(cashDrops));
+    } catch (e) {
+      console.warn('Failed to persist cash drops', e);
+    }
+  }, [cashDrops]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('bizsmart_closed_shifts', JSON.stringify(closedShifts));
+    } catch (e) {
+      console.warn('Failed to persist closed shifts', e);
+    }
+  }, [closedShifts]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('bizsmart_active_shift', JSON.stringify(activeShift));
+    } catch (e) {
+      console.warn('Failed to persist active shift', e);
+    }
+  }, [activeShift]);
+
   // -------------------------------------------------------------
   // SUPPLIERS STATE (Wholesale suppliers directory)
   // -------------------------------------------------------------
@@ -391,19 +415,143 @@ export default function App() {
   // -------------------------------------------------------------
   // 7. CASH DRAWER & SHIFT RECONCILER STATE (Hisab-Kitab)
   // -------------------------------------------------------------
-  const [activeShift, setActiveShift] = useState({
-    id: 'SHIFT-101',
-    cashierId: 1,
-    cashierName: 'Ajay Sharma',
-    shiftName: 'Morning Shift (8 AM - 4 PM)',
-    startTime: '08:00 AM',
-    startDate: new Date().toISOString().slice(0, 10),
-    openingFloat: 2000,
-    status: 'OPEN' // 'OPEN' | 'CLOSED'
+  const [activeShift, setActiveShift] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bizsmart_active_shift');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to parse active shift', e);
+    }
+    return {
+      id: 'SHIFT-101',
+      cashierId: 1,
+      cashierName: 'Ajay Sharma',
+      shiftName: 'Morning Shift (8 AM - 4 PM)',
+      startTime: '08:00 AM',
+      startDate: new Date().toISOString().slice(0, 10),
+      openingFloat: 2000,
+      status: 'OPEN' // 'OPEN' | 'CLOSED'
+    };
   });
 
-  const [cashDrops, setCashDrops] = useState([]);
-  const [closedShifts, setClosedShifts] = useState([]);
+  const [cashDrops, setCashDrops] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bizsmart_cash_drops');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to parse cash drops', e);
+    }
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0, 10);
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+    const twoDaysAgoStr = twoDaysAgo.toISOString().slice(0, 10);
+
+    return [
+      { id: 101, shiftId: 'SHIFT-101', type: 'CASH_OUT', amount: 450, reason: 'Vendor Payout (Milk/Bread)', notes: 'Morning Amul fresh milk delivery crate payout', cashier: 'Ajay Sharma', timestamp: '08:45 AM', date: todayStr },
+      { id: 102, shiftId: 'SHIFT-101', type: 'CASH_IN', amount: 1000, reason: 'Change Refill (Small Notes)', notes: 'Bank coin & ₹10/₹20 change refill from store safe', cashier: 'Ajay Sharma', timestamp: '11:15 AM', date: todayStr },
+      { id: 103, shiftId: 'SHIFT-100', type: 'CASH_OUT', amount: 320, reason: 'Store Petty Overhead', notes: 'Cleaning liquid and tea for counter staff', cashier: 'Ajay Sharma', timestamp: '02:30 PM', date: yesterdayStr },
+      { id: 104, shiftId: 'SHIFT-100', type: 'CASH_OUT', amount: 1500, reason: 'Bank Cash Deposit', notes: 'Mid-day excess cash safe transfer', cashier: 'Ajay Sharma', timestamp: '05:00 PM', date: yesterdayStr },
+      { id: 105, shiftId: 'SHIFT-099', type: 'CASH_OUT', amount: 600, reason: 'Vendor Payout (Milk/Bread)', notes: 'Britannia bread & pav evening restock', cashier: 'Ajay Sharma', timestamp: '04:15 PM', date: twoDaysAgoStr },
+      { id: 106, shiftId: 'SHIFT-099', type: 'CASH_IN', amount: 500, reason: 'Change Refill (Small Notes)', notes: '₹10 & ₹20 note change pack', cashier: 'Ajay Sharma', timestamp: '09:00 AM', date: twoDaysAgoStr }
+    ];
+  });
+
+  const [closedShifts, setClosedShifts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bizsmart_closed_shifts');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to parse closed shifts', e);
+    }
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0, 10);
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+    const twoDaysAgoStr = twoDaysAgo.toISOString().slice(0, 10);
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+    const threeDaysAgoStr = threeDaysAgo.toISOString().slice(0, 10);
+
+    return [
+      {
+        id: 'SHIFT-100',
+        cashierName: 'Ajay Sharma',
+        shiftName: 'Full Day Shift (8 AM - 8 PM)',
+        startDate: yesterdayStr,
+        startTime: '08:00 AM',
+        endDate: yesterdayStr,
+        endTime: '08:15 PM',
+        openingFloat: 2000,
+        cashSales: 14250,
+        upiSales: 19800,
+        totalSales: 34050,
+        billsCount: 42,
+        cashIn: 0,
+        cashOut: 1820,
+        expectedCash: 14430,
+        actualCash: 14430,
+        discrepancy: 0,
+        status: 'BALANCED',
+        notes: 'Shift balanced cleanly. ₹1,820 petty payout receipts filed.',
+        denominations: { 500: '24', 200: '10', 100: '4', 50: '0', 20: '1', 10: '1' }
+      },
+      {
+        id: 'SHIFT-099',
+        cashierName: 'Ajay Sharma',
+        shiftName: 'Full Day Shift (8 AM - 8 PM)',
+        startDate: twoDaysAgoStr,
+        startTime: '08:00 AM',
+        endDate: twoDaysAgoStr,
+        endTime: '08:00 PM',
+        openingFloat: 2000,
+        cashSales: 16800,
+        upiSales: 21400,
+        totalSales: 38200,
+        billsCount: 48,
+        cashIn: 500,
+        cashOut: 600,
+        expectedCash: 18700,
+        actualCash: 18700,
+        discrepancy: 0,
+        status: 'BALANCED',
+        notes: 'Even till close. All bills accounted.',
+        denominations: { 500: '32', 200: '12', 100: '3', 50: '0', 20: '0', 10: '0' }
+      },
+      {
+        id: 'SHIFT-098',
+        cashierName: 'Ajay Sharma',
+        shiftName: 'Full Day Shift (8 AM - 8 PM)',
+        startDate: threeDaysAgoStr,
+        startTime: '08:00 AM',
+        endDate: threeDaysAgoStr,
+        endTime: '08:30 PM',
+        openingFloat: 2000,
+        cashSales: 12500,
+        upiSales: 18200,
+        totalSales: 30700,
+        billsCount: 39,
+        cashIn: 0,
+        cashOut: 400,
+        expectedCash: 14100,
+        actualCash: 14100,
+        discrepancy: 0,
+        status: 'BALANCED',
+        notes: 'Balanced.',
+        denominations: { 500: '25', 200: '7', 100: '2', 50: '0', 20: '0', 10: '0' }
+      }
+    ];
+  });
+
+  // Owner Cash Drawer Filter Period ('today' | 'week' | 'month' | 'custom' | 'all')
+  const [drawerPeriod, setDrawerPeriod] = useState('today');
+  const [drawerStartDate, setDrawerStartDate] = useState('');
+  const [drawerEndDate, setDrawerEndDate] = useState('');
+  const [dailyCashTarget, setDailyCashTarget] = useState(15000); // Daily cash target (₹15,000)
+  const [monthlyCashTarget, setMonthlyCashTarget] = useState(350000); // Monthly cash target (₹3,50,000)
 
   // Drawer Modals State
   const [showOpeningFloatModal, setShowOpeningFloatModal] = useState(false);
@@ -1963,6 +2111,91 @@ export default function App() {
     if (b.paymentMode === 'SPLIT') return acc + (b.splitUpi || 0);
     return acc;
   }, 0);
+
+  // -------------------------------------------------------------
+  // CASH DRAWER & SHIFTS OWNER AUDIT CALCULATIONS (Day/Week/Month/Custom)
+  // -------------------------------------------------------------
+  const getDrawerDateFilteredData = () => {
+    const today = new Date();
+    const past7 = new Date();
+    past7.setDate(today.getDate() - 6);
+    const past7Str = past7.toISOString().slice(0, 10);
+
+    const filterDate = (itemDate) => {
+      if (!itemDate) return false;
+      const dStr = itemDate.slice(0, 10);
+      if (drawerPeriod === 'today') return dStr === todayStr;
+      if (drawerPeriod === 'week') return dStr >= past7Str && dStr <= todayStr;
+      if (drawerPeriod === 'month') return dStr.startsWith(currentMonthStr);
+      if (drawerPeriod === 'custom') {
+        return (!drawerStartDate || dStr >= drawerStartDate) && (!drawerEndDate || dStr <= drawerEndDate);
+      }
+      return true; // 'all'
+    };
+
+    const periodBills = bills.filter(b => filterDate(b.dateStr));
+    const periodDrops = cashDrops.filter(cd => filterDate(cd.date));
+    const periodClosedShifts = closedShifts.filter(cs => filterDate(cs.startDate));
+
+    // Cash from sales in selected period
+    const cashFromSales = periodBills.reduce((acc, b) => {
+      if (b.paymentMode === 'CASH') return acc + b.total;
+      if (b.paymentMode === 'SPLIT') return acc + (b.splitCash || 0);
+      return acc;
+    }, 0);
+
+    // UPI from sales in selected period
+    const upiFromSales = periodBills.reduce((acc, b) => {
+      if (b.paymentMode === 'UPI') return acc + b.total;
+      if (b.paymentMode === 'SPLIT') return acc + (b.splitUpi || 0);
+      return acc;
+    }, 0);
+
+    // Cash Drops In & Out in selected period
+    const cashInDrops = periodDrops.filter(cd => cd.type === 'CASH_IN').reduce((acc, cd) => acc + cd.amount, 0);
+    const cashOutDrops = periodDrops.filter(cd => cd.type === 'CASH_OUT').reduce((acc, cd) => acc + cd.amount, 0);
+
+    // Total Cash In = Cash Sales + Cash Drops In
+    const totalCashInflow = cashFromSales + cashInDrops;
+    // Total Cash Out = Cash Drops Out (Vendor/Petty/Bank drops)
+    const totalCashOutflow = cashOutDrops;
+    // Net Cash Movement
+    const netCashMovement = totalCashInflow - totalCashOutflow;
+
+    return {
+      periodBills,
+      periodDrops,
+      periodClosedShifts,
+      cashFromSales,
+      upiFromSales,
+      cashInDrops,
+      cashOutDrops,
+      totalCashInflow,
+      totalCashOutflow,
+      netCashMovement
+    };
+  };
+
+  const drawerData = getDrawerDateFilteredData();
+
+  // Targets computations: Today Cash Target & Monthly Cash Target
+  const todayCashSales = bills.filter(b => b.dateStr === todayStr).reduce((acc, b) => {
+    if (b.paymentMode === 'CASH') return acc + b.total;
+    if (b.paymentMode === 'SPLIT') return acc + (b.splitCash || 0);
+    return acc;
+  }, 0);
+
+  const monthCashSales = bills.filter(b => b.dateStr.startsWith(currentMonthStr)).reduce((acc, b) => {
+    if (b.paymentMode === 'CASH') return acc + b.total;
+    if (b.paymentMode === 'SPLIT') return acc + (b.splitCash || 0);
+    return acc;
+  }, 0);
+
+  const todayCashTargetAchieved = dailyCashTarget > 0 ? (todayCashSales >= dailyCashTarget) : true;
+  const todayCashTargetPct = dailyCashTarget > 0 ? Math.min(100, Math.round((todayCashSales / dailyCashTarget) * 100)) : 100;
+
+  const monthCashTargetAchieved = monthlyCashTarget > 0 ? (monthCashSales >= monthlyCashTarget) : true;
+  const monthCashTargetPct = monthlyCashTarget > 0 ? Math.min(100, Math.round((monthCashSales / monthlyCashTarget) * 100)) : 100;
 
   // =============================================================
   // SCREEN 1: REAL LOGIN SCREEN (When Not Authenticated)
@@ -4636,11 +4869,11 @@ export default function App() {
             {/* Header & Quick Shift Actions */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h3 className="text-lg font-black text-slate-900 flex items-center">
-                  <Landmark className="w-5 h-5 mr-2 text-indigo-600" /> Cash Drawer Float &amp; Shift Reconciler
+                <h3 className="text-xl font-black text-slate-900 flex items-center">
+                  <Landmark className="w-6 h-6 mr-2 text-indigo-600" /> Cash Drawer &amp; Shift Management
                 </h3>
-                <p className="text-xs text-slate-500">
-                  Morning cash float, mid-day petty cash drops, daily hisab-kitab, and cashier sales leaderboard
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Complete Cash In &amp; Out audit, live drawer hisab-kitab, sales target tracking, and cashier shifts
                 </p>
               </div>
 
@@ -4663,7 +4896,7 @@ export default function App() {
                   className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-sm"
                 >
                   <ArrowDownLeft className="w-4 h-4" />
-                  <span>+ Cash Drop (In/Out)</span>
+                  <span>+ Cash Movement (In/Out)</span>
                 </button>
                 <button
                   onClick={() => {
@@ -4680,53 +4913,306 @@ export default function App() {
               </div>
             </div>
 
-            {/* Active Drawer Hisab Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
-              <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Opening Cash Float</div>
-                <div className="text-xl font-black text-slate-800 mt-1">₹{(activeShift?.openingFloat || 0).toLocaleString('en-IN')}</div>
-                <div className="mt-2 text-[11px] text-slate-500 flex items-center justify-between">
-                  <span>Shift: {activeShift?.shiftName}</span>
-                  <button onClick={() => { setTempOpeningFloat(String(activeShift?.openingFloat || 2000)); setShowOpeningFloatModal(true); }} className="text-indigo-600 font-bold hover:underline">Edit</button>
+            {/* TARGETS SECTION: TODAY & THIS MONTH CASH SALES TARGET ACHIEVEMENTS */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Today Cash Target Card */}
+              <div className="bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-2xl p-5 shadow-sm">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full">
+                      Daily Cash Target
+                    </span>
+                    <h4 className="text-base font-black text-slate-900 mt-1">Today's Cash Collection</h4>
+                  </div>
+                  <div className="text-right">
+                    <span className={`text-xs font-black px-2.5 py-1 rounded-full ${todayCashTargetAchieved ? 'bg-emerald-600 text-white' : 'bg-amber-100 text-amber-900 border border-amber-200'}`}>
+                      {todayCashTargetAchieved ? '🎉 TARGET ACHIEVED' : `${todayCashTargetPct}% Progress`}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-baseline space-x-2 mt-2">
+                  <span className="text-2xl sm:text-3xl font-black text-emerald-700">₹{todayCashSales.toLocaleString('en-IN')}</span>
+                  <span className="text-xs font-bold text-slate-400">/ Goal: ₹{dailyCashTarget.toLocaleString('en-IN')}</span>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden mt-3">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${todayCashTargetAchieved ? 'bg-emerald-600' : 'bg-emerald-500'}`}
+                    style={{ width: `${todayCashTargetPct}%` }}
+                  />
+                </div>
+
+                <div className="flex justify-between items-center text-[11px] text-slate-500 mt-2">
+                  <span>From {todayBillsList.filter(b => b.paymentMode === 'CASH' || (b.paymentMode === 'SPLIT' && b.splitCash > 0)).length} cash bills today</span>
+                  <span className="font-semibold text-emerald-800">
+                    {todayCashTargetAchieved
+                      ? `Surplus: +₹${(todayCashSales - dailyCashTarget).toLocaleString('en-IN')} above target`
+                      : `₹${(dailyCashTarget - todayCashSales).toLocaleString('en-IN')} remaining to goal`}
+                  </span>
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Cash Sales (Active Shift)</div>
-                <div className="text-xl font-black text-indigo-600 mt-1">₹{currentShiftCashSales.toLocaleString('en-IN')}</div>
-                <div className="mt-2 text-[11px] text-slate-500">
-                  {activeShiftBills.filter(b => b.paymentMode === 'CASH').length} cash bills &bull; Cashier: {activeShift?.cashierName}
+              {/* Monthly Cash Target Card */}
+              <div className="bg-gradient-to-br from-indigo-50 via-white to-sky-50 border border-indigo-200 rounded-2xl p-5 shadow-sm">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-800 bg-indigo-100/80 px-2 py-0.5 rounded-full">
+                      Monthly Cash Target ({new Date().toLocaleString('en-IN', { month: 'long', year: 'numeric' })})
+                    </span>
+                    <h4 className="text-base font-black text-slate-900 mt-1">This Month's Cash Revenue</h4>
+                  </div>
+                  <div className="text-right">
+                    <span className={`text-xs font-black px-2.5 py-1 rounded-full ${monthCashTargetAchieved ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-900 border border-indigo-200'}`}>
+                      {monthCashTargetAchieved ? '🏆 MONTH TARGET COMPLETED' : `${monthCashTargetPct}% Achieved`}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-baseline space-x-2 mt-2">
+                  <span className="text-2xl sm:text-3xl font-black text-indigo-700">₹{monthCashSales.toLocaleString('en-IN')}</span>
+                  <span className="text-xs font-bold text-slate-400">/ Goal: ₹{monthlyCashTarget.toLocaleString('en-IN')}</span>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden mt-3">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${monthCashTargetAchieved ? 'bg-indigo-600' : 'bg-indigo-500'}`}
+                    style={{ width: `${monthCashTargetPct}%` }}
+                  />
+                </div>
+
+                <div className="flex justify-between items-center text-[11px] text-slate-500 mt-2">
+                  <span>From {monthBillsList.filter(b => b.paymentMode === 'CASH' || (b.paymentMode === 'SPLIT' && b.splitCash > 0)).length} cash transactions this month</span>
+                  <span className="font-semibold text-indigo-800">
+                    {monthCashTargetAchieved
+                      ? `Surplus: +₹${(monthCashSales - monthlyCashTarget).toLocaleString('en-IN')} beyond goal`
+                      : `₹${(monthlyCashTarget - monthCashSales).toLocaleString('en-IN')} to hit target`}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* OWNER CASH IN & OUT AUDIT (Day / Week / Month / Custom Period Bar) */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pb-3 border-b border-slate-100">
+                <div>
+                  <h4 className="text-sm font-black text-slate-900 flex items-center">
+                    <Banknote className="w-4 h-4 mr-1.5 text-emerald-600" /> Cash In &amp; Cash Out Ledger &amp; Velocity
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Select any timeframe to view exact cash receipts, vendor payouts, and net drawer balance
+                  </p>
+                </div>
+
+                {/* Period Selector Tabs */}
+                <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 rounded-xl text-xs font-bold">
+                  <button
+                    onClick={() => setDrawerPeriod('today')}
+                    className={`px-3 py-1.5 rounded-lg transition ${drawerPeriod === 'today' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    Today
+                  </button>
+                  <button
+                    onClick={() => setDrawerPeriod('week')}
+                    className={`px-3 py-1.5 rounded-lg transition ${drawerPeriod === 'week' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    This Week (Past 7D)
+                  </button>
+                  <button
+                    onClick={() => setDrawerPeriod('month')}
+                    className={`px-3 py-1.5 rounded-lg transition ${drawerPeriod === 'month' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    This Month
+                  </button>
+                  <button
+                    onClick={() => setDrawerPeriod('custom')}
+                    className={`px-3 py-1.5 rounded-lg transition ${drawerPeriod === 'custom' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    Specific Date Range
+                  </button>
+                  <button
+                    onClick={() => setDrawerPeriod('all')}
+                    className={`px-3 py-1.5 rounded-lg transition ${drawerPeriod === 'all' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    All History
+                  </button>
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Mid-day Cash In / Out</div>
-                <div className="text-xl font-black text-slate-800 mt-1 flex items-center space-x-2">
-                  <span className="text-emerald-600">+₹{currentShiftCashIn}</span>
-                  <span className="text-slate-300">/</span>
-                  <span className="text-rose-600">-₹{currentShiftCashOut}</span>
+              {/* Specific Date Range Inputs */}
+              {drawerPeriod === 'custom' && (
+                <div className="flex flex-wrap items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+                  <span className="font-bold text-slate-700">Choose Specific Date Range:</span>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-slate-500 text-[11px]">From:</span>
+                    <input
+                      type="date"
+                      value={drawerStartDate}
+                      onChange={e => setDrawerStartDate(e.target.value)}
+                      className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <span className="text-slate-500 text-[11px]">To:</span>
+                    <input
+                      type="date"
+                      value={drawerEndDate}
+                      onChange={e => setDrawerEndDate(e.target.value)}
+                      className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  {(drawerStartDate || drawerEndDate) && (
+                    <button
+                      onClick={() => { setDrawerStartDate(''); setDrawerEndDate(''); }}
+                      className="text-xs text-rose-600 font-bold hover:underline"
+                    >
+                      Clear
+                    </button>
+                  )}
                 </div>
-                <div className="mt-2 text-[11px] text-slate-500">
-                  {currentShiftCashDrops.length} drops recorded today
+              )}
+
+              {/* 4 Summary Metric Cards for Selected Period */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-1">
+                {/* 1. Cash Inflow (Sales + Cash In Drops) */}
+                <div className="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4">
+                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 flex items-center justify-between">
+                    <span>Total Cash In (Received)</span>
+                    <ArrowDownLeft className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <div className="text-2xl font-black text-emerald-700 mt-1">
+                    +₹{drawerData.totalCashInflow.toLocaleString('en-IN')}
+                  </div>
+                  <div className="mt-2 text-[11px] text-emerald-800 space-y-0.5">
+                    <div className="flex justify-between">
+                      <span>• Counter Cash Sales:</span>
+                      <span className="font-bold">₹{drawerData.cashFromSales.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>• Change/Deposits In:</span>
+                      <span className="font-bold">₹{drawerData.cashInDrops.toLocaleString('en-IN')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Cash Outflow (Drops / Payouts) */}
+                <div className="bg-rose-50/70 border border-rose-200 rounded-2xl p-4">
+                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-rose-800 flex items-center justify-between">
+                    <span>Total Cash Out (Paid Out)</span>
+                    <ArrowUpRight className="w-4 h-4 text-rose-600" />
+                  </div>
+                  <div className="text-2xl font-black text-rose-700 mt-1">
+                    -₹{drawerData.totalCashOutflow.toLocaleString('en-IN')}
+                  </div>
+                  <div className="mt-2 text-[11px] text-rose-800 space-y-0.5">
+                    <div className="flex justify-between">
+                      <span>• Drops Count:</span>
+                      <span className="font-bold">{drawerData.periodDrops.filter(d => d.type === 'CASH_OUT').length} payouts</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>• Vendor &amp; Petty Cash:</span>
+                      <span className="font-bold">₹{drawerData.cashOutDrops.toLocaleString('en-IN')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Net Cash Movement */}
+                <div className="bg-indigo-50/70 border border-indigo-200 rounded-2xl p-4">
+                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-800 flex items-center justify-between">
+                    <span>Net Cash Flow (In - Out)</span>
+                    <Coins className="w-4 h-4 text-indigo-600" />
+                  </div>
+                  <div className={`text-2xl font-black mt-1 ${drawerData.netCashMovement >= 0 ? 'text-indigo-700' : 'text-rose-600'}`}>
+                    {drawerData.netCashMovement >= 0 ? '+' : ''}₹{drawerData.netCashMovement.toLocaleString('en-IN')}
+                  </div>
+                  <div className="mt-2 text-[11px] text-indigo-800">
+                    Net cash added to store till in selected period
+                  </div>
+                </div>
+
+                {/* 4. Digital UPI Sales in same period */}
+                <div className="bg-sky-50/70 border border-sky-200 rounded-2xl p-4">
+                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-sky-800 flex items-center justify-between">
+                    <span>Digital / UPI Sales</span>
+                    <Smartphone className="w-4 h-4 text-sky-600" />
+                  </div>
+                  <div className="text-2xl font-black text-sky-700 mt-1">
+                    ₹{drawerData.upiFromSales.toLocaleString('en-IN')}
+                  </div>
+                  <div className="mt-2 text-[11px] text-sky-800 flex justify-between">
+                    <span>Bank account deposits</span>
+                    <span className="font-bold">{drawerData.periodBills.filter(b => b.paymentMode === 'UPI' || (b.paymentMode === 'SPLIT' && b.splitUpi > 0)).length} bills</span>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="bg-white rounded-2xl p-4 border-2 border-emerald-500/70 shadow-sm bg-emerald-50/30">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 flex items-center justify-between">
-                  <span>Expected Drawer Cash</span>
-                  <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-extrabold text-[9px]">LIVE</span>
+            {/* LIVE ACTIVE SHIFT STATUS & TILL BREAKDOWN */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-slate-100">
+                <div>
+                  <h4 className="text-sm font-black text-slate-900 flex items-center">
+                    <ShieldCheck className="w-4 h-4 mr-1.5 text-indigo-600" /> Live Register &amp; Active Shift Cash Audit
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Shift ID: <span className="font-mono font-bold text-indigo-600">{activeShift?.id}</span> &bull; Operator: <span className="font-bold text-slate-800">{activeShift?.cashierName}</span> &bull; {activeShift?.shiftName}
+                  </p>
                 </div>
-                <div className="text-2xl font-black text-emerald-700 mt-1">₹{expectedDrawerCash.toLocaleString('en-IN')}</div>
-                <div className="mt-2 text-[11px] font-semibold text-emerald-800">
-                  Must be physically present in till
-                </div>
+                <span className="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 flex items-center space-x-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping mr-1" />
+                  <span>SHIFT IN PROGRESS</span>
+                </span>
               </div>
 
-              <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Digital / UPI Sales</div>
-                <div className="text-xl font-black text-emerald-600 mt-1">₹{currentShiftUpiSales.toLocaleString('en-IN')}</div>
-                <div className="mt-2 text-[11px] text-slate-500">
-                  Bank direct credit (Not in physical till)
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Opening Cash Float</div>
+                  <div className="text-xl font-black text-slate-800 mt-1">₹{(activeShift?.openingFloat || 0).toLocaleString('en-IN')}</div>
+                  <div className="mt-2 text-[11px] text-slate-500 flex items-center justify-between">
+                    <span>Base drawer change</span>
+                    <button onClick={() => { setTempOpeningFloat(String(activeShift?.openingFloat || 2000)); setShowOpeningFloatModal(true); }} className="text-indigo-600 font-bold hover:underline">Edit</button>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Shift Cash Sales</div>
+                  <div className="text-xl font-black text-indigo-600 mt-1">₹{currentShiftCashSales.toLocaleString('en-IN')}</div>
+                  <div className="mt-2 text-[11px] text-slate-500">
+                    {activeShiftBills.filter(b => b.paymentMode === 'CASH' || (b.paymentMode === 'SPLIT' && b.splitCash > 0)).length} cash bills
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Shift Drops In / Out</div>
+                  <div className="text-xl font-black text-slate-800 mt-1 flex items-center space-x-2">
+                    <span className="text-emerald-600">+₹{currentShiftCashIn}</span>
+                    <span className="text-slate-300">/</span>
+                    <span className="text-rose-600">-₹{currentShiftCashOut}</span>
+                  </div>
+                  <div className="mt-2 text-[11px] text-slate-500">
+                    {currentShiftCashDrops.length} drops logged in this shift
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-emerald-50 via-white to-emerald-50 rounded-2xl p-4 border-2 border-emerald-500/80 shadow-sm">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 flex items-center justify-between">
+                    <span>Expected Till Cash</span>
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-200 text-emerald-900 font-black text-[9px]">LIVE</span>
+                  </div>
+                  <div className="text-2xl font-black text-emerald-700 mt-1">₹{expectedDrawerCash.toLocaleString('en-IN')}</div>
+                  <div className="mt-2 text-[11px] font-bold text-emerald-800">
+                    Must be in physical drawer
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">UPI Sales (Bank Direct)</div>
+                  <div className="text-xl font-black text-sky-600 mt-1">₹{currentShiftUpiSales.toLocaleString('en-IN')}</div>
+                  <div className="mt-2 text-[11px] text-slate-500">
+                    Not counted in drawer cash
+                  </div>
                 </div>
               </div>
             </div>
@@ -4739,7 +5225,7 @@ export default function App() {
                     <Trophy className="w-4 h-4 mr-1.5 text-amber-500" /> Cashier Performance &amp; Sales Leaderboard
                   </h4>
                   <p className="text-xs text-slate-500">
-                    Track billing velocity, revenue generated, and earned staff commission bonuses
+                    Track billing velocity, revenue generated, and monthly staff salary
                   </p>
                 </div>
                 <span className="text-[11px] font-bold px-3 py-1 bg-amber-50 text-amber-900 rounded-full border border-amber-200 flex items-center">
@@ -4811,15 +5297,19 @@ export default function App() {
               </div>
             </div>
 
-            {/* Mid-day Cash Drops Ledger & Closed Shifts Grid */}
+            {/* Mid-day Cash Movements Ledger & Closed Shifts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Mid-day Petty Cash Drops Ledger */}
+              {/* Cash Movements Ledger (Filtered by Selected Period) */}
               <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-3">
                     <div>
-                      <h4 className="text-sm font-bold text-slate-900">Active Shift Cash Drops / In-Out ({currentShiftCashDrops.length})</h4>
-                      <p className="text-[11px] text-slate-500">Mid-day petty expenses, vendor payouts, or bank drops</p>
+                      <h4 className="text-sm font-bold text-slate-900">
+                        Cash Drops &amp; Movements ({drawerData.periodDrops.length})
+                      </h4>
+                      <p className="text-[11px] text-slate-500">
+                        Showing: {drawerPeriod === 'today' ? 'Today' : drawerPeriod === 'week' ? 'Past 7 Days' : drawerPeriod === 'month' ? 'This Month' : drawerPeriod === 'custom' ? `${drawerStartDate || 'Start'} to ${drawerEndDate || 'End'}` : 'All Records'}
+                      </p>
                     </div>
                     <button
                       onClick={() => {
@@ -4833,23 +5323,23 @@ export default function App() {
                     </button>
                   </div>
 
-                  {currentShiftCashDrops.length === 0 ? (
-                    <div className="py-8 text-center text-xs text-slate-400">
-                      No mid-day cash movements logged for active shift. All cash received stays in till.
+                  {drawerData.periodDrops.length === 0 ? (
+                    <div className="py-10 text-center text-xs text-slate-400 bg-slate-50 rounded-xl">
+                      No cash movements recorded for this selected timeframe.
                     </div>
                   ) : (
-                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                      {currentShiftCashDrops.map(drop => (
-                        <div key={drop.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                      {drawerData.periodDrops.map(drop => (
+                        <div key={drop.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-xs hover:bg-slate-100/60 transition">
                           <div>
                             <div className="flex items-center space-x-2">
                               <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${drop.type === 'CASH_OUT' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}`}>
-                                {drop.type === 'CASH_OUT' ? 'CASH DROP OUT' : 'CASH IN'}
+                                {drop.type === 'CASH_OUT' ? '🔻 CASH DROP OUT' : '🔺 CASH IN'}
                               </span>
                               <span className="font-bold text-slate-800">{drop.reason}</span>
                             </div>
-                            <div className="text-[11px] text-slate-400 mt-0.5">
-                              {drop.timestamp} &bull; Recorded by: {drop.cashier} {drop.notes ? `&bull; Note: ${drop.notes}` : ''}
+                            <div className="text-[11px] text-slate-400 mt-1">
+                              Date: <strong className="text-slate-600">{drop.date}</strong> &bull; {drop.timestamp} &bull; Recorded by: {drop.cashier} {drop.notes ? `• Note: "${drop.notes}"` : ''}
                             </div>
                           </div>
                           <span className={`font-black text-sm ${drop.type === 'CASH_OUT' ? 'text-rose-600' : 'text-emerald-600'}`}>
@@ -4867,19 +5357,19 @@ export default function App() {
                 <div>
                   <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-3">
                     <div>
-                      <h4 className="text-sm font-bold text-slate-900">Reconciled Shift History ({closedShifts.length})</h4>
+                      <h4 className="text-sm font-bold text-slate-900">Reconciled Shift History ({drawerData.periodClosedShifts.length})</h4>
                       <p className="text-[11px] text-slate-500">Historical shift close audits and cash discrepancy reports</p>
                     </div>
                   </div>
 
-                  {closedShifts.length === 0 ? (
-                    <div className="py-8 text-center text-xs text-slate-400">
-                      No shifts closed yet in this session. Reconcile active shift at end of day to log audit records.
+                  {drawerData.periodClosedShifts.length === 0 ? (
+                    <div className="py-10 text-center text-xs text-slate-400 bg-slate-50 rounded-xl">
+                      No closed shifts in this selected timeframe. Reconcile shift at end of day to log audit records.
                     </div>
                   ) : (
-                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                      {closedShifts.map(shift => (
-                        <div key={shift.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                      {drawerData.periodClosedShifts.map(shift => (
+                        <div key={shift.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-xs hover:bg-slate-100/60 transition">
                           <div>
                             <div className="flex items-center space-x-2">
                               <span className="font-mono font-bold text-indigo-700">{shift.id}</span>
@@ -4892,8 +5382,8 @@ export default function App() {
                                 {shift.status === 'BALANCED' ? 'BALANCED' : `${shift.status}: ${shift.discrepancy > 0 ? '+' : ''}₹${shift.discrepancy}`}
                               </span>
                             </div>
-                            <div className="text-[11px] text-slate-400 mt-0.5">
-                              {shift.startDate} ({shift.startTime} - {shift.endTime}) &bull; {shift.billsCount} Bills &bull; Actual: ₹{shift.actualCash.toLocaleString('en-IN')}
+                            <div className="text-[11px] text-slate-400 mt-1">
+                              Date: <strong className="text-slate-600">{shift.startDate}</strong> ({shift.startTime} - {shift.endTime}) &bull; {shift.billsCount} Bills &bull; Actual Cash: ₹{shift.actualCash.toLocaleString('en-IN')}
                             </div>
                           </div>
                           <button
