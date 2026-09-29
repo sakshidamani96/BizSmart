@@ -20,6 +20,7 @@ import {
   Send,
   UserCheck,
   UserPlus,
+  User,
   X,
   Store,
   LogIn,
@@ -330,6 +331,15 @@ export default function App() {
   // -------------------------------------------------------------
   // POS & BILLING CART (With Queue Buster Hold & Loyalty Points)
   // -------------------------------------------------------------
+  // POS Search & Customer inputs (typing instead of scrolling / dropdowns)
+  const [posSearchQuery, setPosSearchQuery] = useState('');
+  const [customerNameInput, setCustomerNameInput] = useState('');
+  const [customerPhoneInput, setCustomerPhoneInput] = useState('');
+  const [showOwnerProfileModal, setShowOwnerProfileModal] = useState(false);
+  const [ownerProfilePeriod, setOwnerProfilePeriod] = useState('all'); // 'all' | 'today' | 'month' | 'custom'
+  const [ownerProfileStartDate, setOwnerProfileStartDate] = useState('');
+  const [ownerProfileEndDate, setOwnerProfileEndDate] = useState('');
+
   const [selectedCustomerId, setSelectedCustomerId] = useState(1);
   const [cart, setCart] = useState([]);
   const [discountAmount, setDiscountAmount] = useState(0);
@@ -825,7 +835,15 @@ export default function App() {
 
   // Cart operations
   // Cart operations (With Queue Buster Hold, Loyalty Points & FIFO)
-  const currentCustomer = customers.find(c => c.id === Number(selectedCustomerId));
+  const currentCustomer = customerNameInput.trim()
+    ? (customers.find(c => c.name.toLowerCase() === customerNameInput.trim().toLowerCase()) || {
+        id: 'manual',
+        name: customerNameInput.trim(),
+        phone: customerPhoneInput.trim() || 'N/A',
+        balance: 0,
+        loyaltyPoints: 0
+      })
+    : customers.find(c => c.id === Number(selectedCustomerId));
   const cartSubtotal = cart.reduce((acc, item) => acc + (item.product.sellingPrice * item.quantity), 0);
   const cartGst = Math.round(cartSubtotal * 0.05);
   const availableLoyaltyPoints = currentCustomer?.loyaltyPoints || 0;
@@ -855,11 +873,14 @@ export default function App() {
   // 1. HOLD / PARK CART HANDLERS (Queue Buster)
   const handleHoldCart = () => {
     if (cart.length === 0) return;
-    const cust = customers.find(c => c.id === Number(selectedCustomerId));
+    const cust = customerNameInput.trim()
+      ? { id: 'manual', name: customerNameInput.trim(), phone: customerPhoneInput.trim() || 'N/A' }
+      : (customers.find(c => c.id === Number(selectedCustomerId)) || { id: 1, name: 'Walk-in Retail Customer', phone: 'N/A' });
     const newHeld = {
       id: Date.now(),
-      customerId: selectedCustomerId,
-      customerName: cust ? cust.name : 'Walk-in Retail Customer',
+      customerId: cust.id,
+      customerName: cust.name,
+      customerPhone: cust.phone || '',
       items: [...cart],
       discountAmount,
       redeemLoyaltyPoints,
@@ -871,6 +892,8 @@ export default function App() {
     setCart([]);
     setDiscountAmount(0);
     setRedeemLoyaltyPoints(false);
+    setCustomerNameInput('');
+    setCustomerPhoneInput('');
     alert(`Cart for "${newHeld.customerName}" held! Counter is cleared for next customer.`);
   };
 
@@ -880,11 +903,14 @@ export default function App() {
     if (cart.length > 0) {
       const confirmSwitch = window.confirm("You have active items in your current cart. Park current cart and resume this held cart?");
       if (!confirmSwitch) return;
-      const cust = customers.find(c => c.id === Number(selectedCustomerId));
+      const currentCust = customerNameInput.trim()
+        ? { id: 'manual', name: customerNameInput.trim(), phone: customerPhoneInput.trim() || 'N/A' }
+        : (customers.find(c => c.id === Number(selectedCustomerId)) || { id: 1, name: 'Walk-in Retail Customer', phone: 'N/A' });
       const currentHeld = {
         id: Date.now(),
-        customerId: selectedCustomerId,
-        customerName: cust ? cust.name : 'Walk-in Retail Customer',
+        customerId: currentCust.id,
+        customerName: currentCust.name,
+        customerPhone: currentCust.phone || '',
         items: [...cart],
         discountAmount,
         redeemLoyaltyPoints,
@@ -897,7 +923,14 @@ export default function App() {
       setHeldCarts(prev => prev.filter(h => h.id !== heldCartId));
     }
     setCart(target.items);
-    setSelectedCustomerId(target.customerId);
+    if (target.customerId === 'manual' || typeof target.customerId === 'string') {
+      setCustomerNameInput(target.customerName || '');
+      setCustomerPhoneInput(target.customerPhone || '');
+    } else {
+      setSelectedCustomerId(target.customerId);
+      setCustomerNameInput(target.customerName || '');
+      setCustomerPhoneInput(target.customerPhone || '');
+    }
     setDiscountAmount(target.discountAmount || 0);
     setRedeemLoyaltyPoints(target.redeemLoyaltyPoints || false);
     setShowHeldCartsModal(false);
@@ -912,7 +945,21 @@ export default function App() {
   // BILL GENERATION WITH FIFO BATCH DEDUCTION & LOYALTY POINTS
   const handleGenerateBill = () => {
     if (cart.length === 0) return;
-    const cust = customers.find(c => c.id === Number(selectedCustomerId));
+    const cust = customerNameInput.trim()
+      ? (customers.find(c => c.name.toLowerCase() === customerNameInput.trim().toLowerCase()) || {
+          id: 'manual',
+          name: customerNameInput.trim(),
+          phone: customerPhoneInput.trim() || 'N/A',
+          balance: 0,
+          loyaltyPoints: 0
+        })
+      : (customers.find(c => c.id === Number(selectedCustomerId)) || {
+          id: 1,
+          name: 'Walk-in Retail Customer',
+          phone: 'N/A',
+          balance: 0,
+          loyaltyPoints: 0
+        });
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10);
     const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
@@ -1025,6 +1072,8 @@ export default function App() {
     setSplitCashAmount('');
     setSplitUpiAmount('');
     setTenderCashGiven('');
+    setCustomerNameInput('');
+    setCustomerPhoneInput('');
 
     // Sync order to Cloud Database if connected
     if (API_ENABLED && isAuthenticated) {
@@ -1918,8 +1967,58 @@ export default function App() {
   const analyticsRevenue = analyticsBillsList.reduce((acc, b) => acc + b.total, 0);
   const analyticsOrdersCount = analyticsBillsList.length;
   const analyticsAov = analyticsOrdersCount > 0 ? Math.round(analyticsRevenue / analyticsOrdersCount) : 0;
-  const analyticsCash = analyticsBillsList.filter(b => b.paymentMode === 'CASH').reduce((acc, b) => acc + b.total, 0);
-  const analyticsUPI = analyticsBillsList.filter(b => b.paymentMode === 'UPI').reduce((acc, b) => acc + b.total, 0);
+  // FILTERED POS PRODUCTS FOR REAL-TIME SEARCH (By Name, SKU, Category)
+  const filteredPosProducts = useMemo(() => {
+    if (!posSearchQuery.trim()) return products;
+    const q = posSearchQuery.trim().toLowerCase();
+    return products.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      (p.sku && p.sku.toLowerCase().includes(q)) ||
+      (p.category && p.category.toLowerCase().includes(q))
+    );
+  }, [products, posSearchQuery]);
+
+  // OWNER DESIRED PERIOD CASH & UPI BREAKDOWN
+  const getOwnerProfileBills = () => {
+    if (ownerProfilePeriod === 'today') {
+      return bills.filter(b => b.dateStr === todayStr);
+    }
+    if (ownerProfilePeriod === 'month') {
+      return bills.filter(b => b.dateStr.startsWith(currentMonthStr));
+    }
+    if (ownerProfilePeriod === 'custom') {
+      return bills.filter(b => (!ownerProfileStartDate || b.dateStr >= ownerProfileStartDate) && (!ownerProfileEndDate || b.dateStr <= ownerProfileEndDate));
+    }
+    return bills; // 'all'
+  };
+
+  const ownerProfileBillsList = getOwnerProfileBills();
+  const ownerProfileTotalRevenue = ownerProfileBillsList.reduce((acc, b) => acc + b.total, 0);
+  const ownerProfileCashTotal = ownerProfileBillsList.reduce((acc, b) => {
+    if (b.paymentMode === 'CASH') return acc + b.total;
+    if (b.paymentMode === 'SPLIT') return acc + (b.splitCash || 0);
+    return acc;
+  }, 0);
+  const ownerProfileUpiTotal = ownerProfileBillsList.reduce((acc, b) => {
+    if (b.paymentMode === 'UPI') return acc + b.total;
+    if (b.paymentMode === 'SPLIT') return acc + (b.splitUpi || 0);
+    return acc;
+  }, 0);
+  const ownerProfileCreditTotal = ownerProfileBillsList.reduce((acc, b) => {
+    if (b.paymentMode === 'CREDIT') return acc + b.total;
+    return acc;
+  }, 0);
+
+  const analyticsCash = analyticsBillsList.reduce((acc, b) => {
+    if (b.paymentMode === 'CASH') return acc + b.total;
+    if (b.paymentMode === 'SPLIT') return acc + (b.splitCash || 0);
+    return acc;
+  }, 0);
+  const analyticsUPI = analyticsBillsList.reduce((acc, b) => {
+    if (b.paymentMode === 'UPI') return acc + b.total;
+    if (b.paymentMode === 'SPLIT') return acc + (b.splitUpi || 0);
+    return acc;
+  }, 0);
   const analyticsCredit = analyticsBillsList.filter(b => b.paymentMode === 'CREDIT').reduce((acc, b) => acc + b.total, 0);
 
   // =============================================================
@@ -1931,27 +2030,26 @@ export default function App() {
     // -----------------------------------------------------------
     if (viewMode === 'landing') {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-violet-950 via-purple-900 to-emerald-950 text-white font-sans selection:bg-fuchsia-500 selection:text-white flex flex-col relative overflow-hidden">
-          {/* Ambient Vibrant Mesh Glows */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[850px] h-[450px] bg-gradient-to-r from-fuchsia-600/35 via-violet-600/30 to-emerald-500/25 blur-3xl pointer-events-none rounded-full" />
-          <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-emerald-500/25 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute top-1/3 -right-20 w-96 h-96 bg-fuchsia-500/25 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-10 right-1/3 w-80 h-80 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-sky-100/70 text-slate-800 font-sans selection:bg-sky-500 selection:text-white flex flex-col relative overflow-hidden">
+          {/* Ambient Sky Blue & Cyan Soft Glows */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[850px] h-[450px] bg-gradient-to-r from-sky-300/30 via-cyan-200/40 to-blue-300/25 blur-3xl pointer-events-none rounded-full" />
+          <div className="absolute bottom-1/4 -left-20 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-1/3 -right-20 w-96 h-96 bg-blue-200/30 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Top Glassmorphic Navigation */}
-          <header className="border-b border-white/10 bg-black/30 backdrop-blur-2xl sticky top-0 z-50">
+          {/* Top Crisp Navigation */}
+          <header className="border-b border-sky-100 bg-white/80 backdrop-blur-2xl sticky top-0 z-50 shadow-xs">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
               {/* Logo */}
               <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setViewMode('landing')}>
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-fuchsia-500 to-emerald-400 flex items-center justify-center text-white shadow-xl shadow-fuchsia-500/30 ring-2 ring-white/20">
+                <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-600 to-sky-400 flex items-center justify-center text-white shadow-lg shadow-sky-500/25 ring-2 ring-sky-100">
                   <Building2 className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="flex items-center space-x-1.5">
-                    <span className="text-2xl font-black tracking-tight text-white">Biz<span className="bg-gradient-to-r from-fuchsia-400 via-pink-300 to-emerald-300 bg-clip-text text-transparent">Smart</span></span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Retail 2.0</span>
+                    <span className="text-2xl font-black tracking-tight text-slate-900">Biz<span className="text-sky-600">Smart</span></span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-100 text-sky-700 border border-sky-200">Retail 2.0</span>
                   </div>
-                  <p className="text-[11px] text-purple-200/70 font-medium">Unified Kirana, Supermarket & Retail POS Platform</p>
+                  <p className="text-[11px] text-slate-500 font-medium">Unified Kirana, Supermarket & Retail POS Platform</p>
                 </div>
               </div>
 
@@ -1962,9 +2060,9 @@ export default function App() {
                     setLoginError('');
                     setViewMode('login');
                   }}
-                  className="px-5 py-2.5 text-xs font-bold text-white/90 hover:text-white bg-white/10 hover:bg-white/20 rounded-2xl backdrop-blur-md transition flex items-center space-x-2 border border-white/15 shadow-sm"
+                  className="px-5 py-2.5 text-xs font-bold text-slate-700 hover:text-sky-700 bg-white hover:bg-sky-50 rounded-2xl transition flex items-center space-x-2 border border-slate-200 shadow-xs"
                 >
-                  <LogIn className="w-4 h-4 text-emerald-300" />
+                  <LogIn className="w-4 h-4 text-sky-600" />
                   <span>Sign In</span>
                 </button>
                 <button
@@ -1972,7 +2070,7 @@ export default function App() {
                     setRegisterError('');
                     setViewMode('register');
                   }}
-                  className="px-5 py-2.5 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-emerald-500 hover:from-fuchsia-600 hover:to-emerald-600 text-white text-xs font-black rounded-2xl transition shadow-xl shadow-fuchsia-500/30 flex items-center space-x-1.5 ring-2 ring-white/20"
+                  className="px-5 py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white text-xs font-black rounded-2xl transition shadow-lg shadow-sky-500/25 flex items-center space-x-1.5"
                 >
                   <Store className="w-4 h-4" />
                   <span>Register Store (Owner) &rarr;</span>
@@ -1984,20 +2082,20 @@ export default function App() {
           {/* Hero Section */}
           <section className="max-w-5xl mx-auto px-4 pt-16 pb-14 text-center relative z-10">
             {/* Pill Announcement */}
-            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-xs font-bold text-emerald-300 mb-6 shadow-lg">
-              <Sparkles className="w-4 h-4 text-amber-300 animate-spin" />
+            <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-sky-100 border border-sky-200 text-xs font-bold text-sky-800 mb-6 shadow-xs">
+              <Sparkles className="w-4 h-4 text-sky-600 animate-spin" />
               <span>Next-Gen Counter Billing &amp; Expiry Defense System</span>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-white tracking-tight leading-tight sm:leading-none mb-6">
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-900 tracking-tight leading-tight sm:leading-none mb-6">
               Run Your Retail Store With <br className="hidden sm:inline" />
-              <span className="bg-gradient-to-r from-fuchsia-400 via-amber-300 to-emerald-300 bg-clip-text text-transparent">
-                Vibrant Speed &amp; Zero Wastage
+              <span className="bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                High Speed &amp; Zero Wastage
               </span>
             </h1>
 
-            <p className="text-purple-100/90 text-sm sm:text-lg max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
-              BizSmart powers daily kirana and retail stores with instant thermal barcode POS, Queue Buster multi-cart hold, split cash/UPI tender calculator, 15-day promotional clearance triggers, and foolproof cashier cash-drawer reconciliation.
+            <p className="text-slate-600 text-sm sm:text-lg max-w-3xl mx-auto mb-10 leading-relaxed font-normal">
+              BizSmart powers daily kirana and retail stores with real-time product search, instant thermal barcode POS, Queue Buster multi-cart hold, split cash/UPI tender calculator, 15-day promotional clearance triggers, and foolproof cashier cash-drawer reconciliation.
             </p>
 
             {/* Hero CTAs */}
@@ -2007,7 +2105,7 @@ export default function App() {
                   setRegisterError('');
                   setViewMode('register');
                 }}
-                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-fuchsia-500 to-emerald-500 hover:from-fuchsia-600 hover:to-emerald-600 text-white font-black text-sm rounded-2xl shadow-2xl shadow-fuchsia-500/40 transition flex items-center justify-center space-x-2 ring-2 ring-white/30 transform hover:-translate-y-0.5"
+                className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-black text-sm rounded-2xl shadow-xl shadow-sky-500/30 transition flex items-center justify-center space-x-2 transform hover:-translate-y-0.5"
               >
                 <Store className="w-4 h-4" />
                 <span>Register Store (Owner Portal)</span>
@@ -2018,30 +2116,30 @@ export default function App() {
                   setLoginError('');
                   setViewMode('login');
                 }}
-                className="w-full sm:w-auto px-8 py-4 bg-black/40 hover:bg-black/60 text-white font-extrabold text-sm rounded-2xl border border-white/20 backdrop-blur-xl transition flex items-center justify-center space-x-2 shadow-lg hover:border-white/40"
+                className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-sky-50 text-slate-800 font-extrabold text-sm rounded-2xl border border-sky-200 transition flex items-center justify-center space-x-2 shadow-sm hover:border-sky-300"
               >
-                <LogIn className="w-4 h-4 text-emerald-400" />
+                <LogIn className="w-4 h-4 text-sky-600" />
                 <span>Launch Counter / Staff Sign In</span>
               </button>
             </div>
 
             {/* Quick Live Highlight Badges */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-4xl mx-auto text-xs font-bold">
-              <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex flex-col items-center">
-                <span className="text-emerald-300 text-lg font-black">60 Items</span>
-                <span className="text-purple-200/80 text-[11px]">Daily Essentials Preloaded</span>
+              <div className="p-3.5 rounded-2xl bg-white border border-sky-100 shadow-sm flex flex-col items-center">
+                <span className="text-sky-600 text-lg font-black">60 Items</span>
+                <span className="text-slate-500 text-[11px]">Daily Essentials Preloaded</span>
               </div>
-              <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex flex-col items-center">
-                <span className="text-amber-300 text-lg font-black">15% Off</span>
-                <span className="text-purple-200/80 text-[11px]">Near-Expiry Markdown Radar</span>
+              <div className="p-3.5 rounded-2xl bg-white border border-sky-100 shadow-sm flex flex-col items-center">
+                <span className="text-amber-600 text-lg font-black">15% Off</span>
+                <span className="text-slate-500 text-[11px]">Near-Expiry Markdown Radar</span>
               </div>
-              <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex flex-col items-center">
-                <span className="text-fuchsia-300 text-lg font-black">Split POS</span>
-                <span className="text-purple-200/80 text-[11px]">Cash + UPI + Tender Return</span>
+              <div className="p-3.5 rounded-2xl bg-white border border-sky-100 shadow-sm flex flex-col items-center">
+                <span className="text-blue-600 text-lg font-black">Split POS</span>
+                <span className="text-slate-500 text-[11px]">Cash + UPI + Tender Return</span>
               </div>
-              <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex flex-col items-center">
-                <span className="text-sky-300 text-lg font-black">100% Audit</span>
-                <span className="text-purple-200/80 text-[11px]">Float &amp; Till Reconciliation</span>
+              <div className="p-3.5 rounded-2xl bg-white border border-sky-100 shadow-sm flex flex-col items-center">
+                <span className="text-emerald-600 text-lg font-black">100% Audit</span>
+                <span className="text-slate-500 text-[11px]">Float &amp; Till Reconciliation</span>
               </div>
             </div>
           </section>
@@ -2049,104 +2147,104 @@ export default function App() {
           {/* 6 Modern Vibrant Architectural Highlights */}
           <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="text-center max-w-2xl mx-auto mb-12">
-              <span className="text-xs font-extrabold uppercase tracking-widest bg-gradient-to-r from-fuchsia-300 to-emerald-300 bg-clip-text text-transparent">
+              <span className="text-xs font-extrabold uppercase tracking-widest text-sky-600">
                 Store-Ready Capabilities
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-white mt-2">
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-2">
                 Designed for Ultra-Fast Checkout &amp; Maximum Profits
               </h2>
-              <p className="text-xs sm:text-sm text-purple-200/80 mt-2">
+              <p className="text-xs sm:text-sm text-slate-500 mt-2">
                 Everything Indian retailers and supermarket cashiers need for peak holiday rushes and everyday billing.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Feature 1 */}
-              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 hover:bg-white/15 transition shadow-xl">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-fuchsia-500 to-pink-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-fuchsia-500/30">
+              <div className="bg-white border border-sky-100 rounded-3xl p-6 hover:shadow-lg hover:border-sky-300 transition shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center mb-4 shadow-sm">
                   <Receipt className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-extrabold text-white mb-2">Split Payment &amp; Change Tender</h3>
-                <p className="text-xs text-purple-100/80 leading-relaxed mb-3">
+                <h3 className="text-base font-extrabold text-slate-900 mb-2">Split Payment &amp; Change Tender</h3>
+                <p className="text-xs text-slate-600 leading-relaxed mb-3">
                   Accept hybrid payments (₹500 Cash + ₹300 UPI) in a single bill with an automated Cash Tender calculator computing exact customer change to return.
                 </p>
-                <div className="text-[11px] text-emerald-300 font-bold flex items-center">
-                  <Check className="w-3.5 h-3.5 mr-1 text-emerald-400" />
+                <div className="text-[11px] text-sky-700 font-bold flex items-center">
+                  <Check className="w-3.5 h-3.5 mr-1 text-sky-600" />
                   <span>Dynamic QR Generator + WhatsApp e-Invoices</span>
                 </div>
               </div>
 
               {/* Feature 2 */}
-              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 hover:bg-white/15 transition shadow-xl">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-rose-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-amber-500/30">
+              <div className="bg-white border border-sky-100 rounded-3xl p-6 hover:shadow-lg hover:border-sky-300 transition shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mb-4 shadow-sm">
                   <Percent className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-extrabold text-white mb-2">15-Day Clearance Markdown Radar</h3>
-                <p className="text-xs text-purple-100/80 leading-relaxed mb-3">
+                <h3 className="text-base font-extrabold text-slate-900 mb-2">15-Day Clearance Markdown Radar</h3>
+                <p className="text-xs text-slate-600 leading-relaxed mb-3">
                   Early detection system warns when stock is within 15 days of expiry. Trigger instant 15% clearance promotional markdowns with 1 click to clear dead stock.
                 </p>
-                <div className="text-[11px] text-amber-300 font-bold flex items-center">
-                  <Check className="w-3.5 h-3.5 mr-1 text-amber-400" />
+                <div className="text-[11px] text-amber-700 font-bold flex items-center">
+                  <Check className="w-3.5 h-3.5 mr-1 text-amber-600" />
                   <span>FIFO Multi-Batch dispatch ensures fresh goods</span>
                 </div>
               </div>
 
               {/* Feature 3 */}
-              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 hover:bg-white/15 transition shadow-xl">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-emerald-500/30">
+              <div className="bg-white border border-sky-100 rounded-3xl p-6 hover:shadow-lg hover:border-sky-300 transition shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center mb-4 shadow-sm">
                   <FileSpreadsheet className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-extrabold text-white mb-2">Bulk CSV &amp; Excel Product Sync</h3>
-                <p className="text-xs text-purple-100/80 leading-relaxed mb-3">
+                <h3 className="text-base font-extrabold text-slate-900 mb-2">Bulk CSV &amp; Excel Product Sync</h3>
+                <p className="text-xs text-slate-600 leading-relaxed mb-3">
                   Export all 60 store items with full batch numbers and expiry dates to CSV, edit in Excel, and re-import bulk updates instantly with zero downtime.
                 </p>
-                <div className="text-[11px] text-emerald-300 font-bold flex items-center">
-                  <Check className="w-3.5 h-3.5 mr-1 text-emerald-400" />
+                <div className="text-[11px] text-blue-700 font-bold flex items-center">
+                  <Check className="w-3.5 h-3.5 mr-1 text-blue-600" />
                   <span>Sample template download &amp; error-free upload</span>
                 </div>
               </div>
 
               {/* Feature 4 */}
-              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 hover:bg-white/15 transition shadow-xl">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-500 to-indigo-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-violet-500/30">
+              <div className="bg-white border border-sky-100 rounded-3xl p-6 hover:shadow-lg hover:border-sky-300 transition shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center mb-4 shadow-sm">
                   <Landmark className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-extrabold text-white mb-2">Shift Float &amp; Cash Till Hisab-Kitab</h3>
-                <p className="text-xs text-purple-100/80 leading-relaxed mb-3">
+                <h3 className="text-base font-extrabold text-slate-900 mb-2">Shift Float &amp; Cash Till Hisab-Kitab</h3>
+                <p className="text-xs text-slate-600 leading-relaxed mb-3">
                   Track starting morning float, record mid-day cash drops (milk/bread payouts), and match evening physical notes. Zero-discrepancy daily balance audits.
                 </p>
-                <div className="text-[11px] text-purple-300 font-bold flex items-center">
-                  <Check className="w-3.5 h-3.5 mr-1 text-purple-400" />
+                <div className="text-[11px] text-indigo-700 font-bold flex items-center">
+                  <Check className="w-3.5 h-3.5 mr-1 text-indigo-600" />
                   <span>Physical denomination breakdown counter</span>
                 </div>
               </div>
 
               {/* Feature 5 */}
-              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 hover:bg-white/15 transition shadow-xl">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/30">
+              <div className="bg-white border border-sky-100 rounded-3xl p-6 hover:shadow-lg hover:border-sky-300 transition shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-700 flex items-center justify-center mb-4 shadow-sm">
                   <Users className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-extrabold text-white mb-2">Customer Khata &amp; Loyalty CRM</h3>
-                <p className="text-xs text-purple-100/80 leading-relaxed mb-3">
+                <h3 className="text-base font-extrabold text-slate-900 mb-2">Customer Khata &amp; Loyalty CRM</h3>
+                <p className="text-xs text-slate-600 leading-relaxed mb-3">
                   Digital customer ledger with credit limits, payment tracking, balance reminders, and instant bill history lookup for loyal neighborhood customers.
                 </p>
-                <div className="text-[11px] text-cyan-300 font-bold flex items-center">
-                  <Check className="w-3.5 h-3.5 mr-1 text-cyan-400" />
+                <div className="text-[11px] text-cyan-700 font-bold flex items-center">
+                  <Check className="w-3.5 h-3.5 mr-1 text-cyan-600" />
                   <span>Automatic 1% loyalty point rewards on bills</span>
                 </div>
               </div>
 
               {/* Feature 6 */}
-              <div className="bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 hover:bg-white/15 transition shadow-xl">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 to-rose-600 text-white flex items-center justify-center mb-4 shadow-lg shadow-pink-500/30">
+              <div className="bg-white border border-sky-100 rounded-3xl p-6 hover:shadow-lg hover:border-sky-300 transition shadow-sm">
+                <div className="w-12 h-12 rounded-2xl bg-sky-50 text-sky-700 flex items-center justify-center mb-4 shadow-sm">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-extrabold text-white mb-2">Strict Owner &amp; Cashier Separation</h3>
-                <p className="text-xs text-purple-100/80 leading-relaxed mb-3">
+                <h3 className="text-base font-extrabold text-slate-900 mb-2">Strict Owner &amp; Cashier Separation</h3>
+                <p className="text-xs text-slate-600 leading-relaxed mb-3">
                   Store Owners manage overhead expenses, staff salaries (e.g. ₹25,000 for Ajay Sharma), and catalog pricing while Cashiers run focused POS billing desks.
                 </p>
-                <div className="text-[11px] text-pink-300 font-bold flex items-center">
-                  <Check className="w-3.5 h-3.5 mr-1 text-pink-400" />
+                <div className="text-[11px] text-sky-700 font-bold flex items-center">
+                  <Check className="w-3.5 h-3.5 mr-1 text-sky-600" />
                   <span>Sensitive store profits hidden from terminal</span>
                 </div>
               </div>
@@ -2154,44 +2252,44 @@ export default function App() {
           </section>
 
           {/* Simple 3-Step Store Setup Workflow */}
-          <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-white/10">
+          <section className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-t border-sky-100">
             <div className="text-center mb-10">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">
+              <span className="text-xs font-bold uppercase tracking-wider text-sky-600">
                 Simple &amp; Fast Onboarding
               </span>
-              <h2 className="text-2xl font-black text-white mt-1">
+              <h2 className="text-2xl font-black text-slate-900 mt-1">
                 How Damani Retails &amp; Retailers Get Started
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white/10 backdrop-blur-xl border border-white/15 p-5 rounded-3xl relative">
-                <div className="w-8 h-8 rounded-xl bg-fuchsia-500 text-white font-black text-xs flex items-center justify-center mb-3 shadow-md">
+              <div className="bg-white border border-sky-100 p-5 rounded-3xl shadow-sm">
+                <div className="w-8 h-8 rounded-xl bg-sky-500 text-white font-black text-xs flex items-center justify-center mb-3 shadow-md">
                   1
                 </div>
-                <h4 className="text-sm font-bold text-white mb-1">Owner Registers Store</h4>
-                <p className="text-xs text-purple-200/80">
+                <h4 className="text-sm font-bold text-slate-900 mb-1">Owner Registers Store</h4>
+                <p className="text-xs text-slate-600">
                   Store Owner sets up the business profile with name, address, and master password credentials.
                 </p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-xl border border-white/15 p-5 rounded-3xl relative">
-                <div className="w-8 h-8 rounded-xl bg-purple-500 text-white font-black text-xs flex items-center justify-center mb-3 shadow-md">
+              <div className="bg-white border border-sky-100 p-5 rounded-3xl shadow-sm">
+                <div className="w-8 h-8 rounded-xl bg-blue-500 text-white font-black text-xs flex items-center justify-center mb-3 shadow-md">
                   2
                 </div>
-                <h4 className="text-sm font-bold text-white mb-1">Owner Assigns Staff</h4>
-                <p className="text-xs text-purple-200/80">
+                <h4 className="text-sm font-bold text-slate-900 mb-1">Owner Assigns Staff</h4>
+                <p className="text-xs text-slate-600">
                   From the Owner Dashboard, create staff logins with custom email, password, and monthly salary.
                 </p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-xl border border-white/15 p-5 rounded-3xl relative">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white font-black text-xs flex items-center justify-center mb-3 shadow-md">
+              <div className="bg-white border border-sky-100 p-5 rounded-3xl shadow-sm">
+                <div className="w-8 h-8 rounded-xl bg-cyan-600 text-white font-black text-xs flex items-center justify-center mb-3 shadow-md">
                   3
                 </div>
-                <h4 className="text-sm font-bold text-white mb-1">Cashier Fires Up POS</h4>
-                <p className="text-xs text-purple-200/80">
-                  Cashier signs in directly to POS billing with Queue Buster hold, Split payments, and live barcode scanning.
+                <h4 className="text-sm font-bold text-slate-900 mb-1">Cashier Fires Up POS</h4>
+                <p className="text-xs text-slate-600">
+                  Cashier signs in directly to POS billing with instant item search, Queue Buster hold, Split payments, and live barcode scanning.
                 </p>
               </div>
             </div>
@@ -2199,11 +2297,11 @@ export default function App() {
 
           {/* Bottom Call to Action */}
           <section className="max-w-4xl mx-auto px-4 py-12 text-center">
-            <div className="bg-gradient-to-r from-fuchsia-600/40 via-purple-600/30 to-emerald-600/40 border-2 border-white/20 rounded-3xl p-8 backdrop-blur-2xl shadow-2xl">
-              <h3 className="text-2xl sm:text-3xl font-black text-white mb-2">
+            <div className="bg-gradient-to-r from-sky-500 via-blue-500 to-cyan-500 text-white border border-sky-200 rounded-3xl p-8 shadow-xl">
+              <h3 className="text-2xl sm:text-3xl font-black mb-2">
                 Ready to Upgrade Your Retail Billing?
               </h3>
-              <p className="text-xs sm:text-sm text-purple-100 max-w-xl mx-auto mb-6">
+              <p className="text-xs sm:text-sm text-sky-100 max-w-xl mx-auto mb-6">
                 Start managing sales, FIFO batch expiry defense, and cash reconciliations with BizSmart.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3">
@@ -2212,9 +2310,9 @@ export default function App() {
                     setRegisterError('');
                     setViewMode('register');
                   }}
-                  className="px-6 py-3.5 bg-gradient-to-r from-fuchsia-500 to-emerald-500 hover:from-fuchsia-600 hover:to-emerald-600 text-white text-xs font-black rounded-2xl transition shadow-xl shadow-fuchsia-500/30 flex items-center space-x-2 ring-2 ring-white/20"
+                  className="px-6 py-3.5 bg-white text-sky-700 hover:bg-sky-50 text-xs font-black rounded-2xl transition shadow-lg flex items-center space-x-2"
                 >
-                  <Store className="w-4 h-4" />
+                  <Store className="w-4 h-4 text-sky-600" />
                   <span>Register Store (Owner Portal) &rarr;</span>
                 </button>
                 <button
@@ -2222,9 +2320,9 @@ export default function App() {
                     setLoginError('');
                     setViewMode('login');
                   }}
-                  className="px-6 py-3.5 bg-white/15 hover:bg-white/25 text-white text-xs font-extrabold rounded-2xl border border-white/20 backdrop-blur-md transition flex items-center space-x-2"
+                  className="px-6 py-3.5 bg-sky-600/80 hover:bg-sky-600 text-white text-xs font-extrabold rounded-2xl border border-white/20 transition flex items-center space-x-2"
                 >
-                  <LogIn className="w-4 h-4 text-emerald-300" />
+                  <LogIn className="w-4 h-4 text-white" />
                   <span>Sign In to Terminal</span>
                 </button>
               </div>
@@ -2232,28 +2330,28 @@ export default function App() {
           </section>
 
           {/* Footer */}
-          <footer className="mt-auto border-t border-white/10 py-6 text-center text-xs text-purple-300/70 bg-black/20">
+          <footer className="mt-auto border-t border-sky-100 py-6 text-center text-xs text-slate-500 bg-white/60">
             <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div>
                 &copy; {new Date().getFullYear()} BizSmart Retail Platform. Engineered for Indian Retailers.
               </div>
               <div className="flex items-center space-x-4">
-                <span className="flex items-center text-emerald-400 font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-1.5 shadow-sm shadow-emerald-400" />
+                <span className="flex items-center text-emerald-600 font-semibold">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-1.5 shadow-sm shadow-emerald-400" />
                   Cloud Database Live (PostgreSQL)
                 </span>
-                <span className="text-white/20">&bull;</span>
+                <span className="text-slate-300">&bull;</span>
                 <button
                   onClick={() => setViewMode('login')}
-                  className="text-fuchsia-300 hover:underline font-bold"
+                  className="text-sky-600 hover:underline font-bold"
                 >
                   Terminal Login
                 </button>
                 <button
                   onClick={() => setViewMode('register')}
-                  className="text-emerald-300 hover:underline font-bold"
+                  className="text-sky-600 hover:underline font-bold"
                 >
-                  Owner Registration
+                  Register Store
                 </button>
               </div>
             </div>
@@ -2622,12 +2720,20 @@ export default function App() {
 
           {/* Logged in User Profile & Sign Out Button */}
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-right">
+            <div
+              onClick={() => {
+                if (currentUser.role === 'OWNER') {
+                  setActiveTab('owner-profile');
+                }
+              }}
+              className={`flex items-center space-x-2 text-right ${currentUser.role === 'OWNER' ? 'cursor-pointer hover:opacity-85 transition p-1 rounded-xl hover:bg-slate-50' : ''}`}
+              title={currentUser.role === 'OWNER' ? 'Click to view Owner Profile & Cash/UPI earnings' : ''}
+            >
               <div className="hidden sm:block">
                 <div className="text-xs font-bold text-slate-900">{currentUser.name}</div>
                 <div className="text-[10px] text-slate-400 font-mono">{currentUser.email}</div>
               </div>
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold ${
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold shadow-sm ${
                 currentUser.role === 'OWNER' ? 'bg-indigo-600' :
                 currentUser.role === 'EMPLOYEE' ? 'bg-amber-600' :
                 currentUser.role === 'SUPPLIER' ? 'bg-blue-600' : 'bg-purple-600'
@@ -2759,6 +2865,16 @@ export default function App() {
             >
               <Wallet className="w-4 h-4" />
               <span>Expenses & Profit</span>
+            </button>
+          )}
+
+          {currentUser.role === 'OWNER' && (
+            <button
+              onClick={() => setActiveTab('owner-profile')}
+              className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-bold transition ${activeTab === 'owner-profile' ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              <User className="w-4 h-4" />
+              <span>Owner Profile (Cash & UPI)</span>
             </button>
           )}
 
@@ -3501,13 +3617,13 @@ export default function App() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                   <div>
                     <h3 className="text-base font-bold text-slate-900 flex items-center">
                       <Receipt className="w-5 h-5 mr-2 text-indigo-600" /> POS Billing Counter
                     </h3>
                     <p className="text-xs text-slate-500">
-                      {products.length === 0 ? 'Catalog initialized (0 items)' : `Tap items to bill (${products.length} products available)`}
+                      {products.length === 0 ? 'Catalog initialized (0 items)' : `Tap items to bill (${filteredPosProducts.length} of ${products.length} products showing)`}
                     </p>
                   </div>
                   {currentUser.role === 'OWNER' && (
@@ -3517,6 +3633,26 @@ export default function App() {
                     >
                       <Plus className="w-3.5 h-3.5" />
                       <span>+ Add Item</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Instant Item Search Bar - No more tedious scrolling */}
+                <div className="mb-4 relative">
+                  <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={posSearchQuery}
+                    onChange={(e) => setPosSearchQuery(e.target.value)}
+                    placeholder="Search POS items by name, category, or SKU (e.g. Atta, Milk, Oil, Maggi)..."
+                    className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 focus:border-indigo-500 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition shadow-inner"
+                  />
+                  {posSearchQuery && (
+                    <button
+                      onClick={() => setPosSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs p-1"
+                    >
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
@@ -3541,9 +3677,21 @@ export default function App() {
                       </span>
                     )}
                   </div>
+                ) : filteredPosProducts.length === 0 ? (
+                  <div className="py-12 px-4 text-center bg-slate-50 rounded-2xl border border-slate-200 my-2">
+                    <Search className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                    <h4 className="text-sm font-bold text-slate-800">No matching items found</h4>
+                    <p className="text-xs text-slate-500 mt-1 mb-3">No product matched "{posSearchQuery}".</p>
+                    <button
+                      onClick={() => setPosSearchQuery('')}
+                      className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-lg text-xs"
+                    >
+                      Clear Search
+                    </button>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[460px] overflow-y-auto pr-1">
-                    {products.map(p => (
+                    {filteredPosProducts.map(p => (
                       <button
                         key={p.id}
                         onClick={() => addToCart(p)}
@@ -3624,24 +3772,32 @@ export default function App() {
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                    Customer Name (For Udhaar / Loyalty / Receipt)
-                  </label>
-                  <select
-                    value={selectedCustomerId}
-                    onChange={(e) => {
-                      setSelectedCustomerId(Number(e.target.value));
-                      setRedeemLoyaltyPoints(false);
-                    }}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  >
-                    {customers.map(c => (
-                      <option key={c.id} value={c.id}>
-                        {c.name} {c.balance > 0 ? `(Khata Due: ₹${c.balance})` : ''} {c.loyaltyPoints > 0 ? `⭐ ${c.loyaltyPoints} pts` : ''}
-                      </option>
-                    ))}
-                  </select>
+                {/* Direct Customer Name Entry (No Dropdown Menu) */}
+                <div className="mb-3 space-y-2">
+                  <div>
+                    <label className="text-[11px] font-bold uppercase tracking-wider text-slate-600 block mb-1">
+                      Customer Name <span className="text-indigo-600">* (Type Directly)</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter customer name (e.g. Ramesh Kumar, Sunita Devi...)"
+                      value={customerNameInput}
+                      onChange={(e) => {
+                        setCustomerNameInput(e.target.value);
+                        setRedeemLoyaltyPoints(false);
+                      }}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="tel"
+                      placeholder="Customer phone (optional for WhatsApp bill / khata)"
+                      value={customerPhoneInput}
+                      onChange={(e) => setCustomerPhoneInput(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                  </div>
                 </div>
 
                 {/* Loyalty Points Redemption Widget */}
@@ -5233,6 +5389,231 @@ export default function App() {
           </div>
         )}
 
+        {/* ============================================================== */}
+        {/* VIEW 9: OWNER PROFILE & DESIRED PERIOD CASH / UPI EARNINGS */}
+        {/* ============================================================== */}
+        {activeTab === 'owner-profile' && currentUser.role === 'OWNER' && (
+          <div className="space-y-6">
+            {/* Owner Profile Header Card */}
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 via-sky-600 to-blue-500 text-white flex items-center justify-center text-2xl font-black shadow-lg shadow-indigo-500/25">
+                  {currentUser.name[0]}
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h2 className="text-xl sm:text-2xl font-black text-slate-900">{currentUser.name}</h2>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-indigo-100 text-indigo-700 border border-indigo-200">
+                      Store Owner
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">{business.name} &bull; {currentUser.email}</p>
+                  <p className="text-[11px] text-slate-400 mt-1 font-mono">{business.address}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2 w-full md:w-auto">
+                <button
+                  onClick={() => setActiveTab('pos')}
+                  className="flex-1 md:flex-none px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center space-x-2 shadow-sm"
+                >
+                  <Receipt className="w-4 h-4" />
+                  <span>Go to POS & Billing</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Owner Desired Timeframe Selector */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 flex items-center">
+                    <Wallet className="w-5 h-5 mr-2 text-indigo-600" /> Cash &amp; UPI Earnings Breakdown
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Filter by any desired timeframe: Today, This Month, All Time, or pick Custom Dates to see exactly how much you made in Cash vs UPI.
+                  </p>
+                </div>
+
+                {/* Period Selector Buttons */}
+                <div className="flex flex-wrap gap-1.5 bg-slate-100 p-1 rounded-xl">
+                  <button
+                    onClick={() => setOwnerProfilePeriod('today')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${ownerProfilePeriod === 'today' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    Today
+                  </button>
+                  <button
+                    onClick={() => setOwnerProfilePeriod('month')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${ownerProfilePeriod === 'month' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    This Month
+                  </button>
+                  <button
+                    onClick={() => setOwnerProfilePeriod('all')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${ownerProfilePeriod === 'all' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    All-Time
+                  </button>
+                  <button
+                    onClick={() => setOwnerProfilePeriod('custom')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${ownerProfilePeriod === 'custom' ? 'bg-white text-indigo-600 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    Custom Dates
+                  </button>
+                </div>
+              </div>
+
+              {/* Custom Date Pickers */}
+              {ownerProfilePeriod === 'custom' && (
+                <div className="flex flex-wrap items-center gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs">
+                  <div className="flex items-center space-x-1.5">
+                    <Calendar className="w-4 h-4 text-indigo-600" />
+                    <span className="text-slate-600 font-bold">From Date:</span>
+                    <input
+                      type="date"
+                      value={ownerProfileStartDate}
+                      onChange={e => setOwnerProfileStartDate(e.target.value)}
+                      className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-slate-600 font-bold">To Date:</span>
+                    <input
+                      type="date"
+                      value={ownerProfileEndDate}
+                      onChange={e => setOwnerProfileEndDate(e.target.value)}
+                      className="px-2.5 py-1.5 bg-white border border-slate-300 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
+                    />
+                  </div>
+                  {(ownerProfileStartDate || ownerProfileEndDate) && (
+                    <button
+                      onClick={() => {
+                        setOwnerProfileStartDate('');
+                        setOwnerProfileEndDate('');
+                      }}
+                      className="text-xs text-rose-600 hover:underline font-bold"
+                    >
+                      Reset Dates
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* The Cash vs UPI Big Stat Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                {/* Total Sales Card */}
+                <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-5 shadow-sm">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-300 flex items-center justify-between">
+                    <span>Total Revenue</span>
+                    <Receipt className="w-4 h-4 text-indigo-400" />
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black mt-2">
+                    ₹{ownerProfileTotalRevenue.toLocaleString('en-IN')}
+                  </div>
+                  <div className="text-xs text-slate-300 mt-2">
+                    From {ownerProfileBillsList.length} transactions in selected period
+                  </div>
+                </div>
+
+                {/* Cash Collections Card */}
+                <div className="bg-gradient-to-br from-emerald-50 via-white to-emerald-50 border border-emerald-200 rounded-2xl p-5 shadow-sm">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 flex items-center justify-between">
+                    <span>Cash Made (Hard Cash)</span>
+                    <Banknote className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-emerald-700 mt-2">
+                    ₹{ownerProfileCashTotal.toLocaleString('en-IN')}
+                  </div>
+                  <div className="text-xs font-semibold text-emerald-600 mt-2 flex items-center justify-between">
+                    <span>{ownerProfileTotalRevenue > 0 ? ((ownerProfileCashTotal / ownerProfileTotalRevenue) * 100).toFixed(1) : 0}% of Total Revenue</span>
+                    <span className="text-[10px] bg-emerald-100 px-2 py-0.5 rounded-full text-emerald-800">Physical Till</span>
+                  </div>
+                </div>
+
+                {/* UPI Collections Card */}
+                <div className="bg-gradient-to-br from-sky-50 via-white to-blue-50 border border-sky-200 rounded-2xl p-5 shadow-sm">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-sky-800 flex items-center justify-between">
+                    <span>UPI Made (Online / QR)</span>
+                    <Smartphone className="w-5 h-5 text-sky-600" />
+                  </div>
+                  <div className="text-2xl sm:text-3xl font-black text-sky-700 mt-2">
+                    ₹{ownerProfileUpiTotal.toLocaleString('en-IN')}
+                  </div>
+                  <div className="text-xs font-semibold text-sky-600 mt-2 flex items-center justify-between">
+                    <span>{ownerProfileTotalRevenue > 0 ? ((ownerProfileUpiTotal / ownerProfileTotalRevenue) * 100).toFixed(1) : 0}% of Total Revenue</span>
+                    <span className="text-[10px] bg-sky-100 px-2 py-0.5 rounded-full text-sky-800">Bank Transfer</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Transactions List for the selected timeframe */}
+              <div className="pt-4 border-t border-slate-100">
+                <div className="flex justify-between items-center mb-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                    Payment Transactions Breakdown ({ownerProfileBillsList.length})
+                  </h4>
+                  <span className="text-xs text-slate-400 font-mono">
+                    {ownerProfilePeriod === 'today' ? "Showing Today's Bills" :
+                     ownerProfilePeriod === 'month' ? "Showing This Month's Bills" :
+                     ownerProfilePeriod === 'custom' ? `Showing ${ownerProfileStartDate || 'Start'} to ${ownerProfileEndDate || 'End'}` : "Showing All Bills"}
+                  </span>
+                </div>
+
+                {ownerProfileBillsList.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-slate-400 bg-slate-50 rounded-xl">
+                    No transactions found for this period.
+                  </div>
+                ) : (
+                  <div className="max-h-72 overflow-y-auto pr-1">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                          <th className="py-2.5 px-3">Bill No</th>
+                          <th className="py-2.5 px-3">Date</th>
+                          <th className="py-2.5 px-3">Customer</th>
+                          <th className="py-2.5 px-3">Payment Mode</th>
+                          <th className="py-2.5 px-3 text-right">Cash Part</th>
+                          <th className="py-2.5 px-3 text-right">UPI Part</th>
+                          <th className="py-2.5 px-3 text-right">Total Bill</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {ownerProfileBillsList.slice(0, 50).map(b => (
+                          <tr key={b.id} className="hover:bg-slate-50">
+                            <td className="py-2.5 px-3 font-mono font-bold text-slate-900">{b.billNo}</td>
+                            <td className="py-2.5 px-3 text-slate-600">{b.date}</td>
+                            <td className="py-2.5 px-3 font-medium text-slate-900">{b.customer?.name || 'Walk-in Customer'}</td>
+                            <td className="py-2.5 px-3">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                b.paymentMode === 'CASH' ? 'bg-emerald-100 text-emerald-800' :
+                                b.paymentMode === 'UPI' ? 'bg-sky-100 text-sky-800' :
+                                b.paymentMode === 'SPLIT' ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-700'
+                              }`}>
+                                {b.paymentMode}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-bold text-emerald-700">
+                              {b.paymentMode === 'CASH' ? `₹${b.total.toLocaleString('en-IN')}` :
+                               b.paymentMode === 'SPLIT' && b.splitCash > 0 ? `₹${b.splitCash.toLocaleString('en-IN')}` : '-'}
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-bold text-sky-700">
+                              {b.paymentMode === 'UPI' ? `₹${b.total.toLocaleString('en-IN')}` :
+                               b.paymentMode === 'SPLIT' && b.splitUpi > 0 ? `₹${b.splitUpi.toLocaleString('en-IN')}` : '-'}
+                            </td>
+                            <td className="py-2.5 px-3 text-right font-black text-slate-900">
+                              ₹{b.total.toLocaleString('en-IN')}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
 
