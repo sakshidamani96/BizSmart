@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   LayoutDashboard,
+  QrCode,
   Receipt,
   Package,
   Truck,
@@ -64,6 +65,8 @@ import {
   Briefcase
 } from 'lucide-react';
 import api, { API_ENABLED, portalForRoles } from './api';
+import rawProducts60 from './products60.json';
+import seedData1Year from './seedData1Year.json';
 
 // Helper: calculate days remaining until expiry
 export const calculateDaysToExpiry = (expiryDateStr) => {
@@ -81,476 +84,21 @@ export const calculateDaysToExpiry = (expiryDateStr) => {
 };
 
 // -------------------------------------------------------------
-// 30 REALISTIC RETAIL / KIRANA INVENTORY PRODUCTS
+// 60 DAILY ESSENTIAL KIRANA & RETAIL INVENTORY PRODUCTS
 // -------------------------------------------------------------
-const RAW_INITIAL_PRODUCTS = [
-  // 1-8: Staples & Grains
-  {
-    id: 1,
-    sku: "SKU-ATTA-101",
-    name: "Aashirvaad Shudh Chakki Atta 10kg",
-    category: "Staples & Grains",
-    purchasePrice: 385,
-    sellingPrice: 440,
-    quantity: 35,
-    minStock: 15,
-    supplier: "ITC Consumer Goods Distribution",
-    expiryDate: "2027-04-15",
-    batches: [
-      { id: 101, batchNo: "BAT-ITC-101", quantity: 35, purchasePrice: 385, expiryDate: "2027-04-15" }
-    ]
-  },
-  {
-    id: 2,
-    sku: "SKU-RICE-102",
-    name: "India Gate Classic Basmati Rice 5kg",
-    category: "Staples & Grains",
-    purchasePrice: 520,
-    sellingPrice: 610,
-    quantity: 20,
-    minStock: 10,
-    supplier: "ITC Consumer Goods Distribution",
-    expiryDate: "2027-08-20",
-    batches: [
-      { id: 102, batchNo: "BAT-ITC-102", quantity: 20, purchasePrice: 520, expiryDate: "2027-08-20" }
-    ]
-  },
-  {
-    id: 3,
-    sku: "SKU-DAL-103",
-    name: "Tata Sampann Unpolished Toor Dal 1kg",
-    category: "Staples & Grains",
-    purchasePrice: 145,
-    sellingPrice: 170,
-    quantity: 8, // ⚠️ LOW STOCK
-    minStock: 15,
-    supplier: "Tata Consumer Products Hub",
-    expiryDate: "2027-03-10",
-    batches: [
-      { id: 103, batchNo: "BAT-TATA-103", quantity: 8, purchasePrice: 145, expiryDate: "2027-03-10" }
-    ]
-  },
-  {
-    id: 4,
-    sku: "SKU-SALT-104",
-    name: "Tata Salt Vacuum Evaporated Iodized 1kg",
-    category: "Staples & Grains",
-    purchasePrice: 22,
-    sellingPrice: 28,
-    quantity: 85,
-    minStock: 25,
-    supplier: "Tata Consumer Products Hub",
-    expiryDate: "2027-11-30",
-    batches: [
-      { id: 104, batchNo: "BAT-TATA-104", quantity: 85, purchasePrice: 22, expiryDate: "2027-11-30" }
-    ]
-  },
-  {
-    id: 5,
-    sku: "SKU-CHANA-105",
-    name: "Fortune Premium Chana Dal 1kg",
-    category: "Staples & Grains",
-    purchasePrice: 85,
-    sellingPrice: 98,
-    quantity: 40,
-    minStock: 15,
-    supplier: "Adani Wilmar Supply Hub",
-    expiryDate: "2027-05-15",
-    batches: [
-      { id: 105, batchNo: "BAT-ADANI-105", quantity: 40, purchasePrice: 85, expiryDate: "2027-05-15" }
-    ]
-  },
-  {
-    id: 6,
-    sku: "SKU-SUGAR-106",
-    name: "Madhur Pure & Hygienic Sugar 5kg",
-    category: "Staples & Grains",
-    purchasePrice: 210,
-    sellingPrice: 240,
-    quantity: 28,
-    minStock: 10,
-    supplier: "Tata Consumer Products Hub",
-    expiryDate: "2027-09-01",
-    batches: [
-      { id: 106, batchNo: "BAT-TATA-106", quantity: 28, purchasePrice: 210, expiryDate: "2027-09-01" }
-    ]
-  },
-  {
-    id: 7,
-    sku: "SKU-BESAN-107",
-    name: "Rajdhani Pure Besan (Gram Flour) 1kg",
-    category: "Staples & Grains",
-    purchasePrice: 78,
-    sellingPrice: 92,
-    quantity: 18,
-    minStock: 10,
-    supplier: "ITC Consumer Goods Distribution",
-    expiryDate: "2027-02-28",
-    batches: [
-      { id: 107, batchNo: "BAT-ITC-107", quantity: 18, purchasePrice: 78, expiryDate: "2027-02-28" }
-    ]
-  },
-  {
-    id: 8,
-    sku: "SKU-CORN-108",
-    name: "Kellogg's Corn Flakes Original 875g",
-    category: "Staples & Grains",
-    purchasePrice: 290,
-    sellingPrice: 345,
-    quantity: 14,
-    minStock: 8,
-    supplier: "Nestle Regional Agency",
-    expiryDate: "2026-11-20", // near-90
-    batches: [
-      { id: 108, batchNo: "BAT-NEST-108", quantity: 14, purchasePrice: 290, expiryDate: "2026-11-20" }
-    ]
-  },
+const RAW_INITIAL_PRODUCTS = rawProducts60.map((p, idx) => ({
+  id: idx + 1,
+  ...p,
+  batches: [
+    { id: 100 + idx + 1, batchNo: `BAT-${p.sku || 'ITEM'}-${100 + idx + 1}`, quantity: p.quantity, purchasePrice: p.purchasePrice, expiryDate: p.expiryDate }
+  ]
+}));
 
-  // 9-12: Edible Oils & Ghee
-  {
-    id: 9,
-    sku: "SKU-OIL-109",
-    name: "Fortune Sunlite Refined Sunflower Oil 1L",
-    category: "Edible Oils & Ghee",
-    purchasePrice: 125,
-    sellingPrice: 150,
-    quantity: 45,
-    minStock: 15,
-    supplier: "Adani Wilmar Supply Hub",
-    expiryDate: "2027-01-10",
-    batches: [
-      { id: 109, batchNo: "BAT-ADANI-109", quantity: 45, purchasePrice: 125, expiryDate: "2027-01-10" }
-    ]
-  },
-  {
-    id: 10,
-    sku: "SKU-MUST-110",
-    name: "Dhara Kachi Ghani Pure Mustard Oil 1L",
-    category: "Edible Oils & Ghee",
-    purchasePrice: 140,
-    sellingPrice: 165,
-    quantity: 5, // ⚠️ LOW STOCK
-    minStock: 15,
-    supplier: "Adani Wilmar Supply Hub",
-    expiryDate: "2026-12-15",
-    batches: [
-      { id: 110, batchNo: "BAT-ADANI-110", quantity: 5, purchasePrice: 140, expiryDate: "2026-12-15" }
-    ]
-  },
-  {
-    id: 11,
-    sku: "SKU-GHEE-111",
-    name: "Amul Pure Cow Ghee Pouch 1L",
-    category: "Edible Oils & Ghee",
-    purchasePrice: 530,
-    sellingPrice: 590,
-    quantity: 22,
-    minStock: 10,
-    supplier: "Amul Dairy Federation Depot",
-    expiryDate: "2027-06-30",
-    batches: [
-      { id: 111, batchNo: "BAT-AMUL-111", quantity: 22, purchasePrice: 530, expiryDate: "2027-06-30" }
-    ]
-  },
-  {
-    id: 12,
-    sku: "SKU-SAFF-112",
-    name: "Saffola Gold Pro Healthy Lifestyle Oil 2L",
-    category: "Edible Oils & Ghee",
-    purchasePrice: 320,
-    sellingPrice: 375,
-    quantity: 12,
-    minStock: 8,
-    supplier: "Hindustan Unilever FMCG Depot",
-    expiryDate: "2027-02-15",
-    batches: [
-      { id: 112, batchNo: "BAT-HUL-112", quantity: 12, purchasePrice: 320, expiryDate: "2027-02-15" }
-    ]
-  },
-
-  // 13-17: Dairy & Breakfast
-  {
-    id: 13,
-    sku: "SKU-MILK-113",
-    name: "Amul Taaza Homogenised Toned Milk 1L",
-    category: "Dairy & Breakfast",
-    purchasePrice: 68,
-    sellingPrice: 76,
-    quantity: 30,
-    minStock: 15,
-    supplier: "Amul Dairy Federation Depot",
-    expiryDate: "2026-10-18", // near-60 (~36 days)
-    batches: [
-      { id: 113, batchNo: "BAT-AMUL-113", quantity: 30, purchasePrice: 68, expiryDate: "2026-10-18" }
-    ]
-  },
-  {
-    id: 14,
-    sku: "SKU-BUTT-114",
-    name: "Amul Pasteurised Salted Butter 500g",
-    category: "Dairy & Breakfast",
-    purchasePrice: 245,
-    sellingPrice: 275,
-    quantity: 6, // ⚠️ LOW STOCK & near-60
-    minStock: 12,
-    supplier: "Amul Dairy Federation Depot",
-    expiryDate: "2026-10-25", // near-60 (~43 days)
-    batches: [
-      { id: 114, batchNo: "BAT-AMUL-114", quantity: 6, purchasePrice: 245, expiryDate: "2026-10-25" }
-    ]
-  },
-  {
-    id: 15,
-    sku: "SKU-PANEER-115",
-    name: "Mother Dairy Fresh Malai Paneer 200g",
-    category: "Dairy & Breakfast",
-    purchasePrice: 82,
-    sellingPrice: 95,
-    quantity: 15,
-    minStock: 8,
-    supplier: "Amul Dairy Federation Depot",
-    expiryDate: "2026-09-28", // ⚠️ CRITICAL near-30 (~16 days!)
-    batches: [
-      { id: 115, batchNo: "BAT-AMUL-115", quantity: 15, purchasePrice: 82, expiryDate: "2026-09-28" }
-    ]
-  },
-  {
-    id: 16,
-    sku: "SKU-CHEESE-116",
-    name: "Amul Processed Cheese Block 200g",
-    category: "Dairy & Breakfast",
-    purchasePrice: 115,
-    sellingPrice: 135,
-    quantity: 18,
-    minStock: 10,
-    supplier: "Amul Dairy Federation Depot",
-    expiryDate: "2026-11-30", // near-90
-    batches: [
-      { id: 116, batchNo: "BAT-AMUL-116", quantity: 18, purchasePrice: 115, expiryDate: "2026-11-30" }
-    ]
-  },
-  {
-    id: 17,
-    sku: "SKU-OATS-117",
-    name: "Quaker Whole Rolled Oats 1kg",
-    category: "Dairy & Breakfast",
-    purchasePrice: 160,
-    sellingPrice: 195,
-    quantity: 24,
-    minStock: 10,
-    supplier: "Nestle Regional Agency",
-    expiryDate: "2027-03-25",
-    batches: [
-      { id: 117, batchNo: "BAT-NEST-117", quantity: 24, purchasePrice: 160, expiryDate: "2027-03-25" }
-    ]
-  },
-
-  // 18-23: FMCG & Packaged Foods
-  {
-    id: 18,
-    sku: "SKU-MAGGI-118",
-    name: "Maggi 2-Minute Masala Instant Noodles (Pack of 6)",
-    category: "FMCG & Packaged Foods",
-    purchasePrice: 75,
-    sellingPrice: 88,
-    quantity: 60,
-    minStock: 20,
-    supplier: "Nestle Regional Agency",
-    expiryDate: "2027-04-10",
-    batches: [
-      { id: 118, batchNo: "BAT-NEST-118", quantity: 60, purchasePrice: 75, expiryDate: "2027-04-10" }
-    ]
-  },
-  {
-    id: 19,
-    sku: "SKU-GDAY-119",
-    name: "Britannia Good Day Cashew Cookies 600g",
-    category: "FMCG & Packaged Foods",
-    purchasePrice: 105,
-    sellingPrice: 130,
-    quantity: 42,
-    minStock: 15,
-    supplier: "Britannia Distribution Hub",
-    expiryDate: "2027-01-30",
-    batches: [
-      { id: 119, batchNo: "BAT-BRIT-119", quantity: 42, purchasePrice: 105, expiryDate: "2027-01-30" }
-    ]
-  },
-  {
-    id: 20,
-    sku: "SKU-PARLE-120",
-    name: "Parle-G Gold Glucose Biscuits 1kg Family Pack",
-    category: "FMCG & Packaged Foods",
-    purchasePrice: 85,
-    sellingPrice: 105,
-    quantity: 50,
-    minStock: 20,
-    supplier: "Parle Products Wholesale",
-    expiryDate: "2027-05-15",
-    batches: [
-      { id: 120, batchNo: "BAT-PARLE-120", quantity: 50, purchasePrice: 85, expiryDate: "2027-05-15" }
-    ]
-  },
-  {
-    id: 21,
-    sku: "SKU-FANT-121",
-    name: "Sunfeast Dark Fantasy Choco Fills 300g",
-    category: "FMCG & Packaged Foods",
-    purchasePrice: 120,
-    sellingPrice: 150,
-    quantity: 25,
-    minStock: 10,
-    supplier: "ITC Consumer Goods Distribution",
-    expiryDate: "2027-03-01",
-    batches: [
-      { id: 121, batchNo: "BAT-ITC-121", quantity: 25, purchasePrice: 120, expiryDate: "2027-03-01" }
-    ]
-  },
-  {
-    id: 22,
-    sku: "SKU-BHUJ-122",
-    name: "Haldiram's Nagpur Bhujia Sev 400g",
-    category: "FMCG & Packaged Foods",
-    purchasePrice: 95,
-    sellingPrice: 120,
-    quantity: 30,
-    minStock: 12,
-    supplier: "Parle Products Wholesale",
-    expiryDate: "2027-02-20",
-    batches: [
-      { id: 122, batchNo: "BAT-PARLE-122", quantity: 30, purchasePrice: 95, expiryDate: "2027-02-20" }
-    ]
-  },
-  {
-    id: 23,
-    sku: "SKU-LAYS-123",
-    name: "Lay's India's Magic Masala Potato Chips 50g",
-    category: "FMCG & Packaged Foods",
-    purchasePrice: 16,
-    sellingPrice: 20,
-    quantity: 80,
-    minStock: 25,
-    supplier: "Hindustan Unilever FMCG Depot",
-    expiryDate: "2026-12-31",
-    batches: [
-      { id: 123, batchNo: "BAT-HUL-123", quantity: 80, purchasePrice: 16, expiryDate: "2026-12-31" }
-    ]
-  },
-
-  // 24-27: Beverages & Tea
-  {
-    id: 24,
-    sku: "SKU-TGOLD-124",
-    name: "Tata Tea Gold Rich Taste & Aroma 500g",
-    category: "Beverages & Tea",
-    purchasePrice: 290,
-    sellingPrice: 340,
-    quantity: 35,
-    minStock: 12,
-    supplier: "Tata Consumer Products Hub",
-    expiryDate: "2027-10-15",
-    batches: [
-      { id: 124, batchNo: "BAT-TATA-124", quantity: 35, purchasePrice: 290, expiryDate: "2027-10-15" }
-    ]
-  },
-  {
-    id: 25,
-    sku: "SKU-REDL-125",
-    name: "Brooke Bond Red Label Natural Care Tea 500g",
-    category: "Beverages & Tea",
-    purchasePrice: 270,
-    sellingPrice: 320,
-    quantity: 28,
-    minStock: 12,
-    supplier: "Hindustan Unilever FMCG Depot",
-    expiryDate: "2027-09-10",
-    batches: [
-      { id: 125, batchNo: "BAT-HUL-125", quantity: 28, purchasePrice: 270, expiryDate: "2027-09-10" }
-    ]
-  },
-  {
-    id: 26,
-    sku: "SKU-NESC-126",
-    name: "Nescafe Classic 100% Pure Coffee 100g Glass Jar",
-    category: "Beverages & Tea",
-    purchasePrice: 280,
-    sellingPrice: 330,
-    quantity: 16,
-    minStock: 8,
-    supplier: "Nestle Regional Agency",
-    expiryDate: "2027-12-31",
-    batches: [
-      { id: 126, batchNo: "BAT-NEST-126", quantity: 16, purchasePrice: 280, expiryDate: "2027-12-31" }
-    ]
-  },
-  {
-    id: 27,
-    sku: "SKU-JUICE-127",
-    name: "Real Activ 100% Mixed Fruit Juice 1L",
-    category: "Beverages & Tea",
-    purchasePrice: 110,
-    sellingPrice: 135,
-    quantity: 7, // ⚠️ LOW STOCK
-    minStock: 12,
-    supplier: "ITC Consumer Goods Distribution",
-    expiryDate: "2026-11-15", // near-90
-    batches: [
-      { id: 127, batchNo: "BAT-ITC-127", quantity: 7, purchasePrice: 110, expiryDate: "2026-11-15" }
-    ]
-  },
-
-  // 28-30: Personal Care & Cleaning
-  {
-    id: 28,
-    sku: "SKU-DETT-128",
-    name: "Dettol Original Germ Protection Bathing Soap (Pack of 4x125g)",
-    category: "Personal Care & Cleaning",
-    purchasePrice: 165,
-    sellingPrice: 198,
-    quantity: 40,
-    minStock: 15,
-    supplier: "Hindustan Unilever FMCG Depot",
-    expiryDate: "2027-08-10",
-    batches: [
-      { id: 128, batchNo: "BAT-HUL-128", quantity: 40, purchasePrice: 165, expiryDate: "2027-08-10" }
-    ]
-  },
-  {
-    id: 29,
-    sku: "SKU-SURF-129",
-    name: "Surf Excel Easy Wash Detergent Powder 1kg",
-    category: "Personal Care & Cleaning",
-    purchasePrice: 125,
-    sellingPrice: 145,
-    quantity: 38,
-    minStock: 15,
-    supplier: "Hindustan Unilever FMCG Depot",
-    expiryDate: "2028-01-01",
-    batches: [
-      { id: 129, batchNo: "BAT-HUL-129", quantity: 38, purchasePrice: 125, expiryDate: "2028-01-01" }
-    ]
-  },
-  {
-    id: 30,
-    sku: "SKU-COLG-130",
-    name: "Colgate Strong Teeth Dental Cream Toothpaste 300g Saver Pack",
-    category: "Personal Care & Cleaning",
-    purchasePrice: 145,
-    sellingPrice: 175,
-    quantity: 32,
-    minStock: 12,
-    supplier: "Hindustan Unilever FMCG Depot",
-    expiryDate: "2027-11-15",
-    batches: [
-      { id: 130, batchNo: "BAT-HUL-130", quantity: 32, purchasePrice: 145, expiryDate: "2027-11-15" }
-    ]
-  }
-];
-
-export const INITIAL_30_PRODUCTS = RAW_INITIAL_PRODUCTS.map(p => ({
+export const INITIAL_60_PRODUCTS = RAW_INITIAL_PRODUCTS.map(p => ({
   ...p,
   daysToExpiry: calculateDaysToExpiry(p.expiryDate)
 }));
+export const INITIAL_30_PRODUCTS = INITIAL_60_PRODUCTS;
 
 export default function App() {
   // -------------------------------------------------------------
@@ -613,10 +161,10 @@ export default function App() {
     return [
       {
         id: 1,
-        name: 'Rajesh Sharma',
-        email: 'owner@bizsmart.in',
+        name: 'Damani Retails Owner',
+        email: 'damani@gmail.com',
         password: 'password123',
-        storeName: 'Sharma Kirana & Superstore',
+        storeName: 'Damani Retails',
         category: 'Kirana & Supermarket',
         tagline: 'Quality Groceries & Daily Needs',
         address: 'Shop 12-14, Main Market, Sector 15, New Delhi',
@@ -654,7 +202,7 @@ export default function App() {
       console.warn('Failed to parse active store', e);
     }
     return {
-      name: "Sharma Kirana & Superstore",
+      name: "Damani Retails",
       tagline: "Quality Groceries & Daily Needs",
       address: "Shop 12-14, Main Market, Sector 15, New Delhi",
       gstin: "07AABCS1429B1Z8",
@@ -687,7 +235,7 @@ export default function App() {
       console.warn('Failed to parse employees', e);
     }
     return [
-      { id: 1, name: 'Amit Verma', role: 'Cashier & POS Operator', phone: '+91-98122-33445', email: 'employee@bizsmart.in', password: 'password123', salary: 25000, shift: 'Morning (8 AM - 4 PM)', status: 'ACTIVE', joinedDate: 'Today' }
+      { id: 1, name: 'Ajay Sharma', role: 'Cashier & POS Operator', phone: '+91-98122-33445', email: 'ajaysharma@gmail.com', password: 'password123', salary: 25000, shift: 'Morning (8 AM - 4 PM)', status: 'ACTIVE', joinedDate: 'Today' }
     ];
   });
 
@@ -755,12 +303,28 @@ export default function App() {
   // -------------------------------------------------------------
   // EXPENSES (Default empty / ₹0 for new business)
   // -------------------------------------------------------------
-  const [expenses, setExpenses] = useState([]);
+  const [expenses, setExpenses] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bizsmart_expenses_v2');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to parse expenses', e);
+    }
+    return seedData1Year.expenses || [];
+  });
 
   // -------------------------------------------------------------
   // BILLS / TRANSACTIONS HISTORY (Default empty / ₹0)
   // -------------------------------------------------------------
-  const [bills, setBills] = useState([]);
+  const [bills, setBills] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bizsmart_bills_v2');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.warn('Failed to parse bills', e);
+    }
+    return seedData1Year.bills || [];
+  });
 
   // -------------------------------------------------------------
   // POS & BILLING CART (With Queue Buster Hold & Loyalty Points)
@@ -814,7 +378,7 @@ export default function App() {
   const [activeShift, setActiveShift] = useState({
     id: 'SHIFT-101',
     cashierId: 1,
-    cashierName: 'Amit Verma',
+    cashierName: 'Ajay Sharma',
     shiftName: 'Morning Shift (8 AM - 4 PM)',
     startTime: '08:00 AM',
     startDate: new Date().toISOString().slice(0, 10),
@@ -1358,7 +922,7 @@ export default function App() {
       pointsRedeemed: loyaltyDiscount,
       total: cartFinalTotal,
       paymentMode,
-      cashier: currentUser ? currentUser.name : 'Amit Verma',
+      cashier: currentUser ? currentUser.name : 'Ajay Sharma',
       shiftId: activeShift ? activeShift.id : 'SHIFT-101'
     };
 
@@ -2712,7 +2276,7 @@ export default function App() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Rajesh Sharma"
+                      placeholder="e.g. Damani Retails Owner"
                       value={ownerRegisterForm.ownerName}
                       onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, ownerName: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -2922,7 +2486,7 @@ export default function App() {
                 <input
                   type="email"
                   required
-                  placeholder="owner@bizsmart.in or staff@bizsmart.in"
+                  placeholder="damani@gmail.com or ajaysharma@gmail.com"
                   value={loginEmail}
                   onChange={e => setLoginEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
@@ -3350,6 +2914,64 @@ export default function App() {
                 </div>
               )}
             </div>
+
+            {/* Staff & Payroll Overview (Owner Dashboard) */}
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100 mb-4">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 flex items-center">
+                    <Users className="w-5 h-5 mr-2 text-indigo-600" /> Active Store Staff &amp; Salary Overview
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Store employee roster, allocated shifts, and monthly fixed salary payroll
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('employees')}
+                  className="text-xs text-indigo-600 font-bold hover:underline"
+                >
+                  Manage All Staff &rarr;
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {employees.map(emp => (
+                  <div key={emp.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                          {emp.name[0]}
+                        </div>
+                        <div>
+                          <div className="font-bold text-slate-900 text-sm">{emp.name}</div>
+                          <div className="text-[11px] text-indigo-600 font-medium">{emp.role}</div>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
+                        {emp.status}
+                      </span>
+                    </div>
+
+                    <div className="mt-3.5 pt-3 border-t border-slate-200/70 space-y-1.5 text-xs">
+                      <div className="flex justify-between items-center text-slate-600">
+                        <span>Assigned Shift:</span>
+                        <span className="font-medium text-slate-800">{emp.shift}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-slate-600">
+                        <span>Staff Login:</span>
+                        <span className="font-mono text-slate-700 text-[11px]">{emp.email}</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-1.5 border-t border-slate-200/50">
+                        <span className="font-bold text-slate-700">Monthly Salary:</span>
+                        <span className="text-sm font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-200">
+                          ₹{emp.salary.toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -3737,7 +3359,7 @@ export default function App() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100">
                 <div>
                   <h4 className="text-sm font-bold text-slate-900 flex items-center">
-                    <Trophy className="w-4 h-4 mr-1.5 text-amber-500" /> My Shift Performance &amp; Commission Bonus
+                    <Trophy className="w-4 h-4 mr-1.5 text-amber-500" /> My Shift Performance
                   </h4>
                   <p className="text-xs text-slate-500">
                     Real-time metrics for current cashier logged in as <span className="font-bold text-slate-800">{currentUser.name}</span>
@@ -3749,23 +3371,23 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 text-xs">
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Bills Processed</span>
-                  <div className="text-lg font-black text-slate-900 mt-0.5">{activeShiftBills.length} Customers</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 text-xs">
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Bills Processed</span>
+                    <div className="text-xl font-black text-slate-900 mt-0.5">{activeShiftBills.length} Customers</div>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+                    <Receipt className="w-5 h-5" />
+                  </div>
                 </div>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Sales Handled</span>
-                  <div className="text-lg font-black text-indigo-600 mt-0.5">₹{currentShiftTotalSales.toLocaleString('en-IN')}</div>
-                </div>
-                <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg Billing Speed</span>
-                  <div className="text-lg font-black text-emerald-700 mt-0.5">~38s / customer</div>
-                </div>
-                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                  <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Earned Incentive Bonus</span>
-                  <div className="text-lg font-black text-emerald-700 mt-0.5">
-                    +₹{Math.round(currentShiftTotalSales * 0.01 + activeShiftBills.length * 5).toLocaleString('en-IN')}
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Sales Handled</span>
+                    <div className="text-xl font-black text-indigo-600 mt-0.5">₹{currentShiftTotalSales.toLocaleString('en-IN')}</div>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                    <Banknote className="w-5 h-5" />
                   </div>
                 </div>
               </div>
@@ -4118,6 +3740,34 @@ export default function App() {
                     </button>
                   </div>
                 </div>
+
+                {/* POS Dynamic Bill Payment QR Scanner Preview */}
+                {cart.length > 0 && (
+                  <div className="mt-4 p-3 bg-indigo-50/60 rounded-xl border border-indigo-100 flex items-center justify-between gap-2.5">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-1 text-xs font-bold text-slate-800">
+                        <QrCode className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>Dynamic Bill Scanner</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-0.5">
+                        {paymentMode === 'UPI' ? 'UPI QR code ready for instant checkout' : 'Instant barcode & bill scanner active'}
+                      </p>
+                      <div className="text-[10px] font-mono text-indigo-700 font-bold mt-1">
+                        ₹{cartFinalTotal} &bull; Damani Retails
+                      </div>
+                    </div>
+                    <div className="p-1 bg-white rounded-lg border border-slate-200 shadow-xs flex flex-col items-center">
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=1&data=${encodeURIComponent(`upi://pay?pa=damani@okaxis&pn=Damani+Retails&am=${cartFinalTotal}&cu=INR`)}`}
+                        alt="POS Scanner"
+                        className="w-14 h-14 object-contain rounded"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <button
@@ -4809,8 +4459,8 @@ export default function App() {
                       <th className="py-3 px-4 text-center">Bills Processed</th>
                       <th className="py-3 px-4 text-right">Revenue Generated</th>
                       <th className="py-3 px-4 text-center">Cash vs UPI</th>
-                      <th className="py-3 px-4 text-center">Avg Billing Speed</th>
-                      <th className="py-3 px-4 text-right">Earned Commission Bonus</th>
+                      <th className="py-3 px-4 text-right">Monthly Salary (₹)</th>
+                      <th className="py-3 px-4 text-center">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -4849,13 +4499,13 @@ export default function App() {
                             ₹{cashier.cashSales.toLocaleString('en-IN')} (C) / ₹{cashier.upiSales.toLocaleString('en-IN')} (U)
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-center">
-                          <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 font-bold text-[10px]">
-                            ~{cashier.avgSpeedSeconds}s / bill
-                          </span>
-                        </td>
                         <td className="py-3 px-4 text-right font-black text-emerald-700">
-                          +₹{cashier.incentiveBonus.toLocaleString('en-IN')}
+                          ₹{(employees.find(e => e.id === cashier.id)?.salary || 25000).toLocaleString('en-IN')}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
+                            ACTIVE
+                          </span>
                         </td>
                       </tr>
                     ))}
@@ -6030,6 +5680,43 @@ export default function App() {
               </div>
             </div>
 
+            {/* Bill Payment QR Code & Scanner Box */}
+            <div className="my-3 p-3 bg-gradient-to-br from-indigo-50/70 via-slate-50 to-emerald-50/50 rounded-2xl border border-indigo-100/80 flex items-center justify-between gap-3">
+              <div className="flex-1">
+                <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-900 mb-0.5">
+                  <QrCode className="w-4 h-4 text-indigo-600" />
+                  <span>Scan to Pay &amp; Verify Bill</span>
+                </div>
+                <p className="text-[10px] text-slate-500 leading-tight">
+                  Scan via any UPI App (GPay, PhonePe, Paytm) or barcode reader to instantly settle ₹{lastGeneratedBill.total}
+                </p>
+                <div className="mt-1.5 flex items-center space-x-2 text-[10px] font-mono text-slate-600">
+                  <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200 font-bold text-indigo-700">UPI: damani@okaxis</span>
+                  <span className="text-emerald-600 font-bold flex items-center">
+                    <CheckCircle className="w-3 h-3 mr-0.5 inline" /> Verified
+                  </span>
+                </div>
+              </div>
+              <div className="p-1.5 bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col items-center">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&margin=2&data=${encodeURIComponent(`upi://pay?pa=damani@okaxis&pn=Damani+Retails&am=${lastGeneratedBill.total}&cu=INR&tn=Bill-${lastGeneratedBill.billNo}`)}`}
+                  alt="Payment QR Scanner"
+                  className="w-20 h-20 rounded-lg object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    if (e.currentTarget.nextElementSibling) {
+                      e.currentTarget.nextElementSibling.style.display = 'flex';
+                    }
+                  }}
+                />
+                <div className="w-20 h-20 bg-indigo-50 rounded-lg items-center justify-center flex-col text-indigo-700 hidden text-center p-1">
+                  <QrCode className="w-8 h-8 mx-auto" />
+                  <span className="text-[8px] font-bold">₹{lastGeneratedBill.total}</span>
+                </div>
+                <span className="text-[9px] font-black text-slate-700 mt-1 uppercase tracking-wider">₹{lastGeneratedBill.total}</span>
+              </div>
+            </div>
+
             <div className="mt-4 flex flex-wrap gap-2">
               <button
                 onClick={() => window.print()}
@@ -6098,23 +5785,19 @@ export default function App() {
                 />
               </div>
 
-              {/* Category Dropdown */}
+              {/* Expense What / About - Freeform Text Input (Replaced Dropdown) */}
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Expense Category</label>
-                <select
+                <label className="font-bold text-slate-700 block mb-1">
+                  What is this expense about? * <span className="font-normal text-slate-400">(e.g. Shop Rent, Electricity, Packaging, Water, Repair)</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Write what this expense is about..."
                   value={newExpense.category}
                   onChange={e => setNewExpense({ ...newExpense, category: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none text-slate-900 font-medium"
-                >
-                  <option value="Shop Floor Rent">Shop Floor Rent</option>
-                  <option value="Electricity & Power">Electricity &amp; Power</option>
-                  <option value="Staff Salaries">Staff Salaries</option>
-                  <option value="Wholesale Transport & Logistics">Wholesale Transport &amp; Logistics</option>
-                  <option value="Packaging Materials">Packaging Materials</option>
-                  <option value="Store Maintenance & Repairs">Store Maintenance &amp; Repairs</option>
-                  <option value="Marketing & Signboard">Marketing &amp; Signboard</option>
-                  <option value="Miscellaneous Overhead">Miscellaneous Overhead</option>
-                </select>
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">

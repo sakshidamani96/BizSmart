@@ -96,13 +96,13 @@ public class DataSeeder implements ApplicationRunner {
     }
 
     private void seedUsers(Map<ERole, Role> roles) {
-        createUserIfMissing("owner", "owner@bizsmart.in", "Rajesh Sharma", "Store Owner", roles.get(ERole.ROLE_BUSINESS_OWNER));
-        createUserIfMissing("employee", "cashier@bizsmart.in", "Amit Verma", "Cashier & POS Operator", roles.get(ERole.ROLE_EMPLOYEE));
-        createUserIfMissing("supplier", "supplier@itc.in", "Sunil Kumar", "ITC Distributor", roles.get(ERole.ROLE_SUPPLIER));
-        createUserIfMissing("admin", "admin@bizsmart.in", "Platform Administrator", "Platform Admin", roles.get(ERole.ROLE_PLATFORM_ADMIN));
+        createUserIfMissing("damani", "damani@gmail.com", "Damani Retails Owner", "Store Owner", roles.get(ERole.ROLE_BUSINESS_OWNER), BigDecimal.valueOf(100000));
+        createUserIfMissing("ajaysharma", "ajaysharma@gmail.com", "Ajay Sharma", "Cashier & POS Operator", roles.get(ERole.ROLE_EMPLOYEE), BigDecimal.valueOf(25000));
+        createUserIfMissing("supplier", "supplier@itc.in", "Sunil Kumar", "ITC Distributor", roles.get(ERole.ROLE_SUPPLIER), BigDecimal.valueOf(35000));
+        createUserIfMissing("admin", "admin@bizsmart.in", "Platform Administrator", "Platform Admin", roles.get(ERole.ROLE_PLATFORM_ADMIN), BigDecimal.valueOf(80000));
     }
 
-    private void createUserIfMissing(String username, String email, String fullName, String title, Role role) {
+    private void createUserIfMissing(String username, String email, String fullName, String title, Role role, BigDecimal salary) {
         if (Boolean.TRUE.equals(userRepository.existsByUsernameIgnoreCase(username))
                 || Boolean.TRUE.equals(userRepository.existsByEmailIgnoreCase(email))) {
             return;
@@ -110,8 +110,11 @@ public class DataSeeder implements ApplicationRunner {
         User user = new User(username, email, passwordEncoder.encode(demoPassword), fullName);
         user.setJobTitle(title);
         user.setRoles(new HashSet<>(Set.of(role)));
+        if (salary != null) {
+            user.setSalary(salary);
+        }
         userRepository.save(user);
-        logger.info("Seeded demo user {} ({})", email, role.getName());
+        logger.info("Seeded demo user {} ({}) with salary {}", email, role.getName(), salary);
     }
 
     private void seedSuppliers() {

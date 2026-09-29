@@ -52,6 +52,9 @@ public class User {
     @Size(max = 80)
     private String jobTitle;
 
+    @Column(precision = 10, scale = 2)
+    private java.math.BigDecimal salary = java.math.BigDecimal.valueOf(25000);
+
     private boolean active = true;
 
     private LocalDateTime createdAt = LocalDateTime.now();

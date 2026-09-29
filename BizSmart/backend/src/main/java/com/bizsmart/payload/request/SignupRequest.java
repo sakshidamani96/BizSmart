@@ -33,6 +33,8 @@ public class SignupRequest {
     @Size(max = 80)
     private String jobTitle;
 
+    private java.math.BigDecimal salary;
+
     /** Ignored by public signup (roles are assigned server-side); kept for backward compatibility. */
     private Set<String> roles;
 }

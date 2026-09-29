@@ -52,6 +52,9 @@ public class UserAccountService {
                 request.getFullName() != null ? request.getFullName().trim() : null);
         user.setPhone(request.getPhone());
         user.setJobTitle(request.getJobTitle());
+        if (request.getSalary() != null) {
+            user.setSalary(request.getSalary());
+        }
         user.setRoles(new HashSet<>(Set.of(findOrCreateRole(roleName))));
         return userRepository.save(user);
     }
