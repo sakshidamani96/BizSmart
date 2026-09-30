@@ -266,29 +266,6 @@ export default function App() {
     }
   }, [business]);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('bizsmart_cash_drops', JSON.stringify(cashDrops));
-    } catch (e) {
-      console.warn('Failed to persist cash drops', e);
-    }
-  }, [cashDrops]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('bizsmart_closed_shifts', JSON.stringify(closedShifts));
-    } catch (e) {
-      console.warn('Failed to persist closed shifts', e);
-    }
-  }, [closedShifts]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('bizsmart_active_shift', JSON.stringify(activeShift));
-    } catch (e) {
-      console.warn('Failed to persist active shift', e);
-    }
-  }, [activeShift]);
 
   // -------------------------------------------------------------
   // SUPPLIERS STATE (Wholesale suppliers directory)
@@ -545,6 +522,30 @@ export default function App() {
       }
     ];
   });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('bizsmart_cash_drops', JSON.stringify(cashDrops));
+    } catch (e) {
+      console.warn('Failed to persist cash drops', e);
+    }
+  }, [cashDrops]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('bizsmart_closed_shifts', JSON.stringify(closedShifts));
+    } catch (e) {
+      console.warn('Failed to persist closed shifts', e);
+    }
+  }, [closedShifts]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('bizsmart_active_shift', JSON.stringify(activeShift));
+    } catch (e) {
+      console.warn('Failed to persist active shift', e);
+    }
+  }, [activeShift]);
 
   // Owner Cash Drawer Filter Period ('today' | 'week' | 'month' | 'custom' | 'all')
   const [drawerPeriod, setDrawerPeriod] = useState('today');
