@@ -324,14 +324,20 @@ export default function App() {
   });
 
   // -------------------------------------------------------------
-  // BILLS / TRANSACTIONS HISTORY (Ensuring 19 bills are registered for Today)
+  // BILLS / TRANSACTIONS HISTORY (Ensuring 19 bills are registered for Today and preserving September)
   // -------------------------------------------------------------
   const [bills, setBills] = useState(() => {
     let rawBills = [];
     try {
       const saved = localStorage.getItem('bizsmart_bills_v2');
-      if (saved) rawBills = JSON.parse(saved);
-      else rawBills = seedData1Year.bills || [];
+      if (saved) {
+        rawBills = JSON.parse(saved);
+        if (seedData1Year.bills && seedData1Year.bills.length > rawBills.length) {
+          rawBills = seedData1Year.bills;
+        }
+      } else {
+        rawBills = seedData1Year.bills || [];
+      }
     } catch (e) {
       console.warn('Failed to parse bills', e);
       rawBills = seedData1Year.bills || [];
@@ -339,27 +345,35 @@ export default function App() {
     // Sanitize: No credit/udhaar in system, strictly CASH or UPI
     let sanitized = (rawBills || []).map(b => (b.paymentMode === 'CREDIT' ? { ...b, paymentMode: 'UPI' } : b));
     
-    // Ensure today has at least 19 bills as requested
+    // Ensure today has at least 19 bills as requested without altering September records
     const todayStr = new Date().toISOString().slice(0, 10);
-    const todayCount = sanitized.filter(b => b.dateStr === todayStr).length;
-    if (todayCount < 19 && sanitized.length >= 19) {
+    const todayBills = sanitized.filter(b => b.dateStr === todayStr);
+    if (todayBills.length < 19) {
+      const needed = 19 - todayBills.length;
       const times = [
         '08:15 AM', '08:42 AM', '09:05 AM', '09:28 AM', '09:55 AM',
         '10:12 AM', '10:35 AM', '11:02 AM', '11:24 AM', '11:50 AM',
         '12:15 PM', '12:45 PM', '01:10 PM', '01:38 PM', '02:05 PM',
         '02:30 PM', '03:15 PM', '03:45 PM', '04:20 PM'
       ];
-      sanitized = sanitized.map((b, idx) => {
-        if (idx < 19) {
-          const t = times[idx] || '10:00 AM';
-          return {
-            ...b,
-            dateStr: todayStr,
-            date: `${todayStr} ${t}`
-          };
-        }
-        return b;
-      });
+      let topId = Math.max(...sanitized.map(b => b.id || 0), 25000);
+      const newTodayBills = [];
+      for (let i = 0; i < needed; i++) {
+        topId++;
+        const sampleBill = sanitized[i % sanitized.length] || {};
+        const t = times[i % times.length] || '10:00 AM';
+        newTodayBills.push({
+          ...sampleBill,
+          id: topId,
+          billNo: `INV-${topId}`,
+          dateStr: todayStr,
+          date: `${todayStr} ${t}`,
+          timestamp: `${todayStr}T${t}:00.000Z`,
+          cashier: 'Ajay Sharma',
+          shiftId: 'SHIFT-AJAY-M'
+        });
+      }
+      sanitized = [...newTodayBills, ...sanitized];
     }
     return sanitized;
   });
@@ -621,14 +635,24 @@ export default function App() {
   });
 
   // -------------------------------------------------------------
-  // SIDEBAR NAVIGATION & PRODUCT SALES / PRICE BREAKDOWN STATE
+  // SIDEBAR NAVIGATION & PRODUCT ANALYSIS DEDICATED VIEW STATE
   // -------------------------------------------------------------
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [productSalesPeriod, setProductSalesPeriod] = useState('monthly'); // 'monthly' | 'yearly' | 'custom' | 'all'
+  const [productSalesSelectedMonth, setProductSalesSelectedMonth] = useState('2026-09');
+  const [productSalesSelectedYear, setProductSalesSelectedYear] = useState('2026');
+  const [productSalesStartDate, setProductSalesStartDate] = useState(
+    '2026-09-01'
+  );
+  const [productSalesEndDate, setProductSalesEndDate] = useState(
+    '2026-09-30'
+  );
   const [productSalesSearch, setProductSalesSearch] = useState('');
   const [productSalesCategoryFilter, setProductSalesCategoryFilter] = useState('all');
   const [selectedProductForBreakdown, setSelectedProductForBreakdown] = useState(null);
   const [showPriceBreakdownModal, setShowPriceBreakdownModal] = useState(false);
+  const [targetMonthFilter, setTargetMonthFilter] = useState('2026-09');
 
   // -------------------------------------------------------------
   // SALES ANALYTICS STATE (Weekly, Monthly, Specific Period, Yearly)
@@ -2116,7 +2140,60 @@ export default function App() {
   }, [products, posSearchQuery]);
 
   // -------------------------------------------------------------
-  // PER-PRODUCT SALES & PROFIT ANALYTICS (Aggregated across selected analytics period)
+  // PRODUCT ANALYSIS DEDICATED VIEW FILTERED DATA & PROFIT METRICS
+  // -------------------------------------------------------------
+  const productAnalysisBillsList = useMemo(() => {
+    if (productSalesPeriod === 'monthly') {
+      return bills.filter(b => b.dateStr && b.dateStr.startsWith(productSalesSelectedMonth));
+    }
+    if (productSalesPeriod === 'yearly') {
+      return bills.filter(b => b.dateStr && b.dateStr.startsWith(productSalesSelectedYear));
+    }
+    if (productSalesPeriod === 'custom') {
+      return bills.filter(b => (!productSalesStartDate || b.dateStr >= productSalesStartDate) && (!productSalesEndDate || b.dateStr <= productSalesEndDate));
+    }
+    return bills;
+  }, [bills, productSalesPeriod, productSalesSelectedMonth, productSalesSelectedYear, productSalesStartDate, productSalesEndDate]);
+
+  const productAnalysisExpensesList = useMemo(() => {
+    if (productSalesPeriod === 'monthly') {
+      return expenses.filter(e => e.date && e.date.startsWith(productSalesSelectedMonth));
+    }
+    if (productSalesPeriod === 'yearly') {
+      return expenses.filter(e => e.date && e.date.startsWith(productSalesSelectedYear));
+    }
+    if (productSalesPeriod === 'custom') {
+      return expenses.filter(e => (!productSalesStartDate || e.date >= productSalesStartDate) && (!productSalesEndDate || e.date <= productSalesEndDate));
+    }
+    return expenses;
+  }, [expenses, productSalesPeriod, productSalesSelectedMonth, productSalesSelectedYear, productSalesStartDate, productSalesEndDate]);
+
+  const productAnalysisTotalRevenue = useMemo(() => {
+    return productAnalysisBillsList.reduce((acc, b) => acc + (Number(b.total) || 0), 0);
+  }, [productAnalysisBillsList]);
+
+  const productAnalysisTotalCogs = useMemo(() => {
+    return productAnalysisBillsList.reduce((acc, b) => {
+      return acc + (b.items || []).reduce((sum, it) => sum + ((Number(it.product?.purchasePrice) || 0) * (Number(it.quantity) || 1)), 0);
+    }, 0);
+  }, [productAnalysisBillsList]);
+
+  const productAnalysisTotalExpenses = useMemo(() => {
+    return productAnalysisExpensesList.reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
+  }, [productAnalysisExpensesList]);
+
+  const productAnalysisTotalGst = useMemo(() => {
+    return productAnalysisBillsList.reduce((acc, b) => acc + (Number(b.gst) || 0), 0);
+  }, [productAnalysisBillsList]);
+
+  const productAnalysisGrossProfit = productAnalysisTotalRevenue - productAnalysisTotalCogs;
+  const productAnalysisNetProfitAfterExpenses = productAnalysisTotalRevenue - productAnalysisTotalCogs - productAnalysisTotalExpenses;
+  const productAnalysisNetMarginPct = productAnalysisTotalRevenue > 0 
+    ? ((productAnalysisNetProfitAfterExpenses / productAnalysisTotalRevenue) * 100).toFixed(1)
+    : '0.0';
+
+  // -------------------------------------------------------------
+  // PER-PRODUCT SALES & PROFIT ANALYTICS (Aggregated across selected product analysis period)
   // -------------------------------------------------------------
   const productSalesAnalytics = useMemo(() => {
     const map = new Map();
@@ -2154,8 +2231,8 @@ export default function App() {
       });
     });
 
-    // Aggregate from bills in selected analytics period
-    analyticsBillsList.forEach(bill => {
+    // Aggregate from bills in selected product analysis period
+    productAnalysisBillsList.forEach(bill => {
       (bill.items || []).forEach(it => {
         const pId = it.product?.id;
         const entry = pId ? map.get(pId) : null;
@@ -2177,7 +2254,7 @@ export default function App() {
     });
 
     return Array.from(map.values()).sort((a, b) => b.unitsSold - a.unitsSold);
-  }, [products, analyticsBillsList]);
+  }, [products, productAnalysisBillsList]);
 
   // Filtered Product Sales for Analytics table
   const filteredProductSales = useMemo(() => {
@@ -2357,7 +2434,8 @@ export default function App() {
     return acc;
   }, 0);
 
-  const monthCashSales = bills.filter(b => b.dateStr.startsWith(currentMonthStr)).reduce((acc, b) => {
+  const selectedTargetMonthBills = bills.filter(b => b.dateStr && b.dateStr.startsWith(targetMonthFilter));
+  const monthCashSales = selectedTargetMonthBills.reduce((acc, b) => {
     if (b.paymentMode === 'CASH') return acc + b.total;
     if (b.paymentMode === 'SPLIT') return acc + (b.splitCash || 0);
     return acc;
@@ -2839,7 +2917,7 @@ export default function App() {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Sharma Superstore, City Mart"
+                      placeholder="e.g. Damani Retails, City Mart"
                       value={ownerRegisterForm.storeName}
                       onChange={e => setOwnerRegisterForm({ ...ownerRegisterForm, storeName: e.target.value })}
                       className="w-full px-3 py-2 bg-white border border-sky-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
@@ -3159,10 +3237,25 @@ export default function App() {
                     ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
-                title="Sales Analytics & Product Breakdown"
+                title="Sales Analytics & Revenue Velocity"
               >
                 <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'analytics' ? 'text-sky-600' : 'text-slate-400'}`} />
                 {!sidebarCollapsed && <span className="truncate">Sales Analytics</span>}
+              </button>
+            )}
+
+            {currentUser.role === 'OWNER' && (
+              <button
+                onClick={() => { setActiveTab('product-analysis'); setMobileSidebarOpen(false); }}
+                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                  activeTab === 'product-analysis'
+                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+                title="Product Analysis (Monthly, Yearly, Specific Period)"
+              >
+                <PieChart className={`w-4 h-4 shrink-0 ${activeTab === 'product-analysis' ? 'text-sky-600' : 'text-slate-400'}`} />
+                {!sidebarCollapsed && <span className="truncate">Product Analysis</span>}
               </button>
             )}
 
@@ -3909,6 +4002,387 @@ export default function App() {
                         </td>
                         <td className="py-3 px-4 text-right font-black text-slate-900">
                           ₹{item.totalRevenue.toLocaleString('en-IN')}
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <button
+                            onClick={() => {
+                              setSelectedProductForBreakdown(item);
+                              setShowPriceBreakdownModal(true);
+                            }}
+                            className="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-lg text-[11px] font-bold transition flex items-center space-x-1 mx-auto"
+                            title="View comprehensive price & GST breakdown"
+                          >
+                            <Eye className="w-3 h-3 text-sky-600" />
+                            <span>Breakdown</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* VIEW 1C: DEDICATED PRODUCT ANALYSIS & PRICING ARCHITECTURE */}
+        {/* ============================================================== */}
+        {activeTab === 'product-analysis' && currentUser.role === 'OWNER' && (
+          <div className="space-y-6">
+            {/* Header & Period Switcher */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+              <div>
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-sky-600 text-white flex items-center justify-center shadow-md shadow-sky-500/20">
+                    <PieChart className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-slate-900 flex items-center">
+                      Product Sales Analysis &amp; Price Breakdown
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Live unit sales, 5% GST tax architecture, wholesale cost of goods, and net profit after overhead expenses
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Period Switcher Pills */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center bg-slate-100 p-1 rounded-2xl border border-slate-200 text-xs font-bold">
+                  {[
+                    { id: 'monthly', label: 'Monthly' },
+                    { id: 'yearly', label: 'Yearly' },
+                    { id: 'custom', label: 'Specific Period' },
+                    { id: 'all', label: 'All Time' }
+                  ].map(p => (
+                    <button
+                      key={p.id}
+                      onClick={() => setProductSalesPeriod(p.id)}
+                      className={`px-3.5 py-2 rounded-xl transition ${
+                        productSalesPeriod === p.id
+                          ? 'bg-sky-600 text-white shadow-sm'
+                          : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Monthly Selector Dropdown */}
+                {productSalesPeriod === 'monthly' && (
+                  <div className="flex items-center space-x-2 bg-sky-50 border border-sky-200 px-3 py-1.5 rounded-2xl">
+                    <Calendar className="w-4 h-4 text-sky-600 shrink-0" />
+                    <select
+                      value={productSalesSelectedMonth}
+                      onChange={e => setProductSalesSelectedMonth(e.target.value)}
+                      className="bg-transparent text-xs font-bold text-sky-900 focus:outline-none cursor-pointer"
+                    >
+                      <option value="2026-09">September 2026 (Target 100%+ Achieved 🏆)</option>
+                      <option value="2026-10">October 2026 (Current Month)</option>
+                      <option value="2026-08">August 2026</option>
+                      <option value="2026-07">July 2026</option>
+                      <option value="2026-06">June 2026</option>
+                      <option value="2026-05">May 2026</option>
+                      <option value="2026-04">April 2026</option>
+                      <option value="2026-03">March 2026</option>
+                      <option value="2026-02">February 2026</option>
+                      <option value="2026-01">January 2026</option>
+                      <option value="2025-12">December 2025</option>
+                      <option value="2025-11">November 2025</option>
+                      <option value="2025-10">October 2025</option>
+                    </select>
+                  </div>
+                )}
+
+                {/* Yearly Selector Dropdown */}
+                {productSalesPeriod === 'yearly' && (
+                  <div className="flex items-center space-x-2 bg-sky-50 border border-sky-200 px-3 py-1.5 rounded-2xl">
+                    <Calendar className="w-4 h-4 text-sky-600 shrink-0" />
+                    <select
+                      value={productSalesSelectedYear}
+                      onChange={e => setProductSalesSelectedYear(e.target.value)}
+                      className="bg-transparent text-xs font-bold text-sky-900 focus:outline-none cursor-pointer"
+                    >
+                      <option value="2026">Financial Year 2026</option>
+                      <option value="2025">Financial Year 2025</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Custom Specific Period Calendar Range Controls */}
+            {productSalesPeriod === 'custom' && (
+              <div className="bg-sky-50/80 border border-sky-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center space-x-2 text-xs font-bold text-sky-900">
+                  <Calendar className="w-4 h-4 text-sky-600" />
+                  <span>Select Specific Calendar Date Window:</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-xs">
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-slate-500 font-semibold">From:</span>
+                    <input
+                      type="date"
+                      value={productSalesStartDate}
+                      onChange={e => setProductSalesStartDate(e.target.value)}
+                      className="px-3 py-1.5 bg-white border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none text-slate-900"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    <span className="text-slate-500 font-semibold">To:</span>
+                    <input
+                      type="date"
+                      value={productSalesEndDate}
+                      onChange={e => setProductSalesEndDate(e.target.value)}
+                      className="px-3 py-1.5 bg-white border border-slate-300 rounded-xl font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none text-slate-900"
+                    />
+                  </div>
+                  <button
+                    onClick={() => {
+                      setProductSalesStartDate('2026-09-01');
+                      setProductSalesEndDate('2026-09-30');
+                    }}
+                    className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl font-bold transition"
+                  >
+                    Reset Range
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* FINANCIAL SUMMARY & PROFIT AFTER EXPENSES KPI CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              {/* Card 1: Total Sales Revenue */}
+              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Product Sales</span>
+                  <div className="text-2xl font-black text-slate-900 mt-1">
+                    ₹{productAnalysisTotalRevenue.toLocaleString('en-IN')}
+                  </div>
+                </div>
+                <div className="text-xs text-sky-700 mt-3 font-semibold bg-sky-50 px-2 py-1 rounded-lg">
+                  {productAnalysisBillsList.length} Invoices &bull; {productSalesAnalytics.reduce((a, b) => a + b.unitsSold, 0)} Units Sold
+                </div>
+              </div>
+
+              {/* Card 2: Cost of Goods Sold (COGS) */}
+              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Wholesale Cost (COGS)</span>
+                  <div className="text-2xl font-black text-slate-700 mt-1">
+                    ₹{productAnalysisTotalCogs.toLocaleString('en-IN')}
+                  </div>
+                </div>
+                <div className="text-xs text-slate-500 mt-3 font-medium bg-slate-50 px-2 py-1 rounded-lg">
+                  Wholesale procurement costs
+                </div>
+              </div>
+
+              {/* Card 3: Total Overhead Expenses */}
+              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Overhead Expenses</span>
+                  <div className="text-2xl font-black text-rose-600 mt-1">
+                    ₹{productAnalysisTotalExpenses.toLocaleString('en-IN')}
+                  </div>
+                </div>
+                <div className="text-xs text-rose-700 mt-3 font-medium bg-rose-50 px-2 py-1 rounded-lg truncate">
+                  Rent, salaries, power ({productAnalysisExpensesList.length} vouchers)
+                </div>
+              </div>
+
+              {/* Card 4: Net Profit After Expenses (HIGHLIGHTED) */}
+              <div className="bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 text-white rounded-2xl p-5 shadow-md flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-100 bg-white/20 px-2 py-0.5 rounded-full">
+                      Net Profit (Post Expenses)
+                    </span>
+                    <span className="text-[10px] font-black bg-white text-emerald-800 px-2 py-0.5 rounded-full shadow-xs">
+                      {productAnalysisNetMarginPct}% Net
+                    </span>
+                  </div>
+                  <div className="text-2xl font-black mt-2 font-mono">
+                    ₹{productAnalysisNetProfitAfterExpenses.toLocaleString('en-IN')}
+                  </div>
+                </div>
+                <div className="text-[11px] text-emerald-100 mt-3 font-semibold bg-emerald-800/40 px-2 py-1 rounded-lg">
+                  Sales (₹{(productAnalysisTotalRevenue/1000).toFixed(0)}k) - COGS (₹{(productAnalysisTotalCogs/1000).toFixed(0)}k) - Exp (₹{(productAnalysisTotalExpenses/1000).toFixed(0)}k)
+                </div>
+              </div>
+
+              {/* Card 5: GST Collected */}
+              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800">5% GST Collected</span>
+                  <div className="text-2xl font-black text-amber-700 mt-1">
+                    ₹{productAnalysisTotalGst.toLocaleString('en-IN')}
+                  </div>
+                </div>
+                <div className="text-xs text-amber-800 mt-3 font-medium bg-amber-50 px-2 py-1 rounded-lg">
+                  CGST: ₹{Math.round(productAnalysisTotalGst / 2).toLocaleString('en-IN')} + SGST: ₹{Math.round(productAnalysisTotalGst / 2).toLocaleString('en-IN')}
+                </div>
+              </div>
+            </div>
+
+            {/* TOP 5 BEST-SELLING PRODUCTS LEADERBOARD */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center space-x-2">
+                  <span className="p-1.5 bg-amber-100 text-amber-700 rounded-xl">
+                    <Award className="w-4 h-4" />
+                  </span>
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900">Top Revenue Generating Products</h4>
+                    <p className="text-xs text-slate-500">Highest grossing items in {productSalesPeriod === 'monthly' ? `Month (${productSalesSelectedMonth})` : productSalesPeriod === 'yearly' ? `Year (${productSalesSelectedYear})` : 'Selected Period'}</p>
+                  </div>
+                </div>
+                <span className="text-xs font-bold text-sky-700 bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+                  {filteredProductSales.filter(p => p.unitsSold > 0).length} Active Products Sold
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                {productSalesAnalytics.slice(0, 5).map((item, rank) => (
+                  <div
+                    key={item.productId}
+                    className="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-sky-50/50 transition cursor-pointer flex flex-col justify-between"
+                    onClick={() => {
+                      setSelectedProductForBreakdown(item);
+                      setShowPriceBreakdownModal(true);
+                    }}
+                  >
+                    <div>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <span className="w-5 h-5 rounded-full bg-slate-900 text-white text-[10px] font-black flex items-center justify-center">
+                          #{rank + 1}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-black">
+                          {item.unitsSold} Sold
+                        </span>
+                      </div>
+                      <div className="text-xs font-bold text-slate-900 line-clamp-1" title={item.name}>
+                        {item.name}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">{item.category}</div>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-slate-200 flex justify-between items-baseline">
+                      <span className="text-[11px] font-black text-slate-900">₹{item.totalRevenue.toLocaleString('en-IN')}</span>
+                      <span className="text-[10px] font-bold text-emerald-600">+{item.marginPct}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* DETAILED PER-PRODUCT SALES, TAX & PROFIT TABLE */}
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+              <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-gradient-to-r from-sky-50/60 to-white">
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <span className="p-1.5 bg-sky-600 text-white rounded-xl shadow-xs">
+                      <PieChart className="w-4 h-4" />
+                    </span>
+                    <h4 className="text-sm font-black text-slate-900">
+                      Product Pricing Architecture &amp; Unit Sales ({filteredProductSales.length} Products)
+                    </h4>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Selling MRP, Pre-Tax Base Price, 5% GST split (CGST 2.5% + SGST 2.5%), Cost Price (CP), and Net Profit Margin
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                  <div className="relative flex-1 md:w-64">
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search by name, SKU or category..."
+                      value={productSalesSearch}
+                      onChange={e => setProductSalesSearch(e.target.value)}
+                      className="w-full pl-9 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    />
+                  </div>
+                  <select
+                    value={productSalesCategoryFilter}
+                    onChange={e => setProductSalesCategoryFilter(e.target.value)}
+                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none"
+                  >
+                    <option value="all">All Categories</option>
+                    {availableCategories.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                      <th className="py-3 px-4">Product Name &amp; SKU</th>
+                      <th className="py-3 px-4">Category</th>
+                      <th className="py-3 px-4 text-center">Units Sold</th>
+                      <th className="py-3 px-4 text-right">Selling MRP</th>
+                      <th className="py-3 px-4 text-right">Base Price (excl. tax)</th>
+                      <th className="py-3 px-4 text-right">GST (5%)</th>
+                      <th className="py-3 px-4 text-right">Cost Price (CP)</th>
+                      <th className="py-3 px-4 text-right">Unit Profit</th>
+                      <th className="py-3 px-4 text-right">Total Revenue</th>
+                      <th className="py-3 px-4 text-right">Total Profit</th>
+                      <th className="py-3 px-4 text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filteredProductSales.map(item => (
+                      <tr key={item.productId} className="hover:bg-sky-50/40 transition">
+                        <td className="py-3 px-4">
+                          <div className="font-bold text-slate-900">{item.name}</div>
+                          <div className="text-[10px] text-slate-400 font-mono">{item.sku}</div>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold">
+                            {item.category}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-center">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-black ${
+                            item.unitsSold > 0 ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-100 text-slate-500'
+                          }`}>
+                            {item.unitsSold} units
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right font-black text-slate-900">
+                          ₹{item.sellingPrice}
+                        </td>
+                        <td className="py-3 px-4 text-right text-slate-700 font-semibold font-mono">
+                          ₹{item.basePrice}
+                        </td>
+                        <td className="py-3 px-4 text-right text-amber-700 font-bold font-mono">
+                          ₹{item.gstAmount}
+                          <span className="block text-[9px] text-slate-400 font-normal">
+                            (2.5% C + 2.5% S)
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right text-slate-600 font-medium font-mono">
+                          ₹{item.purchasePrice}
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <span className={`font-black font-mono ${item.profitPerUnit >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
+                            ₹{item.profitPerUnit}
+                          </span>
+                          <span className="block text-[9px] text-emerald-600 font-bold">
+                            {item.marginPct}% margin
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right font-black text-slate-900">
+                          ₹{item.totalRevenue.toLocaleString('en-IN')}
+                        </td>
+                        <td className="py-3 px-4 text-right font-black text-emerald-700 font-mono">
+                          ₹{Math.round(item.netProfit).toLocaleString('en-IN')}
                         </td>
                         <td className="py-3 px-4 text-center">
                           <button
@@ -5412,12 +5886,20 @@ export default function App() {
 
               {/* Monthly Cash Target Card */}
               <div className="bg-gradient-to-br from-indigo-50 via-white to-sky-50 border border-indigo-200 rounded-2xl p-5 shadow-sm">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
+                  <div className="flex items-center space-x-2">
                     <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-800 bg-indigo-100/80 px-2 py-0.5 rounded-full">
-                      Monthly Cash Target ({new Date().toLocaleString('en-IN', { month: 'long', year: 'numeric' })})
+                      Monthly Cash Target
                     </span>
-                    <h4 className="text-base font-black text-slate-900 mt-1">This Month's Cash Revenue</h4>
+                    <select
+                      value={targetMonthFilter}
+                      onChange={e => setTargetMonthFilter(e.target.value)}
+                      className="text-xs font-bold bg-white/90 border border-indigo-200 rounded-lg px-2 py-0.5 text-indigo-900 focus:outline-none cursor-pointer"
+                    >
+                      <option value="2026-09">September 2026 (Completed 🏆)</option>
+                      <option value="2026-10">October 2026 (Current Month)</option>
+                      <option value="2026-08">August 2026</option>
+                    </select>
                   </div>
                   <div className="text-right">
                     <span className={`text-xs font-black px-2.5 py-1 rounded-full ${monthCashTargetAchieved ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-900 border border-indigo-200'}`}>
@@ -5440,7 +5922,7 @@ export default function App() {
                 </div>
 
                 <div className="flex justify-between items-center text-[11px] text-slate-500 mt-2">
-                  <span>From {monthBillsList.filter(b => b.paymentMode === 'CASH' || (b.paymentMode === 'SPLIT' && b.splitCash > 0)).length} cash transactions this month</span>
+                  <span>From {selectedTargetMonthBills.filter(b => b.paymentMode === 'CASH' || (b.paymentMode === 'SPLIT' && b.splitCash > 0)).length} cash transactions</span>
                   <span className="font-semibold text-indigo-800">
                     {monthCashTargetAchieved
                       ? `Surplus: +₹${(monthCashSales - monthlyCashTarget).toLocaleString('en-IN')} beyond goal`
