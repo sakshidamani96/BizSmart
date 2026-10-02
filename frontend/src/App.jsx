@@ -649,8 +649,40 @@ export default function App() {
   // -------------------------------------------------------------
   // SIDEBAR NAVIGATION & PRODUCT ANALYSIS DEDICATED VIEW STATE
   // -------------------------------------------------------------
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('bizsmart_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(prev => {
+      const next = !prev;
+      try { localStorage.setItem('bizsmart_sidebar_collapsed', String(next)); } catch {}
+      return next;
+    });
+  };
+
+  // Global keyboard shortcut Ctrl+B / Cmd+B to toggle sidebar anytime after login
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName)) return;
+        e.preventDefault();
+        if (window.innerWidth < 1024) {
+          setMobileSidebarOpen(prev => !prev);
+        } else {
+          toggleSidebar();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const [productSalesPeriod, setProductSalesPeriod] = useState('monthly'); // 'monthly' | 'yearly' | 'custom' | 'all'
   const [productSalesSelectedMonth, setProductSalesSelectedMonth] = useState('2026-09');
   const [productSalesSelectedYear, setProductSalesSelectedYear] = useState('2026');
@@ -3714,25 +3746,41 @@ export default function App() {
     <div className="min-h-screen bg-slate-100 text-slate-900 font-sans flex flex-col">
       {/* Top Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Brand Logo & Mobile Toggle */}
+        <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          {/* Brand Logo & All-Time Collapsible Menu Toggle */}
           <div className="flex items-center space-x-3">
             <button
-              onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 lg:hidden"
-              title="Toggle Menu"
+              onClick={() => {
+                if (window.innerWidth < 1024) {
+                  setMobileSidebarOpen(prev => !prev);
+                } else {
+                  toggleSidebar();
+                }
+              }}
+              className="p-2.5 rounded-xl text-slate-600 hover:text-sky-600 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 transition shadow-xs flex items-center justify-center cursor-pointer group"
+              title={sidebarCollapsed ? "Expand Menu (Ctrl+B)" : "Collapse Menu (Ctrl+B)"}
+              aria-label="Toggle Navigation Menu"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-5 h-5 text-slate-700 group-hover:text-sky-600 transition-colors" />
             </button>
 
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white font-extrabold shadow-md shadow-sky-200">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center">
-                <span className="text-xl font-black tracking-tight text-slate-900">Biz<span className="text-sky-600">Smart</span></span>
+            <div
+              onClick={() => {
+                if (currentUser.role === 'OWNER') setActiveTab('dashboard');
+                else if (currentUser.role === 'EMPLOYEE') setActiveTab('employee-dashboard');
+              }}
+              className="flex items-center space-x-2.5 cursor-pointer hover:opacity-90 transition"
+              title="Go to Home Dashboard"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white font-extrabold shadow-md shadow-sky-200">
+                <Building2 className="w-5 h-5" />
               </div>
-              <p className="text-[11px] text-slate-500 font-medium">{business.name}</p>
+              <div>
+                <div className="flex items-center">
+                  <span className="text-xl font-black tracking-tight text-slate-900">Biz<span className="text-sky-600">Smart</span></span>
+                </div>
+                <p className="text-[11px] text-slate-500 font-medium truncate max-w-[170px] sm:max-w-none">{business.name}</p>
+              </div>
             </div>
           </div>
 
@@ -3784,7 +3832,7 @@ export default function App() {
 
             <button
               onClick={handleSignOut}
-              className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-rose-50 hover:border-rose-300 text-slate-600 hover:text-rose-600 text-xs font-bold transition flex items-center space-x-1.5"
+              className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-rose-50 hover:border-rose-300 text-slate-600 hover:text-rose-600 text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer"
               title="Sign Out"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -3800,219 +3848,343 @@ export default function App() {
         {mobileSidebarOpen && (
           <div
             onClick={() => setMobileSidebarOpen(false)}
-            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-30 lg:hidden"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 lg:hidden"
           />
         )}
 
         {/* ============================================================== */}
-        {/* MODERN SIDE MENU BAR */}
+        {/* MODERN ALL-TIME COLLAPSIBLE SIDE MENU BAR */}
         {/* ============================================================== */}
         <aside
-          className={`bg-white border-r border-slate-200 transition-all duration-300 z-30 flex flex-col justify-between shrink-0 ${
+          className={`bg-white border-r border-slate-200 transition-all duration-300 flex flex-col justify-between shrink-0 ${
             sidebarCollapsed ? 'w-20' : 'w-64'
           } ${
-            mobileSidebarOpen ? 'translate-x-0 fixed inset-y-0 left-0 pt-16 shadow-2xl' : '-translate-x-full lg:translate-x-0 static'
+            mobileSidebarOpen ? 'translate-x-0 fixed inset-y-0 left-0 pt-16 shadow-2xl z-50' : '-translate-x-full lg:translate-x-0 static z-30'
           }`}
         >
-          {/* Menu Items Container */}
-          <div className="p-3 space-y-1 overflow-y-auto flex-1">
-            <div className="px-3 py-2 text-[10px] font-black uppercase tracking-wider text-slate-400">
-              {!sidebarCollapsed ? 'Store Navigation' : '•'}
-            </div>
+          {/* Top Header of Sidebar */}
+          <div className="px-3 py-2.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+            {!sidebarCollapsed ? (
+              <div className="flex items-center space-x-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">Store Navigation</span>
+                <span className="px-1.5 py-0.5 rounded-md bg-sky-100 text-sky-700 text-[9px] font-extrabold tracking-wide uppercase">
+                  {currentUser.role}
+                </span>
+              </div>
+            ) : (
+              <div className="w-full flex justify-center py-0.5">
+                <span className="w-2 h-2 rounded-full bg-sky-500" title={`Logged in as ${currentUser.role}`} />
+              </div>
+            )}
+            <button
+              onClick={toggleSidebar}
+              className="hidden lg:flex p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
+              title={sidebarCollapsed ? "Expand Sidebar (Ctrl+B)" : "Collapse Sidebar (Ctrl+B)"}
+            >
+              {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </button>
+          </div>
 
+          {/* Menu Items Container */}
+          <div className="p-2 space-y-1 overflow-y-auto flex-1">
+            {/* 1. OWNER DASHBOARD */}
             {currentUser.role === 'OWNER' && (
               <button
                 onClick={() => { setActiveTab('dashboard'); setMobileSidebarOpen(false); }}
-                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                className={`w-full flex items-center rounded-xl transition group relative cursor-pointer ${
+                  sidebarCollapsed ? 'justify-center p-3' : 'space-x-3 px-3.5 py-2.5 text-xs'
+                } ${
                   activeTab === 'dashboard'
-                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
                 title="Owner Dashboard"
               >
-                <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'text-sky-600' : 'text-slate-400'}`} />
+                <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'dashboard' ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 {!sidebarCollapsed && <span className="truncate">Owner Dashboard</span>}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                    Owner Dashboard
+                  </div>
+                )}
               </button>
             )}
 
+            {/* 2. SALES ANALYTICS */}
             {currentUser.role === 'OWNER' && (
               <button
                 onClick={() => { setActiveTab('analytics'); setMobileSidebarOpen(false); }}
-                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                className={`w-full flex items-center rounded-xl transition group relative cursor-pointer ${
+                  sidebarCollapsed ? 'justify-center p-3' : 'space-x-3 px-3.5 py-2.5 text-xs'
+                } ${
                   activeTab === 'analytics'
-                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
                 title="Sales Analytics & Revenue Velocity"
               >
-                <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'analytics' ? 'text-sky-600' : 'text-slate-400'}`} />
+                <BarChart3 className={`w-4 h-4 shrink-0 ${activeTab === 'analytics' ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 {!sidebarCollapsed && <span className="truncate">Sales Analytics</span>}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                    Sales Analytics
+                  </div>
+                )}
               </button>
             )}
 
+            {/* 3. PRODUCT ANALYSIS */}
             {currentUser.role === 'OWNER' && (
               <button
                 onClick={() => { setActiveTab('product-analysis'); setMobileSidebarOpen(false); }}
-                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                className={`w-full flex items-center rounded-xl transition group relative cursor-pointer ${
+                  sidebarCollapsed ? 'justify-center p-3' : 'space-x-3 px-3.5 py-2.5 text-xs'
+                } ${
                   activeTab === 'product-analysis'
-                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
-                title="Product Analysis (Monthly, Yearly, Specific Period)"
+                title="Product Analysis (Monthly, Yearly, Specific Period, AI Forecast)"
               >
-                <PieChart className={`w-4 h-4 shrink-0 ${activeTab === 'product-analysis' ? 'text-sky-600' : 'text-slate-400'}`} />
+                <PieChart className={`w-4 h-4 shrink-0 ${activeTab === 'product-analysis' ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 {!sidebarCollapsed && <span className="truncate">Product Analysis</span>}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                    Product Analysis
+                  </div>
+                )}
               </button>
             )}
 
+            {/* 4. CASHIER DASHBOARD (Employee) */}
             {currentUser.role === 'EMPLOYEE' && (
               <button
                 onClick={() => { setActiveTab('employee-dashboard'); setMobileSidebarOpen(false); }}
-                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                className={`w-full flex items-center rounded-xl transition group relative cursor-pointer ${
+                  sidebarCollapsed ? 'justify-center p-3' : 'space-x-3 px-3.5 py-2.5 text-xs'
+                } ${
                   activeTab === 'employee-dashboard'
-                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
-                title="Employee Dashboard"
+                title="Cashier Dashboard"
               >
-                <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'employee-dashboard' ? 'text-sky-600' : 'text-slate-400'}`} />
+                <LayoutDashboard className={`w-4 h-4 shrink-0 ${activeTab === 'employee-dashboard' ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 {!sidebarCollapsed && <span className="truncate">Cashier Dashboard</span>}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                    Cashier Dashboard
+                  </div>
+                )}
               </button>
             )}
 
+            {/* 5. POS & BILLING */}
             {(currentUser.role === 'OWNER' || currentUser.role === 'EMPLOYEE') && (
               <button
                 onClick={() => { setActiveTab('pos'); setMobileSidebarOpen(false); }}
-                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                className={`w-full flex items-center rounded-xl transition group relative cursor-pointer ${
+                  sidebarCollapsed ? 'justify-center p-3' : 'space-x-3 px-3.5 py-2.5 text-xs'
+                } ${
                   activeTab === 'pos'
-                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
-                title="POS & Billing"
+                title="POS & Billing Counter"
               >
-                <Receipt className={`w-4 h-4 shrink-0 ${activeTab === 'pos' ? 'text-sky-600' : 'text-slate-400'}`} />
+                <Receipt className={`w-4 h-4 shrink-0 ${activeTab === 'pos' ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 {!sidebarCollapsed && <span className="truncate">POS &amp; Billing</span>}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                    POS &amp; Billing
+                  </div>
+                )}
               </button>
             )}
 
+            {/* 6. INVENTORY & ITEMS */}
             {(currentUser.role === 'OWNER' || currentUser.role === 'EMPLOYEE') && (
               <button
                 onClick={() => { setActiveTab('inventory'); setMobileSidebarOpen(false); }}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                className={`w-full flex items-center rounded-xl transition group relative cursor-pointer ${
+                  sidebarCollapsed ? 'justify-center p-3' : 'justify-between px-3.5 py-2.5 text-xs'
+                } ${
                   activeTab === 'inventory'
-                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
-                title="Inventory & Stock"
+                title="Inventory & Stock Management"
               >
-                <div className="flex items-center space-x-3 truncate">
-                  <Package className={`w-4 h-4 shrink-0 ${activeTab === 'inventory' ? 'text-sky-600' : 'text-slate-400'}`} />
+                <div className={`flex items-center ${sidebarCollapsed ? 'justify-center relative' : 'space-x-3 truncate'}`}>
+                  <Package className={`w-4 h-4 shrink-0 ${activeTab === 'inventory' ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                   {!sidebarCollapsed && <span className="truncate">Inventory &amp; Items</span>}
+                  {sidebarCollapsed && lowStockProductsList.length > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 rounded-full bg-rose-500 ring-2 ring-white" />
+                  )}
                 </div>
                 {!sidebarCollapsed && lowStockProductsList.length > 0 && (
                   <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-extrabold shrink-0">
                     {lowStockProductsList.length}
                   </span>
                 )}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50 flex items-center space-x-1.5">
+                    <span>Inventory &amp; Items</span>
+                    {lowStockProductsList.length > 0 && (
+                      <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-extrabold">
+                        {lowStockProductsList.length} low stock
+                      </span>
+                    )}
+                  </div>
+                )}
               </button>
             )}
 
+            {/* 7. CASH DRAWER & SHIFTS */}
             {currentUser.role === 'OWNER' && (
               <button
                 onClick={() => { setActiveTab('shifts'); setMobileSidebarOpen(false); }}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                className={`w-full flex items-center rounded-xl transition group relative cursor-pointer ${
+                  sidebarCollapsed ? 'justify-center p-3' : 'justify-between px-3.5 py-2.5 text-xs'
+                } ${
                   activeTab === 'shifts'
-                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
                 title="Cash Drawer & Shift Reconciliation"
               >
-                <div className="flex items-center space-x-3 truncate">
-                  <Landmark className={`w-4 h-4 shrink-0 ${activeTab === 'shifts' ? 'text-sky-600' : 'text-slate-400'}`} />
+                <div className={`flex items-center ${sidebarCollapsed ? 'justify-center relative' : 'space-x-3 truncate'}`}>
+                  <Landmark className={`w-4 h-4 shrink-0 ${activeTab === 'shifts' ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                   {!sidebarCollapsed && <span className="truncate">Cash Drawer &amp; Shifts</span>}
+                  {sidebarCollapsed && currentShiftCashDrops.length > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-white" />
+                  )}
                 </div>
                 {!sidebarCollapsed && currentShiftCashDrops.length > 0 && (
                   <span className="px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-extrabold shrink-0">
                     {currentShiftCashDrops.length}
                   </span>
                 )}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50 flex items-center space-x-1.5">
+                    <span>Cash Drawer &amp; Shifts</span>
+                    {currentShiftCashDrops.length > 0 && (
+                      <span className="px-1.5 py-0.2 rounded-full bg-amber-500 text-white text-[10px] font-extrabold">
+                        {currentShiftCashDrops.length} drops
+                      </span>
+                    )}
+                  </div>
+                )}
               </button>
             )}
 
+            {/* 8. EMPLOYEES */}
             {currentUser.role === 'OWNER' && (
               <button
                 onClick={() => { setActiveTab('employees'); setMobileSidebarOpen(false); }}
-                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                className={`w-full flex items-center rounded-xl transition group relative cursor-pointer ${
+                  sidebarCollapsed ? 'justify-center p-3' : 'space-x-3 px-3.5 py-2.5 text-xs'
+                } ${
                   activeTab === 'employees'
-                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
                 title="Employees & Cashiers"
               >
-                <UserCheck className={`w-4 h-4 shrink-0 ${activeTab === 'employees' ? 'text-sky-600' : 'text-slate-400'}`} />
+                <UserCheck className={`w-4 h-4 shrink-0 ${activeTab === 'employees' ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 {!sidebarCollapsed && <span className="truncate">Employees ({employees.length})</span>}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                    Employees ({employees.length})
+                  </div>
+                )}
               </button>
             )}
 
+            {/* 9. SUPPLIERS */}
             {currentUser.role === 'OWNER' && (
               <button
                 onClick={() => { setActiveTab('suppliers'); setMobileSidebarOpen(false); }}
-                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                className={`w-full flex items-center rounded-xl transition group relative cursor-pointer ${
+                  sidebarCollapsed ? 'justify-center p-3' : 'space-x-3 px-3.5 py-2.5 text-xs'
+                } ${
                   activeTab === 'suppliers'
-                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
                 title="Suppliers & POs"
               >
-                <Truck className={`w-4 h-4 shrink-0 ${activeTab === 'suppliers' ? 'text-sky-600' : 'text-slate-400'}`} />
+                <Truck className={`w-4 h-4 shrink-0 ${activeTab === 'suppliers' ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 {!sidebarCollapsed && <span className="truncate">Suppliers ({suppliers.length})</span>}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                    Suppliers ({suppliers.length})
+                  </div>
+                )}
               </button>
             )}
 
+            {/* 10. EXPENSES & PROFIT */}
             {currentUser.role === 'OWNER' && (
               <button
                 onClick={() => { setActiveTab('expenses'); setMobileSidebarOpen(false); }}
-                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                className={`w-full flex items-center rounded-xl transition group relative cursor-pointer ${
+                  sidebarCollapsed ? 'justify-center p-3' : 'space-x-3 px-3.5 py-2.5 text-xs'
+                } ${
                   activeTab === 'expenses'
-                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
-                title="Expenses & P&L"
+                title="Expenses & Profit Ledger"
               >
-                <Wallet className={`w-4 h-4 shrink-0 ${activeTab === 'expenses' ? 'text-sky-600' : 'text-slate-400'}`} />
+                <Wallet className={`w-4 h-4 shrink-0 ${activeTab === 'expenses' ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 {!sidebarCollapsed && <span className="truncate">Expenses &amp; Profit</span>}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                    Expenses &amp; Profit
+                  </div>
+                )}
               </button>
             )}
 
+            {/* 11. OWNER PROFILE */}
             {currentUser.role === 'OWNER' && (
               <button
                 onClick={() => { setActiveTab('owner-profile'); setMobileSidebarOpen(false); }}
-                className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                className={`w-full flex items-center rounded-xl transition group relative cursor-pointer ${
+                  sidebarCollapsed ? 'justify-center p-3' : 'space-x-3 px-3.5 py-2.5 text-xs'
+                } ${
                   activeTab === 'owner-profile'
-                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs font-bold'
+                    : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
-                title="Owner Profile (Cash & UPI)"
+                title="Owner Profile (Cash & UPI Earnings)"
               >
-                <User className={`w-4 h-4 shrink-0 ${activeTab === 'owner-profile' ? 'text-sky-600' : 'text-slate-400'}`} />
+                <User className={`w-4 h-4 shrink-0 ${activeTab === 'owner-profile' ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 {!sidebarCollapsed && <span className="truncate">Owner Profile (Earnings)</span>}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-50">
+                    Owner Profile (Earnings)
+                  </div>
+                )}
               </button>
             )}
           </div>
 
           {/* Sidebar Bottom Controls */}
-          <div className="p-3 border-t border-slate-100 bg-slate-50/50 hidden lg:block">
+          <div className="p-2.5 border-t border-slate-100 bg-slate-50/70 hidden lg:block">
             <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="w-full flex items-center justify-center space-x-2 py-2 px-2.5 rounded-xl text-xs font-bold text-slate-500 hover:bg-white hover:text-slate-800 border border-transparent hover:border-slate-200 transition"
-              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              onClick={toggleSidebar}
+              className="w-full flex items-center justify-center space-x-2 py-2 px-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-white hover:text-slate-900 border border-slate-200/80 hover:border-slate-300 hover:shadow-xs transition cursor-pointer"
+              title={sidebarCollapsed ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
             >
               {sidebarCollapsed ? (
-                <ChevronRight className="w-4 h-4 text-slate-500" />
+                <ChevronRight className="w-4 h-4 text-slate-600" />
               ) : (
                 <>
-                  <ChevronLeft className="w-4 h-4 text-slate-500" />
-                  <span className="text-[11px]">Collapse Menu</span>
+                  <ChevronLeft className="w-4 h-4 text-slate-600" />
+                  <span className="text-[11px] font-semibold text-slate-700">Collapse Menu</span>
+                  <kbd className="text-[9px] font-mono px-1.5 py-0.5 bg-slate-200/70 text-slate-500 rounded border border-slate-300 ml-auto">Ctrl+B</kbd>
                 </>
               )}
             </button>
