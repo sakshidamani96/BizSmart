@@ -2648,7 +2648,7 @@ export default function App() {
     ? ((productAnalysisNetProfitAfterExpenses / productAnalysisTotalRevenue) * 100).toFixed(1)
     : '0.0';
 
-  // Filtered Product Sales for Analytics table (Includes Search, Category, and AI Forecast Risk Filters)
+  // Filtered Product Sales for Analytics table (Includes Search, Category, and Inventory Status Filters)
   const filteredProductSales = useMemo(() => {
     return productSalesAnalytics.filter(item => {
       const matchQuery = !productSalesSearch.trim() ||
@@ -2656,10 +2656,19 @@ export default function App() {
         item.sku.toLowerCase().includes(productSalesSearch.toLowerCase()) ||
         item.category.toLowerCase().includes(productSalesSearch.toLowerCase());
       const matchCat = productSalesCategoryFilter === 'all' || item.category === productSalesCategoryFilter;
-      const matchForecast = productSalesForecastFilter === 'all' ||
-        (productSalesForecastFilter === 'critical' && item.riskLevel === 'CRITICAL') ||
-        (productSalesForecastFilter === 'low' && (item.riskLevel === 'CRITICAL' || item.riskLevel === 'LOW_STOCK')) ||
-        (productSalesForecastFilter === 'high-velocity' && item.projectedDailyVelocity >= 1.5);
+      
+      let matchForecast = true;
+      if (productSalesForecastFilter === 'critical') {
+        matchForecast = item.riskLevel === 'CRITICAL' || item.daysToStockout <= 5 || item.currentStock === 0;
+      } else if (productSalesForecastFilter === 'low') {
+        matchForecast = item.riskLevel === 'LOW_STOCK' || item.riskLevel === 'CRITICAL' || item.daysToStockout <= 10 || (item.currentStock <= item.minStock);
+      } else if (productSalesForecastFilter === 'high-velocity') {
+        matchForecast = item.projectedDailyVelocity >= 1.2 || item.unitsSold > 5;
+      } else if (productSalesForecastFilter === 'optimal') {
+        matchForecast = item.riskLevel === 'OPTIMAL' || (item.daysToStockout > 10 && item.daysToStockout <= 35);
+      } else if (productSalesForecastFilter === 'surplus') {
+        matchForecast = item.riskLevel === 'SURPLUS' || item.daysToStockout > 35;
+      }
 
       return matchQuery && matchCat && matchForecast;
     });
@@ -5009,151 +5018,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* ============================================================== */}
-            {/* AI PREDICTIVE DEMAND & STOCKOUT FORECASTING PANEL (ML ENGINE) */}
-            {/* ============================================================== */}
-            <div className="bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-950 text-white rounded-3xl p-6 shadow-xl border border-indigo-500/20">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 pb-4 border-b border-white/10">
-                <div className="flex items-center space-x-3">
-                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-500 via-sky-500 to-purple-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                    <Brain className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <h4 className="text-base font-black text-white">
-                        AI Demand &amp; Stockout Predictive Forecasting Engine
-                      </h4>
-                      <span className="px-2 py-0.5 rounded-full bg-indigo-500/30 text-indigo-300 border border-indigo-400/30 text-[10px] font-extrabold uppercase tracking-wider">
-                        ML Time-Series
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-300 mt-0.5">
-                      Predicts sales volume for Next Few Days &amp; Weeks based on 7D/30D weighted run-rate and festival lift (&beta; = 1.35x)
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-indigo-300 bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 font-bold">
-                    60 Active SKUs Analyzed
-                  </span>
-                </div>
-              </div>
-
-              {/* 4 AI Forecast KPI Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-5">
-                {/* 1. Next 7 Days Store Forecast */}
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-400/40 transition">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-300">
-                      🔮 Next 7 Days (1 Week)
-                    </span>
-                    <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full">
-                      Projected
-                    </span>
-                  </div>
-                  <div className="text-2xl font-black mt-2 text-white">
-                    {aiDemandForecastingEngine.totalStoreProjected7DUnits} Units
-                  </div>
-                  <div className="text-xs text-indigo-200 mt-1 font-semibold flex justify-between">
-                    <span>Est. Sales: ₹{aiDemandForecastingEngine.totalStoreProjected7DRevenue.toLocaleString('en-IN')}</span>
-                    <span className="text-emerald-400 font-bold">+₹{aiDemandForecastingEngine.totalStoreProjected7DProfit.toLocaleString('en-IN')}</span>
-                  </div>
-                </div>
-
-                {/* 2. Next 30 Days Store Forecast */}
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-400/40 transition">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-sky-300">
-                      🔮 Next 30 Days (1 Month)
-                    </span>
-                    <span className="text-[10px] font-bold text-sky-400 bg-sky-500/20 px-2 py-0.5 rounded-full">
-                      Projected
-                    </span>
-                  </div>
-                  <div className="text-2xl font-black mt-2 text-white">
-                    {aiDemandForecastingEngine.totalStoreProjected30DUnits} Units
-                  </div>
-                  <div className="text-xs text-sky-200 mt-1 font-semibold flex justify-between">
-                    <span>Est. Sales: ₹{aiDemandForecastingEngine.totalStoreProjected30DRevenue.toLocaleString('en-IN')}</span>
-                    <span className="text-emerald-400 font-bold">+₹{aiDemandForecastingEngine.totalStoreProjected30DProfit.toLocaleString('en-IN')}</span>
-                  </div>
-                </div>
-
-                {/* 3. Stockout Risk Alerts */}
-                <div className={`p-4 rounded-2xl border transition ${
-                  aiDemandForecastingEngine.criticalCount > 0
-                    ? 'bg-rose-500/15 border-rose-500/40 text-rose-100'
-                    : 'bg-white/5 border-white/10 text-slate-300'
-                }`}>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-rose-300">
-                      🚨 Stockout Risk
-                    </span>
-                    <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
-                      aiDemandForecastingEngine.criticalCount > 0 ? 'bg-rose-600 text-white' : 'bg-emerald-500/20 text-emerald-400'
-                    }`}>
-                      {aiDemandForecastingEngine.criticalCount > 0 ? 'Action Needed' : 'Inventory Safe'}
-                    </span>
-                  </div>
-                  <div className="text-2xl font-black mt-2 text-white">
-                    {aiDemandForecastingEngine.criticalCount} Critical <span className="text-xs font-normal text-rose-300">(&le; 5d)</span>
-                  </div>
-                  <div className="text-xs text-rose-200 mt-1 font-medium">
-                    +{aiDemandForecastingEngine.lowStockCount} items running low (&le; 10d runway)
-                  </div>
-                </div>
-
-                {/* 4. Smart Restock PO Budget */}
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-indigo-400/40 transition">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-purple-300">
-                      🛒 Smart Restock PO Budget
-                    </span>
-                    <span className="text-[10px] font-bold text-purple-300 bg-purple-500/20 px-2 py-0.5 rounded-full">
-                      21-Day Buffer
-                    </span>
-                  </div>
-                  <div className="text-2xl font-black mt-2 text-white">
-                    ₹{aiDemandForecastingEngine.totalReorderBudget.toLocaleString('en-IN')}
-                  </div>
-                  <div className="text-xs text-purple-200 mt-1 font-medium">
-                    Recommended wholesale investment for safety buffer
-                  </div>
-                </div>
-              </div>
-
-              {/* Critical Stockout Alert Carousel / Notification Banner */}
-              {aiDemandForecastingEngine.criticalItems.length > 0 && (
-                <div className="mt-4 p-3.5 bg-rose-950/70 border border-rose-500/40 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                  <div className="flex items-center space-x-2.5">
-                    <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
-                    <div>
-                      <span className="text-xs font-bold text-white">
-                        Urgent Reorder Required: {aiDemandForecastingEngine.criticalItems.slice(0, 3).map(c => `${c.name} (${c.daysToStockout}d runway left)`).join(' • ')}
-                      </span>
-                      <p className="text-[11px] text-rose-300 mt-0.5">
-                        These fast-moving items will run out of stock in &le; 5 days based on customer buying velocity.
-                      </p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      const first = aiDemandForecastingEngine.criticalItems[0];
-                      if (first) {
-                        handleOpenAutoPo(first.product);
-                      }
-                    }}
-                    className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shrink-0 shadow-sm"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                    <span>⚡ Auto-Draft PO for Critical Items</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
             {/* TOP 5 BEST-SELLING PRODUCTS LEADERBOARD */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
               <div className="flex justify-between items-center mb-4">
@@ -5207,7 +5071,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* DETAILED PER-PRODUCT SALES, TAX & AI FORECAST TABLE */}
+            {/* DETAILED PER-PRODUCT SALES, TAX & INVENTORY TABLE */}
             <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
               <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-gradient-to-r from-sky-50/60 to-white">
                 <div>
@@ -5216,11 +5080,11 @@ export default function App() {
                       <PieChart className="w-4 h-4" />
                     </span>
                     <h4 className="text-sm font-black text-slate-900">
-                      Product Pricing Architecture, Sales &amp; Demand Forecast ({filteredProductSales.length} Products)
+                      Product Pricing Architecture, Sales &amp; Stock Analytics ({filteredProductSales.length} Products)
                     </h4>
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Live unit sales, Pre-Tax Base Price, 5% GST (CGST + SGST), Cost Price, Net Profit, AI Run-Rate, Next 7D Forecast &amp; Stock Runway
+                    Live unit sales, Pre-Tax Base Price, 5% GST (CGST + SGST), Cost Price, Net Profit, AI Run-Rate &amp; Stock Runway
                   </p>
                 </div>
 
@@ -5241,25 +5105,57 @@ export default function App() {
                   <select
                     value={productSalesCategoryFilter}
                     onChange={e => setProductSalesCategoryFilter(e.target.value)}
-                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none"
+                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
                   >
-                    <option value="all">All Categories</option>
+                    <option value="all">All Categories ({products.length})</option>
                     {availableCategories.map(c => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
 
-                  {/* AI Stockout & Velocity Risk Filter */}
-                  <select
-                    value={productSalesForecastFilter}
-                    onChange={e => setProductSalesForecastFilter(e.target.value)}
-                    className="px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-xl text-xs font-bold text-indigo-900 focus:outline-none cursor-pointer"
-                  >
-                    <option value="all">All Stock Statuses</option>
-                    <option value="critical">🚨 Critical Stockout (&le; 5 Days)</option>
-                    <option value="low">⚠️ Low Stock (&le; 10 Days)</option>
-                    <option value="high-velocity">⚡ Fast Movers (&ge; 1.5 units/day)</option>
-                  </select>
+                  {/* Stock Status & Risk Filter Dropdown (Fully Workable) */}
+                  <div className="relative">
+                    <select
+                      value={productSalesForecastFilter}
+                      onChange={e => setProductSalesForecastFilter(e.target.value)}
+                      className="px-3.5 py-1.5 bg-sky-50/90 hover:bg-sky-100 border border-sky-200 hover:border-sky-300 rounded-xl text-xs font-bold text-sky-950 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer transition pr-8 appearance-none shadow-xs"
+                      title="Filter products by inventory status & stock runway"
+                    >
+                      <option value="all">All Stock Statuses ({productSalesAnalytics.length})</option>
+                      <option value="low">
+                        ⚠️ Low Stock (&le; 10 Days) ({productSalesAnalytics.filter(p => p.riskLevel === 'LOW_STOCK' || p.riskLevel === 'CRITICAL' || p.daysToStockout <= 10 || (p.currentStock > 0 && p.currentStock <= p.minStock)).length})
+                      </option>
+                      <option value="critical">
+                        🚨 Critical Stockout (&le; 5 Days) ({productSalesAnalytics.filter(p => p.riskLevel === 'CRITICAL' || p.daysToStockout <= 5 || p.currentStock === 0).length})
+                      </option>
+                      <option value="high-velocity">
+                        ⚡ Fast Movers ({productSalesAnalytics.filter(p => p.projectedDailyVelocity >= 1.2 || p.unitsSold > 5).length})
+                      </option>
+                      <option value="optimal">
+                        ✅ Optimal Stock ({productSalesAnalytics.filter(p => p.riskLevel === 'OPTIMAL' || (p.daysToStockout > 10 && p.daysToStockout <= 35)).length})
+                      </option>
+                      <option value="surplus">
+                        📦 Surplus Stock (&gt; 35 Days) ({productSalesAnalytics.filter(p => p.riskLevel === 'SURPLUS' || p.daysToStockout > 35).length})
+                      </option>
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-sky-700 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+
+                  {/* Reset active filters button */}
+                  {(productSalesForecastFilter !== 'all' || productSalesCategoryFilter !== 'all' || productSalesSearch.trim() !== '') && (
+                    <button
+                      onClick={() => {
+                        setProductSalesSearch('');
+                        setProductSalesCategoryFilter('all');
+                        setProductSalesForecastFilter('all');
+                      }}
+                      className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition flex items-center space-x-1 cursor-pointer"
+                      title="Reset all search & status filters"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      <span>Clear</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -5284,7 +5180,28 @@ export default function App() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {filteredProductSales.map(item => (
+                    {filteredProductSales.length === 0 ? (
+                      <tr>
+                        <td colSpan={14} className="py-12 text-center text-slate-500">
+                          <div className="flex flex-col items-center justify-center space-y-2">
+                            <Search className="w-6 h-6 text-slate-400" />
+                            <p className="text-xs font-bold text-slate-700">No products match the selected filters</p>
+                            <p className="text-[11px] text-slate-400">Try selecting another stock status or clearing search keywords.</p>
+                            <button
+                              onClick={() => {
+                                setProductSalesSearch('');
+                                setProductSalesCategoryFilter('all');
+                                setProductSalesForecastFilter('all');
+                              }}
+                              className="mt-2 px-3 py-1.5 bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 rounded-xl text-xs font-bold transition cursor-pointer"
+                            >
+                              Reset All Filters
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredProductSales.map(item => (
                       <tr
                         key={item.productId}
                         onClick={() => {
@@ -5387,7 +5304,7 @@ export default function App() {
                           </button>
                         </td>
                       </tr>
-                    ))}
+                    )))}
                   </tbody>
                 </table>
               </div>
