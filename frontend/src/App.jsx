@@ -72,7 +72,6 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
-  Brain,
   Lightbulb,
   PieChart
 } from 'lucide-react';
@@ -327,7 +326,7 @@ export default function App() {
   // -------------------------------------------------------------
   const [expenses, setExpenses] = useState(() => {
     try {
-      const saved = localStorage.getItem('bizsmart_expenses_v3');
+      const saved = localStorage.getItem('bizsmart_expenses_v4');
       if (saved) return JSON.parse(saved);
     } catch (e) {
       console.warn('Failed to parse expenses', e);
@@ -341,7 +340,7 @@ export default function App() {
   const [bills, setBills] = useState(() => {
     let rawBills = [];
     try {
-      const saved = localStorage.getItem('bizsmart_bills_v3');
+      const saved = localStorage.getItem('bizsmart_bills_v4');
       if (saved) {
         rawBills = JSON.parse(saved);
         if (seedData1Year.bills && seedData1Year.bills.length > rawBills.length) {
@@ -684,24 +683,23 @@ export default function App() {
   }, []);
 
   const [productSalesPeriod, setProductSalesPeriod] = useState('monthly'); // 'monthly' | 'yearly' | 'custom' | 'all'
-  const [productSalesSelectedMonth, setProductSalesSelectedMonth] = useState('2026-09');
+  const [productSalesSelectedMonth, setProductSalesSelectedMonth] = useState('2026-10');
   const [productSalesSelectedYear, setProductSalesSelectedYear] = useState('2026');
   const [productSalesStartDate, setProductSalesStartDate] = useState(
-    '2026-09-01'
+    '2026-10-01'
   );
   const [productSalesEndDate, setProductSalesEndDate] = useState(
-    '2026-09-30'
+    '2026-10-12'
   );
   const [productSalesSearch, setProductSalesSearch] = useState('');
   const [productSalesCategoryFilter, setProductSalesCategoryFilter] = useState('all');
-  const [productSalesForecastFilter, setProductSalesForecastFilter] = useState('all'); // 'all' | 'critical' | 'low' | 'high-velocity'
+  const [productSalesStockFilter, setProductSalesStockFilter] = useState('all'); // 'all' | 'low' | 'out_of_stock' | 'in_stock' | 'top_seller'
   const [selectedProductForBreakdown, setSelectedProductForBreakdown] = useState(null);
   const [showPriceBreakdownModal, setShowPriceBreakdownModal] = useState(false);
   const [drilldownPeriod, setDrilldownPeriod] = useState('all'); // 'all' | 'today' | 'this-month' | 'last-month' | 'yearly' | 'custom'
-  const [drilldownStartDate, setDrilldownStartDate] = useState('2026-09-01');
-  const [drilldownEndDate, setDrilldownEndDate] = useState('2026-09-30');
-  const [targetMonthFilter, setTargetMonthFilter] = useState('2026-09');
-  const [anomalySimulatorActive, setAnomalySimulatorActive] = useState(false);
+  const [drilldownStartDate, setDrilldownStartDate] = useState('2026-10-01');
+  const [drilldownEndDate, setDrilldownEndDate] = useState('2026-10-12');
+  const [targetMonthFilter, setTargetMonthFilter] = useState('2026-10');
 
   // -------------------------------------------------------------
   // SALES ANALYTICS STATE (Weekly, Monthly, Specific Period, Yearly)
@@ -2284,245 +2282,6 @@ export default function App() {
   }, [products]);
 
   // -------------------------------------------------------------
-  // AI PREDICTIVE DEMAND & STOCKOUT FORECASTING ENGINE (ML)
-  // Weighted Moving Average (7D: 65%, 30D: 35%) + Festive Multiplier (1.35x)
-  // Projects 3-Day, 7-Day (1 Week), 14-Day (2 Weeks), and 30-Day (1 Month) Sales
-  // -------------------------------------------------------------
-  const aiDemandForecastingEngine = useMemo(() => {
-    const today = new Date();
-    const todayStr = today.toISOString().slice(0, 10);
-    const d7 = new Date();
-    d7.setDate(today.getDate() - 6);
-    const past7Str = d7.toISOString().slice(0, 10);
-    const d30 = new Date();
-    d30.setDate(today.getDate() - 29);
-    const past30Str = d30.toISOString().slice(0, 10);
-
-    // Track unit sales per product across time horizons
-    const salesMap = new Map();
-    products.forEach(p => {
-      salesMap.set(p.id, {
-        todayUnits: 0,
-        past7DUnits: 0,
-        past30DUnits: 0,
-        allTimeUnits: 0,
-        allTimeRev: 0
-      });
-    });
-
-    bills.forEach(b => {
-      const bDate = b.dateStr || (b.date ? b.date.slice(0, 10) : '');
-      const isToday = bDate === todayStr;
-      const is7D = bDate >= past7Str && bDate <= todayStr;
-      const is30D = bDate >= past30Str && bDate <= todayStr;
-
-      (b.items || []).forEach(it => {
-        const matched = productLookup.resolve(it.product);
-        if (matched) {
-          const rec = salesMap.get(matched.id);
-          if (rec) {
-            const q = Number(it.quantity) || 1;
-            const sub = Number(it.subtotal) || (matched.sellingPrice * q);
-            rec.allTimeUnits += q;
-            rec.allTimeRev += sub;
-            if (isToday) rec.todayUnits += q;
-            if (is7D) rec.past7DUnits += q;
-            if (is30D) rec.past30DUnits += q;
-          }
-        }
-      });
-    });
-
-    // Compute forecasting metrics per product
-    const forecasts = products.map(p => {
-      const rec = salesMap.get(p.id) || { todayUnits: 0, past7DUnits: 0, past30DUnits: 0, allTimeUnits: 0, allTimeRev: 0 };
-      const sp = Number(p.sellingPrice) || 0;
-      const cp = Number(p.purchasePrice) || Math.round(sp * 0.8);
-      const basePrice = +(sp / 1.05).toFixed(2);
-      const unitProfit = +(basePrice - cp).toFixed(2);
-      const marginPct = sp > 0 ? +((unitProfit / sp) * 100).toFixed(1) : 0;
-      const currentStock = Number(p.quantity) || 0;
-      const minStock = Number(p.minStock) || 10;
-
-      // 7-day velocity and 30-day velocity
-      const v7 = +(rec.past7DUnits / 7).toFixed(2);
-      const v30 = +(rec.past30DUnits / 30).toFixed(2);
-      const vAll = +(rec.allTimeUnits / 365).toFixed(2);
-
-      // Weighted moving average velocity
-      let weightedVelocity = 0;
-      if (v7 > 0 && v30 > 0) {
-        weightedVelocity = +(0.65 * v7 + 0.35 * v30).toFixed(2);
-      } else if (v7 > 0) {
-        weightedVelocity = v7;
-      } else if (v30 > 0) {
-        weightedVelocity = v30;
-      } else if (vAll > 0) {
-        weightedVelocity = vAll;
-      } else {
-        weightedVelocity = 0.5; // Conservative baseline
-      }
-
-      // Festive multiplier (Diwali & Navratri Kirana surge factor ~ +35%)
-      const festiveMultiplier = 1.35;
-      const projectedDailyVelocity = +(weightedVelocity * festiveMultiplier).toFixed(2);
-
-      // Projected unit sales across horizons
-      const forecast3DUnits = Math.max(1, Math.round(projectedDailyVelocity * 3));
-      const forecast7DUnits = Math.max(1, Math.round(projectedDailyVelocity * 7));
-      const forecast14DUnits = Math.max(2, Math.round(projectedDailyVelocity * 14));
-      const forecast30DUnits = Math.max(4, Math.round(projectedDailyVelocity * 30));
-
-      const forecast3DRevenue = forecast3DUnits * sp;
-      const forecast7DRevenue = forecast7DUnits * sp;
-      const forecast14DRevenue = forecast14DUnits * sp;
-      const forecast30DRevenue = forecast30DUnits * sp;
-
-      const forecast7DProfit = Math.round(forecast7DUnits * unitProfit);
-      const forecast30DProfit = Math.round(forecast30DUnits * unitProfit);
-
-      // Days to stockout
-      const daysToStockout = projectedDailyVelocity > 0 ? Math.floor(currentStock / projectedDailyVelocity) : 999;
-
-      // Stockout risk classification
-      let riskLevel = 'OPTIMAL'; // 'CRITICAL' | 'LOW_STOCK' | 'OPTIMAL' | 'SURPLUS'
-      if (currentStock === 0 || daysToStockout <= 5) {
-        riskLevel = 'CRITICAL';
-      } else if (daysToStockout <= 10 || currentStock <= minStock) {
-        riskLevel = 'LOW_STOCK';
-      } else if (daysToStockout > 35) {
-        riskLevel = 'SURPLUS';
-      }
-
-      // Reorder quantity to cover 21-day buffer
-      const bufferNeeded = Math.round(projectedDailyVelocity * 21);
-      const suggestedReorderQty = Math.max(0, bufferNeeded - currentStock);
-      const suggestedReorderCost = suggestedReorderQty * cp;
-
-      return {
-        product: p,
-        productId: p.id,
-        name: p.name,
-        sku: p.sku || 'N/A',
-        category: p.category || 'General',
-        supplier: p.supplier || 'ITC Consumer Goods Distribution',
-        sellingPrice: sp,
-        purchasePrice: cp,
-        basePrice,
-        unitProfit,
-        marginPct,
-        currentStock,
-        minStock,
-        todayUnits: rec.todayUnits,
-        past7DUnits: rec.past7DUnits,
-        past30DUnits: rec.past30DUnits,
-        allTimeUnits: rec.allTimeUnits,
-        allTimeRev: rec.allTimeRev,
-        v7,
-        v30,
-        projectedDailyVelocity,
-        forecast3DUnits,
-        forecast3DRevenue,
-        forecast7DUnits,
-        forecast7DRevenue,
-        forecast7DProfit,
-        forecast14DUnits,
-        forecast14DRevenue,
-        forecast30DUnits,
-        forecast30DRevenue,
-        forecast30DProfit,
-        daysToStockout,
-        riskLevel,
-        suggestedReorderQty,
-        suggestedReorderCost
-      };
-    });
-
-    // Store-wide aggregates
-    const totalStoreProjected7DUnits = forecasts.reduce((acc, f) => acc + f.forecast7DUnits, 0);
-    const totalStoreProjected7DRevenue = forecasts.reduce((acc, f) => acc + f.forecast7DRevenue, 0);
-    const totalStoreProjected7DProfit = forecasts.reduce((acc, f) => acc + f.forecast7DProfit, 0);
-
-    const totalStoreProjected30DUnits = forecasts.reduce((acc, f) => acc + f.forecast30DUnits, 0);
-    const totalStoreProjected30DRevenue = forecasts.reduce((acc, f) => acc + f.forecast30DRevenue, 0);
-    const totalStoreProjected30DProfit = forecasts.reduce((acc, f) => acc + f.forecast30DProfit, 0);
-
-    const criticalItems = forecasts.filter(f => f.riskLevel === 'CRITICAL').sort((a, b) => a.daysToStockout - b.daysToStockout);
-    const lowStockItems = forecasts.filter(f => f.riskLevel === 'LOW_STOCK').sort((a, b) => a.daysToStockout - b.daysToStockout);
-    const totalReorderBudget = forecasts.reduce((acc, f) => acc + (f.suggestedReorderQty > 0 ? f.suggestedReorderCost : 0), 0);
-
-    return {
-      forecasts,
-      totalStoreProjected7DUnits,
-      totalStoreProjected7DRevenue,
-      totalStoreProjected7DProfit,
-      totalStoreProjected30DUnits,
-      totalStoreProjected30DRevenue,
-      totalStoreProjected30DProfit,
-      criticalCount: criticalItems.length,
-      lowStockCount: lowStockItems.length,
-      criticalItems,
-      lowStockItems,
-      totalReorderBudget
-    };
-  }, [products, bills, productLookup]);
-
-  // -------------------------------------------------------------
-  // PRODUCT ANALYSIS DEDICATED VIEW FILTERED DATA & PROFIT METRICS
-  // -------------------------------------------------------------
-  const totalAllTimeExpenses = useMemo(() => {
-    return expenses.reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
-  }, [expenses]);
-
-  const productAnalysisBillsList = useMemo(() => {
-    const today = new Date();
-    const todayStr = today.toISOString().slice(0, 10);
-    if (productSalesPeriod === 'daily') {
-      return bills.filter(b => b.dateStr === todayStr);
-    }
-    if (productSalesPeriod === 'weekly') {
-      const past7 = new Date();
-      past7.setDate(today.getDate() - 6);
-      const past7Str = past7.toISOString().slice(0, 10);
-      return bills.filter(b => b.dateStr >= past7Str && b.dateStr <= todayStr);
-    }
-    if (productSalesPeriod === 'monthly') {
-      return bills.filter(b => b.dateStr && b.dateStr.startsWith(productSalesSelectedMonth));
-    }
-    if (productSalesPeriod === 'yearly') {
-      return bills.filter(b => b.dateStr && b.dateStr.startsWith(productSalesSelectedYear));
-    }
-    if (productSalesPeriod === 'custom') {
-      return bills.filter(b => (!productSalesStartDate || b.dateStr >= productSalesStartDate) && (!productSalesEndDate || b.dateStr <= productSalesEndDate));
-    }
-    return bills; // 'all'
-  }, [bills, productSalesPeriod, productSalesSelectedMonth, productSalesSelectedYear, productSalesStartDate, productSalesEndDate]);
-
-  const productAnalysisExpensesList = useMemo(() => {
-    const today = new Date();
-    const todayStr = today.toISOString().slice(0, 10);
-    if (productSalesPeriod === 'daily') {
-      return expenses.filter(e => e.date === todayStr);
-    }
-    if (productSalesPeriod === 'weekly') {
-      const past7 = new Date();
-      past7.setDate(today.getDate() - 6);
-      const past7Str = past7.toISOString().slice(0, 10);
-      return expenses.filter(e => e.date >= past7Str && e.date <= todayStr);
-    }
-    if (productSalesPeriod === 'monthly') {
-      return expenses.filter(e => e.date && e.date.startsWith(productSalesSelectedMonth));
-    }
-    if (productSalesPeriod === 'yearly') {
-      return expenses.filter(e => e.date && e.date.startsWith(productSalesSelectedYear));
-    }
-    if (productSalesPeriod === 'custom') {
-      return expenses.filter(e => (!productSalesStartDate || e.date >= productSalesStartDate) && (!productSalesEndDate || e.date <= productSalesEndDate));
-    }
-    return expenses;
-  }, [expenses, productSalesPeriod, productSalesSelectedMonth, productSalesSelectedYear, productSalesStartDate, productSalesEndDate]);
-
-  // -------------------------------------------------------------
   // PER-PRODUCT SALES & PROFIT ANALYTICS (Aggregated across selected product analysis period)
   // -------------------------------------------------------------
   const productSalesAnalytics = useMemo(() => {
@@ -2536,9 +2295,6 @@ export default function App() {
       const gstAmount = +(sp - basePrice).toFixed(2);
       const profitPerUnit = +(basePrice - cp).toFixed(2);
       const marginPct = sp > 0 ? +((profitPerUnit / sp) * 100).toFixed(1) : 0;
-
-      // Find AI demand forecast item
-      const fc = aiDemandForecastingEngine.forecasts.find(f => f.productId === p.id);
 
       map.set(p.id, {
         productId: p.id,
@@ -2562,17 +2318,8 @@ export default function App() {
         netProfit: 0,
         currentStock: p.quantity || 0,
         minStock: p.minStock || 10,
-        projectedDailyVelocity: fc?.projectedDailyVelocity || 1.0,
-        forecast3DUnits: fc?.forecast3DUnits || 3,
-        forecast7DUnits: fc?.forecast7DUnits || 7,
-        forecast7DRevenue: fc?.forecast7DRevenue || (sp * 7),
-        forecast14DUnits: fc?.forecast14DUnits || 14,
-        forecast30DUnits: fc?.forecast30DUnits || 30,
-        forecast30DRevenue: fc?.forecast30DRevenue || (sp * 30),
-        daysToStockout: fc?.daysToStockout ?? 999,
-        riskLevel: fc?.riskLevel || 'OPTIMAL',
-        suggestedReorderQty: fc?.suggestedReorderQty || 0,
-        suggestedReorderCost: fc?.suggestedReorderCost || 0
+        dailySalesVelocity: 0,
+        daysToStockout: 999
       });
     });
 
@@ -2600,8 +2347,21 @@ export default function App() {
       });
     });
 
+    // Calculate observed daily velocity based on period bills
+    const daysInPeriod = productSalesPeriod === 'daily' ? 1 :
+      productSalesPeriod === 'weekly' ? 7 :
+      productSalesPeriod === 'monthly' ? 30 :
+      productSalesPeriod === 'yearly' ? 365 :
+      productSalesPeriod === 'custom' && productSalesStartDate && productSalesEndDate ?
+        Math.max(1, Math.round((new Date(productSalesEndDate) - new Date(productSalesStartDate)) / (1000 * 60 * 60 * 24))) : 30;
+
+    map.forEach(entry => {
+      entry.dailySalesVelocity = +(entry.unitsSold / daysInPeriod).toFixed(1);
+      entry.daysToStockout = entry.dailySalesVelocity > 0 ? Math.floor(entry.currentStock / entry.dailySalesVelocity) : 999;
+    });
+
     return Array.from(map.values()).sort((a, b) => b.unitsSold - a.unitsSold);
-  }, [products, productAnalysisBillsList, productLookup, aiDemandForecastingEngine]);
+  }, [products, productAnalysisBillsList, productLookup, productSalesPeriod, productSalesStartDate, productSalesEndDate]);
 
   const productAnalysisTotalRevenue = useMemo(() => {
     return productAnalysisBillsList.reduce((acc, b) => acc + (Number(b.total) || 0), 0);
@@ -2657,22 +2417,20 @@ export default function App() {
         item.category.toLowerCase().includes(productSalesSearch.toLowerCase());
       const matchCat = productSalesCategoryFilter === 'all' || item.category === productSalesCategoryFilter;
       
-      let matchForecast = true;
-      if (productSalesForecastFilter === 'critical') {
-        matchForecast = item.riskLevel === 'CRITICAL' || item.daysToStockout <= 5 || item.currentStock === 0;
-      } else if (productSalesForecastFilter === 'low') {
-        matchForecast = item.riskLevel === 'LOW_STOCK' || item.riskLevel === 'CRITICAL' || item.daysToStockout <= 10 || (item.currentStock <= item.minStock);
-      } else if (productSalesForecastFilter === 'high-velocity') {
-        matchForecast = item.projectedDailyVelocity >= 1.2 || item.unitsSold > 5;
-      } else if (productSalesForecastFilter === 'optimal') {
-        matchForecast = item.riskLevel === 'OPTIMAL' || (item.daysToStockout > 10 && item.daysToStockout <= 35);
-      } else if (productSalesForecastFilter === 'surplus') {
-        matchForecast = item.riskLevel === 'SURPLUS' || item.daysToStockout > 35;
+      let matchStock = true;
+      if (productSalesStockFilter === 'low') {
+        matchStock = item.currentStock > 0 && item.currentStock <= item.minStock;
+      } else if (productSalesStockFilter === 'out_of_stock') {
+        matchStock = item.currentStock === 0;
+      } else if (productSalesStockFilter === 'in_stock') {
+        matchStock = item.currentStock > item.minStock;
+      } else if (productSalesStockFilter === 'top_seller') {
+        matchStock = item.unitsSold > 0;
       }
 
-      return matchQuery && matchCat && matchForecast;
+      return matchQuery && matchCat && matchStock;
     });
-  }, [productSalesAnalytics, productSalesSearch, productSalesCategoryFilter, productSalesForecastFilter]);
+  }, [productSalesAnalytics, productSalesSearch, productSalesCategoryFilter, productSalesStockFilter]);
 
   // -------------------------------------------------------------
   // PER-PRODUCT DRILL-DOWN HISTORICAL & MULTI-PERIOD SALES DEEP DIVE
@@ -2694,8 +2452,8 @@ export default function App() {
     const d7 = new Date();
     d7.setDate(today.getDate() - 6);
     const past7Str = d7.toISOString().slice(0, 10);
-    const thisMonthKey = '2026-09';
-    const lastMonthKey = '2026-08';
+    const thisMonthKey = '2026-10';
+    const lastMonthKey = '2026-09';
     const thisYearKey = '2026';
 
     const getProductStatsInBills = (billsSubset) => {
@@ -2742,35 +2500,17 @@ export default function App() {
     const allStats = getProductStatsInBills(allBills);
     const customStats = getProductStatsInBills(customBills);
 
-    // AI Forecast for this product
-    const fc = aiDemandForecastingEngine.forecasts.find(f => f.productId === targetId) || {
-      projectedDailyVelocity: 1.0,
-      forecast3DUnits: 3,
-      forecast3DRevenue: sp * 3,
-      forecast7DUnits: 7,
-      forecast7DRevenue: sp * 7,
-      forecast7DProfit: unitProfit * 7,
-      forecast14DUnits: 14,
-      forecast14DRevenue: sp * 14,
-      forecast30DUnits: 30,
-      forecast30DRevenue: sp * 30,
-      forecast30DProfit: unitProfit * 30,
-      daysToStockout: 999,
-      riskLevel: 'OPTIMAL',
-      suggestedReorderQty: 0,
-      suggestedReorderCost: 0
-    };
 
     // 12-Month Historical Trend for this product
     const monthKeys = [
       '2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03',
-      '2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09'
+      '2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10'
     ];
     const monthNames = {
       '2025-10': 'Oct 25', '2025-11': 'Nov 25 (Diwali)', '2025-12': 'Dec 25',
       '2026-01': 'Jan 26', '2026-02': 'Feb 26', '2026-03': 'Mar 26 (Holi)',
       '2026-04': 'Apr 26', '2026-05': 'May 26', '2026-06': 'Jun 26',
-      '2026-07': 'Jul 26', '2026-08': 'Aug 26 (Rakhi)', '2026-09': 'Sep 26 (Festive)'
+      '2026-07': 'Jul 26', '2026-08': 'Aug 26 (Rakhi)', '2026-09': 'Sep 26 (Festive)', '2026-10': 'Oct 26 (Current)'
     };
 
     const monthlyTrends = monthKeys.map(mk => {
@@ -2800,175 +2540,11 @@ export default function App() {
       yearlyStats,
       allStats,
       customStats,
-      fc,
       monthlyTrends
     };
-  }, [selectedProductForBreakdown, bills, drilldownStartDate, drilldownEndDate, productLookup, aiDemandForecastingEngine]);
+  }, [selectedProductForBreakdown, bills, drilldownStartDate, drilldownEndDate, productLookup]);
 
-  // -------------------------------------------------------------
-  // AI CASH DRAWER ANOMALY & THEFT RISK DETECTION ENGINE
-  // Algorithm: Isolation Forest / Z-Score Anomaly Detection (Z >= 2.0σ)
-  // -------------------------------------------------------------
-  const cashDrawerAnomalyEngine = useMemo(() => {
-    // Normal register baseline learned from 12-month store operations:
-    // Mean cash drop payout = ₹650, Std Dev = ₹280, Expected max single drop = ₹1,500
-    // Expected cash-to-UPI ratio = 80.0%, Std Dev = 6.0%
-    const baseline = {
-      meanCashOut: 650,
-      stdDevCashOut: 280,
-      maxNormalSingleDrop: 1500,
-      expectedCashRatio: 80.0,
-      stdDevCashRatio: 6.0,
-      maxToleranceShortage: 100
-    };
-
-    // Current active shift stats (or simulated if simulator active)
-    const effectiveCashOut = anomalySimulatorActive ? 2850 : currentShiftCashOut;
-    const effectiveCashIn = currentShiftCashIn;
-    const effectiveCashSales = currentShiftCashSales;
-    const effectiveUpiSales = currentShiftUpiSales;
-    const totalShiftSales = effectiveCashSales + effectiveUpiSales;
-    const cashRatio = totalShiftSales > 0 ? +((effectiveCashSales / totalShiftSales) * 100).toFixed(1) : 80.0;
-
-    // Z-Score for Cash Out Payouts
-    const zScoreCashOut = +((effectiveCashOut - baseline.meanCashOut) / baseline.stdDevCashOut).toFixed(2);
-    // Cash-out multiplier vs normal morning shift baseline
-    const multiplier = baseline.meanCashOut > 0 ? +Math.max(1.0, (effectiveCashOut / baseline.meanCashOut)).toFixed(1) : 1.0;
-
-    // Shift close discrepancy check
-    const isShortage = shiftDiscrepancy < -baseline.maxToleranceShortage;
-    const isExcess = shiftDiscrepancy > 250;
-
-    // Detect single suspicious drop
-    const drops = anomalySimulatorActive 
-      ? [{ id: 'SIM-99', amount: 2850, type: 'CASH_OUT', reason: 'Unverified Vendor Payout', cashier: activeShift?.cashierName || 'Cashier', timestamp: '11:42 AM' }]
-      : currentShiftCashDrops;
-    const largestDrop = drops.filter(d => d.type === 'CASH_OUT').reduce((max, d) => Math.max(max, d.amount), 0);
-    const hasLargeSingleDrop = largestDrop > baseline.maxNormalSingleDrop;
-
-    // Risk Classification
-    let riskLevel = 'NORMAL'; // 'NORMAL' | 'ELEVATED' | 'HIGH_RISK'
-    let alertTitle = 'Register Operations Secure & Balanced';
-    let alertMessage = 'All cash movements, vendor payouts, and register reconciliations conform to normal 12-month baseline parameters (99.4% confidence interval).';
-    const auditFlags = [];
-
-    if (anomalySimulatorActive || zScoreCashOut >= 2.0 || hasLargeSingleDrop || isShortage) {
-      riskLevel = 'HIGH_RISK';
-      alertTitle = `⚠️ Anomaly Detected: Cash out rate is ${multiplier}x higher than typical morning shifts`;
-      alertMessage = `AI Anomaly Engine detected abnormal cash drawer behavior. Cash out volume (₹${effectiveCashOut.toLocaleString('en-IN')}) exceeds historical register baseline by +${zScoreCashOut}σ. Immediate supervisor verification recommended.`;
-      
-      if (multiplier >= 2.0) {
-        auditFlags.push({
-          type: 'CRITICAL',
-          code: 'ANOMALY_CASH_OUT_SPIKE',
-          msg: `Cash out rate is ${multiplier}x higher than typical morning shifts (₹${effectiveCashOut} vs ₹${baseline.meanCashOut} baseline, Z-Score: +${zScoreCashOut}σ).`
-        });
-      }
-      if (hasLargeSingleDrop) {
-        auditFlags.push({
-          type: 'WARNING',
-          code: 'LARGE_UNVERIFIED_PAYOUT',
-          msg: `Single cash drop of ₹${largestDrop.toLocaleString('en-IN')} exceeds safety threshold (₹${baseline.maxNormalSingleDrop}). Require supplier invoice.`
-        });
-      }
-      if (isShortage) {
-        auditFlags.push({
-          type: 'CRITICAL',
-          code: 'DRAWER_SHORTAGE_DETECTED',
-          msg: `Till physical cash shortage of ₹${Math.abs(shiftDiscrepancy).toLocaleString('en-IN')} flagged at shift reconciliation.`
-        });
-      }
-    } else if (zScoreCashOut >= 1.2 || largestDrop > 1000) {
-      riskLevel = 'ELEVATED';
-      alertTitle = '⚡ Elevated Cash Out Velocity Observed';
-      alertMessage = `Cash withdrawals are slightly higher than normal (₹${effectiveCashOut}, Z-Score: +${zScoreCashOut}σ). Ensure vendor vouchers are collected.`;
-      auditFlags.push({
-        type: 'INFO',
-        code: 'ELEVATED_PAYOUT',
-        msg: `Cash out is ${multiplier}x baseline. Monitored within acceptable variance.`
-      });
-    } else {
-      auditFlags.push({
-        type: 'SUCCESS',
-        code: 'REGISTER_CONFORMANT',
-        msg: `Cash out rate (${multiplier}x baseline) within standard ±1.0σ tolerance.`
-      });
-      auditFlags.push({
-        type: 'SUCCESS',
-        code: 'PAYMENT_SPLIT_NORMAL',
-        msg: `Cash ratio (${cashRatio}%) matches 12-month store average (${baseline.expectedCashRatio}%).`
-      });
-    }
-
-    return {
-      baseline,
-      effectiveCashOut,
-      zScoreCashOut,
-      multiplier,
-      riskLevel,
-      alertTitle,
-      alertMessage,
-      auditFlags,
-      largestDrop,
-      hasLargeSingleDrop,
-      cashRatio
-    };
-  }, [currentShiftCashOut, currentShiftCashIn, currentShiftCashSales, currentShiftUpiSales, currentShiftCashDrops, shiftDiscrepancy, anomalySimulatorActive, activeShift]);
-
-  // -------------------------------------------------------------
-  // MACHINE LEARNING: FREQUENTLY BOUGHT TOGETHER (Market Basket Analysis)
-  // -------------------------------------------------------------
-  const mlUpsellRecommendations = useMemo(() => {
-    if (cart.length === 0) return [];
-    const cartProductIds = new Set(cart.map(c => c.product.id));
-
-    // Co-occurrence matrix across all past bills using robust product resolution
-    const pairFreq = new Map();
-    bills.forEach(bill => {
-      const items = bill.items || [];
-      const billProductIds = items.map(it => productLookup.resolve(it.product)?.id).filter(Boolean);
-      // check if bill contains any cart item
-      const containsCartItem = billProductIds.some(id => cartProductIds.has(id));
-      if (!containsCartItem) return;
-
-      billProductIds.forEach(id => {
-        if (!cartProductIds.has(id)) {
-          pairFreq.set(id, (pairFreq.get(id) || 0) + 1);
-        }
-      });
-    });
-
-    const suggestions = [];
-    pairFreq.forEach((frequency, pid) => {
-      const prod = products.find(p => p.id === pid);
-      if (prod && prod.quantity > 0) {
-        const confidence = Math.min(96, Math.max(62, 50 + frequency * 6));
-        suggestions.push({
-          product: prod,
-          frequency,
-          confidence
-        });
-      }
-    });
-
-    // Fallback if no direct pair history yet
-    if (suggestions.length === 0) {
-      const firstCartCat = cart[0]?.product?.category;
-      products
-        .filter(p => p.category === firstCartCat && !cartProductIds.has(p.id) && p.quantity > 0)
-        .slice(0, 3)
-        .forEach(p => {
-          suggestions.push({
-            product: p,
-            frequency: 1,
-            confidence: 78
-          });
-        });
-    }
-
-    return suggestions.sort((a, b) => b.confidence - a.confidence).slice(0, 3);
-  }, [cart, bills, products, productLookup]);
-
+  
   // OWNER DESIRED PERIOD CASH & UPI BREAKDOWN
   const getOwnerProfileBills = () => {
     if (ownerProfilePeriod === 'today') {
@@ -3953,7 +3529,7 @@ export default function App() {
                     ? 'bg-sky-50 text-sky-700 border border-sky-200 shadow-xs font-bold'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
-                title="Product Analysis (Monthly, Yearly, Specific Period, AI Forecast)"
+                title="Product Analysis (Monthly, Yearly, Specific Period)"
               >
                 <PieChart className={`w-4 h-4 shrink-0 ${activeTab === 'product-analysis' ? 'text-sky-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
                 {!sidebarCollapsed && <span className="truncate">Product Analysis</span>}
@@ -5062,7 +4638,7 @@ export default function App() {
                     <div className="mt-3 pt-2 border-t border-slate-200 flex justify-between items-baseline">
                       <div>
                         <span className="text-[11px] font-black text-slate-900">₹{item.totalRevenue.toLocaleString('en-IN')}</span>
-                        <span className="text-[9px] text-slate-500 block">+{item.forecast7DUnits} units / 7d</span>
+                        <span className="text-[9px] text-slate-500 block">{item.unitsSold} units sold</span>
                       </div>
                       <span className="text-[10px] font-bold text-emerald-600">+{item.marginPct}%</span>
                     </div>
@@ -5084,7 +4660,7 @@ export default function App() {
                     </h4>
                   </div>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Live unit sales, Pre-Tax Base Price, 5% GST (CGST + SGST), Cost Price, Net Profit, AI Run-Rate &amp; Stock Runway
+                    Live unit sales, Pre-Tax Base Price, 5% GST (CGST + SGST), Cost Price, Net Profit &amp; Stock Levels
                   </p>
                 </div>
 
@@ -5113,41 +4689,38 @@ export default function App() {
                     ))}
                   </select>
 
-                  {/* Stock Status & Risk Filter Dropdown (Fully Workable) */}
+                  {/* Stock Status & Inventory Filter Dropdown */}
                   <div className="relative">
                     <select
-                      value={productSalesForecastFilter}
-                      onChange={e => setProductSalesForecastFilter(e.target.value)}
+                      value={productSalesStockFilter}
+                      onChange={e => setProductSalesStockFilter(e.target.value)}
                       className="px-3.5 py-1.5 bg-sky-50/90 hover:bg-sky-100 border border-sky-200 hover:border-sky-300 rounded-xl text-xs font-bold text-sky-950 focus:outline-none focus:ring-2 focus:ring-sky-500 cursor-pointer transition pr-8 appearance-none shadow-xs"
-                      title="Filter products by inventory status & stock runway"
+                      title="Filter products by inventory stock status"
                     >
                       <option value="all">All Stock Statuses ({productSalesAnalytics.length})</option>
                       <option value="low">
-                        ⚠️ Low Stock (&le; 10 Days) ({productSalesAnalytics.filter(p => p.riskLevel === 'LOW_STOCK' || p.riskLevel === 'CRITICAL' || p.daysToStockout <= 10 || (p.currentStock > 0 && p.currentStock <= p.minStock)).length})
+                        ⚠️ Low Stock ({productSalesAnalytics.filter(p => p.currentStock > 0 && p.currentStock <= p.minStock).length})
                       </option>
-                      <option value="critical">
-                        🚨 Critical Stockout (&le; 5 Days) ({productSalesAnalytics.filter(p => p.riskLevel === 'CRITICAL' || p.daysToStockout <= 5 || p.currentStock === 0).length})
+                      <option value="out_of_stock">
+                        🚨 Out of Stock ({productSalesAnalytics.filter(p => p.currentStock === 0).length})
                       </option>
-                      <option value="high-velocity">
-                        ⚡ Fast Movers ({productSalesAnalytics.filter(p => p.projectedDailyVelocity >= 1.2 || p.unitsSold > 5).length})
+                      <option value="in_stock">
+                        ✅ In Stock ({productSalesAnalytics.filter(p => p.currentStock > p.minStock).length})
                       </option>
-                      <option value="optimal">
-                        ✅ Optimal Stock ({productSalesAnalytics.filter(p => p.riskLevel === 'OPTIMAL' || (p.daysToStockout > 10 && p.daysToStockout <= 35)).length})
-                      </option>
-                      <option value="surplus">
-                        📦 Surplus Stock (&gt; 35 Days) ({productSalesAnalytics.filter(p => p.riskLevel === 'SURPLUS' || p.daysToStockout > 35).length})
+                      <option value="top_seller">
+                        ⚡ Active Sellers ({productSalesAnalytics.filter(p => p.unitsSold > 0).length})
                       </option>
                     </select>
                     <ChevronDown className="w-3.5 h-3.5 text-sky-700 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
 
                   {/* Reset active filters button */}
-                  {(productSalesForecastFilter !== 'all' || productSalesCategoryFilter !== 'all' || productSalesSearch.trim() !== '') && (
+                  {(productSalesStockFilter !== 'all' || productSalesCategoryFilter !== 'all' || productSalesSearch.trim() !== '') && (
                     <button
                       onClick={() => {
                         setProductSalesSearch('');
                         setProductSalesCategoryFilter('all');
-                        setProductSalesForecastFilter('all');
+                        setProductSalesStockFilter('all');
                       }}
                       className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition flex items-center space-x-1 cursor-pointer"
                       title="Reset all search & status filters"
@@ -5174,15 +4747,14 @@ export default function App() {
                       <th className="py-3 px-4 text-right">Total Revenue</th>
                       <th className="py-3 px-4 text-right">Total Profit</th>
                       <th className="py-3 px-4 text-center">Daily Velocity</th>
-                      <th className="py-3 px-4 text-center">AI Next 7D / 30D Forecast</th>
-                      <th className="py-3 px-4 text-center">Stock Runway</th>
+                      <th className="py-3 px-4 text-center">Stock Level</th>
                       <th className="py-3 px-4 text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {filteredProductSales.length === 0 ? (
                       <tr>
-                        <td colSpan={14} className="py-12 text-center text-slate-500">
+                        <td colSpan={13} className="py-12 text-center text-slate-500">
                           <div className="flex flex-col items-center justify-center space-y-2">
                             <Search className="w-6 h-6 text-slate-400" />
                             <p className="text-xs font-bold text-slate-700">No products match the selected filters</p>
@@ -5191,7 +4763,7 @@ export default function App() {
                               onClick={() => {
                                 setProductSalesSearch('');
                                 setProductSalesCategoryFilter('all');
-                                setProductSalesForecastFilter('all');
+                                setProductSalesStockFilter('all');
                               }}
                               className="mt-2 px-3 py-1.5 bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 rounded-xl text-xs font-bold transition cursor-pointer"
                             >
@@ -5209,7 +4781,7 @@ export default function App() {
                           setShowPriceBreakdownModal(true);
                         }}
                         className="hover:bg-sky-50/70 transition cursor-pointer group"
-                        title="Click to view full sales history, period breakdown & AI demand projection"
+                        title="Click to view full sales history and period breakdown"
                       >
                         <td className="py-3 px-4">
                           <div className="font-bold text-slate-900 group-hover:text-sky-700 transition">{item.name}</div>
@@ -5260,35 +4832,17 @@ export default function App() {
                           <span className="font-mono font-bold text-slate-800">
                             {item.projectedDailyVelocity} /day
                           </span>
-                          <span className="block text-[9px] text-slate-400">run-rate</span>
-                        </td>
-                        <td className="py-3 px-4 text-center">
-                          <div className="font-bold text-indigo-700">
-                            +{item.forecast7DUnits} u <span className="text-[10px] text-slate-500">(7d)</span>
-                          </div>
-                          <div className="text-[10px] text-slate-500">
-                            +{item.forecast30DUnits} u (30d) • ₹{item.forecast30DRevenue.toLocaleString('en-IN')}
-                          </div>
                         </td>
                         <td className="py-3 px-4 text-center">
                           <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase inline-block ${
-                            item.riskLevel === 'CRITICAL'
-                              ? 'bg-rose-100 text-rose-800 border border-rose-200 animate-pulse'
-                              : item.riskLevel === 'LOW_STOCK'
+                            item.currentStock === 0
+                              ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                              : item.currentStock <= item.minStock
                               ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                              : item.riskLevel === 'SURPLUS'
-                              ? 'bg-purple-100 text-purple-800'
                               : 'bg-emerald-100 text-emerald-800'
                           }`}>
-                            {item.daysToStockout >= 999
-                              ? 'Ample Stock'
-                              : item.riskLevel === 'CRITICAL'
-                              ? `🚨 ${item.daysToStockout}d left`
-                              : item.riskLevel === 'LOW_STOCK'
-                              ? `⚠️ ${item.daysToStockout}d left`
-                              : `✅ ${item.daysToStockout}d left`}
+                            {item.currentStock === 0 ? 'Out of Stock' : `${item.currentStock} in stock`}
                           </span>
-                          <span className="block text-[9px] text-slate-400 mt-0.5">Stock: {item.currentStock}</span>
                         </td>
                         <td className="py-3 px-4 text-center" onClick={e => e.stopPropagation()}>
                           <button
@@ -5659,63 +5213,6 @@ export default function App() {
                   </div>
                 )}
 
-                {/* ============================================================== */}
-                {/* ML RECOMMENDATION ENGINE: FREQUENTLY BOUGHT TOGETHER */}
-                {/* ============================================================== */}
-                {cart.length > 0 && mlUpsellRecommendations.length > 0 && (
-                  <div className="mt-4 p-3.5 bg-gradient-to-r from-sky-50 via-indigo-50/60 to-purple-50/40 rounded-2xl border border-sky-200/80 shadow-sm">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-1.5">
-                        <span className="p-1 rounded-lg bg-sky-600 text-white shadow-xs">
-                          <Brain className="w-3.5 h-3.5" />
-                        </span>
-                        <div>
-                          <div className="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                            <span>Smart Upsell: Frequently Bought Together</span>
-                            <span className="px-1.5 py-0.2 rounded-full bg-sky-100 text-sky-800 text-[9px] font-black uppercase tracking-wider">
-                              ML Apriori AI
-                            </span>
-                          </div>
-                          <p className="text-[10px] text-slate-500">
-                            Based on customer purchase patterns with current items in cart:
-                          </p>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-bold text-sky-700 bg-white/80 px-2 py-0.5 rounded-full border border-sky-100">
-                        High Affinity
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-                      {mlUpsellRecommendations.map((rec) => (
-                        <div
-                          key={rec.product.id}
-                          className="bg-white p-2.5 rounded-xl border border-sky-100/90 hover:border-sky-300 shadow-xs flex items-center justify-between gap-2 group transition"
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className="text-xs font-bold text-slate-800 truncate group-hover:text-sky-700">
-                              {rec.product.name}
-                            </div>
-                            <div className="flex items-center space-x-1.5 mt-0.5">
-                              <span className="text-xs font-black text-slate-900">₹{rec.product.sellingPrice}</span>
-                              <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 rounded">
-                                {rec.confidence}% match
-                              </span>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => addToCart(rec.product)}
-                            className="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-bold rounded-lg transition shadow-xs flex items-center space-x-1 flex-shrink-0"
-                            title="Add recommended item to bill"
-                          >
-                            <Plus className="w-3 h-3" />
-                            <span>Add</span>
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -6838,212 +6335,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* ============================================================== */}
-            {/* AI CASH DRAWER ANOMALY & THEFT RISK DETECTION (Security Panel) */}
-            {/* Algorithm: Isolation Forest / Z-Score Anomaly Detection (Z >= 2.0σ) */}
-            {/* ============================================================== */}
-            <div className={`rounded-3xl p-6 border shadow-sm transition-all ${
-              cashDrawerAnomalyEngine.riskLevel === 'HIGH_RISK'
-                ? 'bg-gradient-to-br from-rose-50 via-white to-red-50/80 border-rose-300 ring-2 ring-rose-500/20'
-                : cashDrawerAnomalyEngine.riskLevel === 'ELEVATED'
-                ? 'bg-gradient-to-br from-amber-50 via-white to-orange-50/80 border-amber-300 ring-1 ring-amber-500/20'
-                : 'bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white border-slate-800'
-            }`}>
-              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-slate-200/20">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-md ${
-                    cashDrawerAnomalyEngine.riskLevel === 'HIGH_RISK'
-                      ? 'bg-rose-600 text-white shadow-rose-500/30 animate-pulse'
-                      : cashDrawerAnomalyEngine.riskLevel === 'ELEVATED'
-                      ? 'bg-amber-600 text-white shadow-amber-500/30'
-                      : 'bg-emerald-600 text-white shadow-emerald-500/30'
-                  }`}>
-                    {cashDrawerAnomalyEngine.riskLevel === 'HIGH_RISK' ? (
-                      <ShieldAlert className="w-6 h-6" />
-                    ) : cashDrawerAnomalyEngine.riskLevel === 'ELEVATED' ? (
-                      <AlertTriangle className="w-6 h-6" />
-                    ) : (
-                      <ShieldCheck className="w-6 h-6" />
-                    )}
-                  </div>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
-                        cashDrawerAnomalyEngine.riskLevel === 'HIGH_RISK'
-                          ? 'bg-rose-600 text-white'
-                          : cashDrawerAnomalyEngine.riskLevel === 'ELEVATED'
-                          ? 'bg-amber-600 text-white'
-                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                      }`}>
-                        {cashDrawerAnomalyEngine.riskLevel === 'HIGH_RISK'
-                          ? '🚨 HIGH RISK ANOMALY DETECTED'
-                          : cashDrawerAnomalyEngine.riskLevel === 'ELEVATED'
-                          ? '⚡ ELEVATED MONITORING'
-                          : '🛡️ REGISTER SECURE & CONFORMANT'}
-                      </span>
-                      <span className={`text-[10px] font-bold ${cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-slate-400' : 'text-slate-500'}`}>
-                        Isolation Forest &bull; Z-Score Anomaly Engine (Z &ge; 2.0&sigma;)
-                      </span>
-                    </div>
-                    <h3 className={`text-lg font-black mt-1 ${cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-white' : 'text-slate-900'}`}>
-                      {cashDrawerAnomalyEngine.alertTitle}
-                    </h3>
-                    <p className={`text-xs mt-0.5 max-w-3xl ${cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-slate-300' : 'text-slate-600'}`}>
-                      {cashDrawerAnomalyEngine.alertMessage}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Real-Time Interactive Anomaly Simulator Button */}
-                <div className="flex items-center space-x-2 shrink-0">
-                  <button
-                    onClick={() => setAnomalySimulatorActive(!anomalySimulatorActive)}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-sm ${
-                      anomalySimulatorActive
-                        ? 'bg-rose-600 hover:bg-rose-700 text-white animate-bounce'
-                        : cashDrawerAnomalyEngine.riskLevel === 'NORMAL'
-                        ? 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
-                        : 'bg-slate-900 hover:bg-slate-800 text-white'
-                    }`}
-                    title="Simulate cash drawer spike to test AI theft risk alert"
-                  >
-                    <Activity className="w-3.5 h-3.5" />
-                    <span>{anomalySimulatorActive ? '🔴 Disable Simulator (Normal Register)' : '🧪 Test Anomaly Spike (+3.2x Cash Out)'}</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* 4 AI Metric Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
-                {/* 1. Cash Out Multiplier */}
-                <div className={`p-4 rounded-2xl border ${
-                  cashDrawerAnomalyEngine.riskLevel === 'NORMAL'
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-white border-slate-200 shadow-2xs'
-                }`}>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider block ${cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Cash-Out Rate Multiplier
-                  </span>
-                  <div className={`text-2xl font-black mt-1 ${
-                    cashDrawerAnomalyEngine.multiplier >= 2.0 ? 'text-rose-600' :
-                    cashDrawerAnomalyEngine.multiplier >= 1.3 ? 'text-amber-600' :
-                    cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-emerald-400' : 'text-emerald-600'
-                  }`}>
-                    {cashDrawerAnomalyEngine.multiplier}x Baseline
-                  </div>
-                  <span className={`text-[11px] block mt-1 ${cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Normal morning shifts: 1.0x (₹650)
-                  </span>
-                </div>
-
-                {/* 2. Z-Score Deviation Meter */}
-                <div className={`p-4 rounded-2xl border ${
-                  cashDrawerAnomalyEngine.riskLevel === 'NORMAL'
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-white border-slate-200 shadow-2xs'
-                }`}>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider block ${cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Payout Z-Score Deviation
-                  </span>
-                  <div className={`text-2xl font-black mt-1 ${
-                    cashDrawerAnomalyEngine.zScoreCashOut >= 2.0 ? 'text-rose-600' :
-                    cashDrawerAnomalyEngine.zScoreCashOut >= 1.0 ? 'text-amber-600' :
-                    cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-emerald-400' : 'text-emerald-600'
-                  }`}>
-                    {cashDrawerAnomalyEngine.zScoreCashOut > 0 ? '+' : ''}{cashDrawerAnomalyEngine.zScoreCashOut}&sigma;
-                  </div>
-                  <span className={`text-[11px] block mt-1 ${cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Confidence Interval: 99.4%
-                  </span>
-                </div>
-
-                {/* 3. Cash vs Digital UPI Ratio */}
-                <div className={`p-4 rounded-2xl border ${
-                  cashDrawerAnomalyEngine.riskLevel === 'NORMAL'
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-white border-slate-200 shadow-2xs'
-                }`}>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider block ${cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Cash-to-UPI Split Ratio
-                  </span>
-                  <div className={`text-2xl font-black mt-1 ${cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-sky-400' : 'text-sky-700'}`}>
-                    {cashDrawerAnomalyEngine.cashRatio}% Cash
-                  </div>
-                  <span className={`text-[11px] block mt-1 ${cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-slate-400' : 'text-slate-500'}`}>
-                    12-Month Kirana Baseline: 80.0%
-                  </span>
-                </div>
-
-                {/* 4. Shift Closing Discrepancy */}
-                <div className={`p-4 rounded-2xl border ${
-                  cashDrawerAnomalyEngine.riskLevel === 'NORMAL'
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-white border-slate-200 shadow-2xs'
-                }`}>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider block ${cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Shift Closing Variance
-                  </span>
-                  <div className={`text-2xl font-black mt-1 ${
-                    shiftDiscrepancy === 0 ? (cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-emerald-400' : 'text-emerald-600') :
-                    shiftDiscrepancy < 0 ? 'text-rose-600' : 'text-amber-600'
-                  }`}>
-                    {shiftDiscrepancy === 0 ? '₹0 (Exact Match)' : shiftDiscrepancy < 0 ? `-₹${Math.abs(shiftDiscrepancy)} Short` : `+₹${shiftDiscrepancy} Excess`}
-                  </div>
-                  <span className={`text-[11px] block mt-1 ${cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Safe tolerance: &plusmn;₹25
-                  </span>
-                </div>
-              </div>
-
-              {/* Audit Findings & Smart Remediation Checklist */}
-              <div className="mt-4 pt-3 border-t border-slate-200/20">
-                <div className="text-xs font-bold mb-2 flex items-center justify-between">
-                  <span className={cashDrawerAnomalyEngine.riskLevel === 'NORMAL' ? 'text-slate-300' : 'text-slate-800'}>
-                    🔍 Real-Time ML Register Audit Logs &amp; Owner Action Recommendations:
-                  </span>
-                  <span className="text-[10px] font-mono opacity-70">
-                    Live Monitor: {activeShift?.shiftName} &bull; Cashier: {activeShift?.cashierName}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                  {cashDrawerAnomalyEngine.auditFlags.map((flag, idx) => (
-                    <div
-                      key={idx}
-                      className={`p-3 rounded-xl flex items-start space-x-2.5 ${
-                        flag.type === 'CRITICAL'
-                          ? 'bg-rose-100/90 border border-rose-200 text-rose-950 font-semibold'
-                          : flag.type === 'WARNING'
-                          ? 'bg-amber-100/90 border border-amber-200 text-amber-950 font-semibold'
-                          : cashDrawerAnomalyEngine.riskLevel === 'NORMAL'
-                          ? 'bg-white/5 border border-white/10 text-emerald-300'
-                          : 'bg-emerald-50 border border-emerald-200 text-emerald-900'
-                      }`}
-                    >
-                      {flag.type === 'CRITICAL' ? (
-                        <AlertOctagon className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                      ) : flag.type === 'WARNING' ? (
-                        <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                      ) : (
-                        <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                      )}
-                      <div>
-                        <span>{flag.msg}</span>
-                        {flag.type === 'CRITICAL' && (
-                          <div className="text-[11px] text-rose-800 mt-1 font-bold">
-                            &rarr; Action Required: Cross-check physical vendor receipts (Milk/Bread) &amp; inspect CCTV register logs for unexpected till opens.
-                          </div>
-                        )}
-                        {flag.type === 'WARNING' && (
-                          <div className="text-[11px] text-amber-800 mt-1 font-bold">
-                            &rarr; Recommendation: Request cashier physical sign-off slip before shift hand-over.
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
 
             {/* OWNER CASH IN & OUT AUDIT (Day / Week / Month / Custom Period Bar) */}
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
@@ -9665,7 +8956,7 @@ export default function App() {
       )}
 
       {/* ============================================================== */}
-      {/* MODAL: COMPREHENSIVE PRODUCT PRICE & GST BREAKDOWN + SALES & AI FORECAST DEEP DIVE */}
+      {/* MODAL: COMPREHENSIVE PRODUCT PRICE & GST BREAKDOWN + SALES DEEP DIVE */}
       {/* ============================================================== */}
       {showPriceBreakdownModal && selectedProductForBreakdown && productDrilldownStats && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -9675,7 +8966,7 @@ export default function App() {
               <div>
                 <div className="flex items-center space-x-2">
                   <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 bg-sky-100 px-2.5 py-0.5 rounded-full border border-sky-200">
-                    Product Pricing &amp; AI Demand Analysis
+                    Product Pricing &amp; Sales Analysis
                   </span>
                   <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
                     Stock: {selectedProductForBreakdown.currentStock} units
@@ -9848,136 +9139,13 @@ export default function App() {
               })()}
             </div>
 
-            {/* SECTION 3: AI PREDICTIVE DEMAND & INVENTORY RUNWAY FORECAST (ML) */}
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-950 text-white border border-indigo-500/30 space-y-3.5">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-2.5 border-b border-white/10">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 rounded-xl bg-indigo-500 text-white flex items-center justify-center">
-                    <Brain className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-black uppercase tracking-wider text-white flex items-center space-x-1.5">
-                      <span>AI Predictive Demand Projections</span>
-                      <span className="bg-indigo-500/30 text-indigo-300 border border-indigo-400/30 text-[9px] px-2 py-0.2 rounded-full font-bold">
-                        Festive Surge Adjusted (+35%)
-                      </span>
-                    </h4>
-                    <p className="text-[10px] text-slate-300">
-                      Projected run rate: <strong className="text-indigo-300">{productDrilldownStats.fc.projectedDailyVelocity} units/day</strong> &bull; Past 7D: {productDrilldownStats.fc.v7} u/d &bull; Past 30D: {productDrilldownStats.fc.v30} u/d
-                    </p>
-                  </div>
-                </div>
-
-                <span className={`px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
-                  productDrilldownStats.fc.riskLevel === 'CRITICAL' ? 'bg-rose-600 text-white animate-pulse' :
-                  productDrilldownStats.fc.riskLevel === 'LOW_STOCK' ? 'bg-amber-500 text-white' :
-                  'bg-emerald-500/20 text-emerald-400 border border-emerald-400/30'
-                }`}>
-                  {productDrilldownStats.fc.daysToStockout >= 999 ? 'Ample Inventory' :
-                   productDrilldownStats.fc.riskLevel === 'CRITICAL' ? `🚨 Stockout in ${productDrilldownStats.fc.daysToStockout} Days` :
-                   productDrilldownStats.fc.riskLevel === 'LOW_STOCK' ? `⚠️ Low: ${productDrilldownStats.fc.daysToStockout} Days Left` :
-                   `✅ ${productDrilldownStats.fc.daysToStockout} Days Runway`}
-                </span>
-              </div>
-
-              {/* 4 Multi-Horizon AI Projection Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                {/* Horizon 1: Next 3 Days */}
-                <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-300 block">
-                    Next 3 Days (Few Days)
-                  </span>
-                  <div className="text-lg font-black text-white mt-1">
-                    +{productDrilldownStats.fc.forecast3DUnits} Units
-                  </div>
-                  <span className="text-[10px] text-indigo-200 block mt-0.5">
-                    Est. Sales: ₹{productDrilldownStats.fc.forecast3DRevenue.toLocaleString('en-IN')}
-                  </span>
-                </div>
-
-                {/* Horizon 2: Next 7 Days */}
-                <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-sky-300 block">
-                    Next 7 Days (1 Week)
-                  </span>
-                  <div className="text-lg font-black text-white mt-1">
-                    +{productDrilldownStats.fc.forecast7DUnits} Units
-                  </div>
-                  <span className="text-[10px] text-sky-200 block mt-0.5">
-                    Est. Sales: ₹{productDrilldownStats.fc.forecast7DRevenue.toLocaleString('en-IN')}
-                  </span>
-                </div>
-
-                {/* Horizon 3: Next 14 Days */}
-                <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-purple-300 block">
-                    Next 14 Days (2 Weeks)
-                  </span>
-                  <div className="text-lg font-black text-white mt-1">
-                    +{productDrilldownStats.fc.forecast14DUnits} Units
-                  </div>
-                  <span className="text-[10px] text-purple-200 block mt-0.5">
-                    Est. Sales: ₹{productDrilldownStats.fc.forecast14DRevenue.toLocaleString('en-IN')}
-                  </span>
-                </div>
-
-                {/* Horizon 4: Next 30 Days */}
-                <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-300 block">
-                    Next 30 Days (1 Month)
-                  </span>
-                  <div className="text-lg font-black text-white mt-1">
-                    +{productDrilldownStats.fc.forecast30DUnits} Units
-                  </div>
-                  <span className="text-[10px] text-emerald-200 block mt-0.5">
-                    Est. Sales: ₹{productDrilldownStats.fc.forecast30DRevenue.toLocaleString('en-IN')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Smart Restock Recommendation & WhatsApp Auto-PO */}
-              <div className="p-3 bg-white/10 border border-white/15 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div>
-                  <div className="text-xs font-bold text-white flex items-center space-x-1.5">
-                    <Truck className="w-4 h-4 text-indigo-400" />
-                    <span>21-Day Buffer Restock Advice:</span>
-                  </div>
-                  <p className="text-[11px] text-slate-300 mt-0.5">
-                    {productDrilldownStats.fc.suggestedReorderQty > 0 ? (
-                      <span>
-                        Recommend ordering <strong className="text-amber-300">{productDrilldownStats.fc.suggestedReorderQty} units</strong> from {selectedProductForBreakdown.supplier} (Est. Wholesale Cost: ₹{productDrilldownStats.fc.suggestedReorderCost.toLocaleString('en-IN')})
-                      </span>
-                    ) : (
-                      <span>Current stock ({selectedProductForBreakdown.currentStock} units) comfortably covers the next 21 days of consumer demand.</span>
-                    )}
-                  </p>
-                </div>
-
-                {productDrilldownStats.fc.suggestedReorderQty > 0 && (
-                  <button
-                    onClick={() => {
-                      const supp = suppliers.find(s => s.name === selectedProductForBreakdown.supplier) || suppliers[0];
-                      const cleanPhone = (supp?.phone || '+91-98200-11223').replace(/[^0-9]/g, '');
-                      const poNo = `PO-AI-${Date.now().toString().slice(-4)}`;
-                      const msg = `*PURCHASE ORDER: ${poNo}*\n*Supplier:* ${selectedProductForBreakdown.supplier}\n*Product:* ${selectedProductForBreakdown.name} (${selectedProductForBreakdown.sku})\n*Quantity Needed:* ${productDrilldownStats.fc.suggestedReorderQty} units\n*Estimated Amount:* ₹${productDrilldownStats.fc.suggestedReorderCost}\n*Delivery Requirement:* Urgent (Stockout buffer refill)\n*From:* ${business.name}`;
-                      window.open(`https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`, '_blank');
-                    }}
-                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shrink-0 shadow-sm"
-                  >
-                    <Share2 className="w-3.5 h-3.5" />
-                    <span>Order Restock via WhatsApp</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
             {/* SECTION 4: 12-MONTH HISTORICAL SALES VELOCITY & FESTIVAL SEASONS */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center">
-                  <TrendingUp className="w-4 h-4 mr-1.5 text-emerald-600" /> 12-Month Sales History &amp; Seasonal Trends
+                  <TrendingUp className="w-4 h-4 mr-1.5 text-emerald-600" /> 13-Month Sales History &amp; Seasonal Trends
                 </h4>
-                <span className="text-[10px] text-slate-500 font-medium">Oct 2025 &ndash; Sep 2026</span>
+                <span className="text-[10px] text-slate-500 font-medium">Oct 2025 &ndash; Oct 2026</span>
               </div>
 
               <div className="border border-slate-200 rounded-2xl overflow-hidden text-xs max-h-48 overflow-y-auto">
@@ -9994,10 +9162,10 @@ export default function App() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {productDrilldownStats.monthlyTrends.map(m => (
-                      <tr key={m.monthKey} className={m.monthKey === '2025-11' || m.monthKey === '2026-03' || m.monthKey === '2026-09' ? 'bg-amber-50/40' : 'hover:bg-slate-50'}>
+                      <tr key={m.monthKey} className={m.monthKey === '2025-11' || m.monthKey === '2026-03' || m.monthKey === '2026-09' || m.monthKey === '2026-10' ? 'bg-amber-50/40' : 'hover:bg-slate-50'}>
                         <td className="py-2 px-3 font-semibold text-slate-900 flex items-center space-x-1">
                           <span>{m.monthName}</span>
-                          {(m.monthKey === '2025-11' || m.monthKey === '2026-03' || m.monthKey === '2026-09') && (
+                          {(m.monthKey === '2025-11' || m.monthKey === '2026-03' || m.monthKey === '2026-09' || m.monthKey === '2026-10') && (
                             <Sparkles className="w-3 h-3 text-amber-500" />
                           )}
                         </td>
