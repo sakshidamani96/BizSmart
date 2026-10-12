@@ -676,7 +676,7 @@
       "category": "Staff Salaries",
       "amount": 20000,
       "date": "2026-10-01",
-      "notes": "Staff salary for Ajay Sharma + counter support"
+      "notes": "Staff salary for Amit Verma + counter support"
     },
     {
       "id": 61,
@@ -716,7 +716,7 @@
       "category": "Staff Salaries",
       "amount": 32000,
       "date": "2026-09-01",
-      "notes": "Monthly staff salary for Ajay Sharma + festival overtime helper allowance"
+      "notes": "Monthly staff salary for Amit Verma + festival overtime helper allowance"
     },
     {
       "id": 56,
@@ -756,7 +756,7 @@
       "category": "Staff Salaries",
       "amount": 28000,
       "date": "2026-08-01",
-      "notes": "Monthly staff salary for Ajay Sharma + festival overtime helper allowance"
+      "notes": "Monthly staff salary for Amit Verma + festival overtime helper allowance"
     },
     {
       "id": 51,
@@ -796,7 +796,7 @@
       "category": "Staff Salaries",
       "amount": 25000,
       "date": "2026-07-01",
-      "notes": "Monthly staff salary for Ajay Sharma (Cashier & Counter Operator)"
+      "notes": "Monthly staff salary for Amit Verma (Cashier & Counter Operator)"
     },
     {
       "id": 46,
@@ -836,7 +836,7 @@
       "category": "Staff Salaries",
       "amount": 25000,
       "date": "2026-06-01",
-      "notes": "Monthly staff salary for Ajay Sharma (Cashier & Counter Operator)"
+      "notes": "Monthly staff salary for Amit Verma (Cashier & Counter Operator)"
     },
     {
       "id": 41,
@@ -876,7 +876,7 @@
       "category": "Staff Salaries",
       "amount": 25000,
       "date": "2026-05-01",
-      "notes": "Monthly staff salary for Ajay Sharma (Cashier & Counter Operator)"
+      "notes": "Monthly staff salary for Amit Verma (Cashier & Counter Operator)"
     },
     {
       "id": 36,
@@ -916,7 +916,7 @@
       "category": "Staff Salaries",
       "amount": 25000,
       "date": "2026-04-01",
-      "notes": "Monthly staff salary for Ajay Sharma (Cashier & Counter Operator)"
+      "notes": "Monthly staff salary for Amit Verma (Cashier & Counter Operator)"
     },
     {
       "id": 31,
@@ -956,7 +956,7 @@
       "category": "Staff Salaries",
       "amount": 28000,
       "date": "2026-03-01",
-      "notes": "Monthly staff salary for Ajay Sharma + festival overtime helper allowance"
+      "notes": "Monthly staff salary for Amit Verma + festival overtime helper allowance"
     },
     {
       "id": 26,
@@ -996,7 +996,7 @@
       "category": "Staff Salaries",
       "amount": 25000,
       "date": "2026-02-01",
-      "notes": "Monthly staff salary for Ajay Sharma (Cashier & Counter Operator)"
+      "notes": "Monthly staff salary for Amit Verma (Cashier & Counter Operator)"
     },
     {
       "id": 21,
@@ -1036,7 +1036,7 @@
       "category": "Staff Salaries",
       "amount": 25000,
       "date": "2026-01-01",
-      "notes": "Monthly staff salary for Ajay Sharma (Cashier & Counter Operator)"
+      "notes": "Monthly staff salary for Amit Verma (Cashier & Counter Operator)"
     },
     {
       "id": 16,
@@ -1076,7 +1076,7 @@
       "category": "Staff Salaries",
       "amount": 26000,
       "date": "2025-12-01",
-      "notes": "Monthly staff salary for Ajay Sharma + festival overtime helper allowance"
+      "notes": "Monthly staff salary for Amit Verma + festival overtime helper allowance"
     },
     {
       "id": 11,
@@ -1116,7 +1116,7 @@
       "category": "Staff Salaries",
       "amount": 32000,
       "date": "2025-11-01",
-      "notes": "Monthly staff salary for Ajay Sharma + festival overtime helper allowance"
+      "notes": "Monthly staff salary for Amit Verma + festival overtime helper allowance"
     },
     {
       "id": 6,
@@ -1156,7 +1156,7 @@
       "category": "Staff Salaries",
       "amount": 28000,
       "date": "2025-10-01",
-      "notes": "Monthly staff salary for Ajay Sharma + festival overtime helper allowance"
+      "notes": "Monthly staff salary for Amit Verma + festival overtime helper allowance"
     },
     {
       "id": 1,
@@ -1471,7 +1471,7 @@
       "dateStr": "2026-10-12",
       "timestamp": "2026-10-12T11:06:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -2711,7 +2711,7 @@
       "dateStr": "2026-10-12",
       "timestamp": "2026-10-12T08:25:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -3759,7 +3759,7 @@
       "dateStr": "2026-10-11",
       "timestamp": "2026-10-11T18:19:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -5015,7 +5015,7 @@
       "dateStr": "2026-10-11",
       "timestamp": "2026-10-11T13:56:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -6255,7 +6255,7 @@
       "dateStr": "2026-10-11",
       "timestamp": "2026-10-11T09:33:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -6639,7 +6639,7 @@
       "dateStr": "2026-10-10",
       "timestamp": "2026-10-10T20:03:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -7895,7 +7895,7 @@
       "dateStr": "2026-10-10",
       "timestamp": "2026-10-10T15:40:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -9135,7 +9135,7 @@
       "dateStr": "2026-10-10",
       "timestamp": "2026-10-10T10:17:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -10095,7 +10095,7 @@
       "dateStr": "2026-10-09",
       "timestamp": "2026-10-09T19:30:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -11335,7 +11335,7 @@
       "dateStr": "2026-10-09",
       "timestamp": "2026-10-09T14:07:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -12591,7 +12591,7 @@
       "dateStr": "2026-10-09",
       "timestamp": "2026-10-09T09:44:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -13447,7 +13447,7 @@
       "dateStr": "2026-10-08",
       "timestamp": "2026-10-08T18:46:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -14687,7 +14687,7 @@
       "dateStr": "2026-10-08",
       "timestamp": "2026-10-08T13:23:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -15943,7 +15943,7 @@
       "dateStr": "2026-10-08",
       "timestamp": "2026-10-08T08:00:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -16135,7 +16135,7 @@
       "dateStr": "2026-10-07",
       "timestamp": "2026-10-07T20:08:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -17375,7 +17375,7 @@
       "dateStr": "2026-10-07",
       "timestamp": "2026-10-07T14:45:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -18631,7 +18631,7 @@
       "dateStr": "2026-10-07",
       "timestamp": "2026-10-07T08:22:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -19975,7 +19975,7 @@
       "dateStr": "2026-10-06",
       "timestamp": "2026-10-06T15:56:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -21215,7 +21215,7 @@
       "dateStr": "2026-10-06",
       "timestamp": "2026-10-06T09:33:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -21879,7 +21879,7 @@
       "dateStr": "2026-10-05",
       "timestamp": "2026-10-05T19:13:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -23135,7 +23135,7 @@
       "dateStr": "2026-10-05",
       "timestamp": "2026-10-05T12:50:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -24671,7 +24671,7 @@
       "dateStr": "2026-10-04",
       "timestamp": "2026-10-04T18:46:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -25911,7 +25911,7 @@
       "dateStr": "2026-10-04",
       "timestamp": "2026-10-04T13:23:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -27167,7 +27167,7 @@
       "dateStr": "2026-10-04",
       "timestamp": "2026-10-04T08:00:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -27919,7 +27919,7 @@
       "dateStr": "2026-10-03",
       "timestamp": "2026-10-03T17:51:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -29175,7 +29175,7 @@
       "dateStr": "2026-10-03",
       "timestamp": "2026-10-03T11:28:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -30607,7 +30607,7 @@
       "dateStr": "2026-10-02",
       "timestamp": "2026-10-02T17:13:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -31863,7 +31863,7 @@
       "dateStr": "2026-10-02",
       "timestamp": "2026-10-02T12:50:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -33207,7 +33207,7 @@
       "dateStr": "2026-10-01",
       "timestamp": "2026-10-01T19:24:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -34447,7 +34447,7 @@
       "dateStr": "2026-10-01",
       "timestamp": "2026-10-01T13:01:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -36111,7 +36111,7 @@
       "dateStr": "2026-09-30",
       "timestamp": "2026-09-30T20:15:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -37783,7 +37783,7 @@
       "dateStr": "2026-09-29",
       "timestamp": "2026-09-29T17:26:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -39439,7 +39439,7 @@
       "dateStr": "2026-09-29",
       "timestamp": "2026-09-29T15:37:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -41111,7 +41111,7 @@
       "dateStr": "2026-09-28",
       "timestamp": "2026-09-28T12:48:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -42767,7 +42767,7 @@
       "dateStr": "2026-09-27",
       "timestamp": "2026-09-27T10:59:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -44439,7 +44439,7 @@
       "dateStr": "2026-09-26",
       "timestamp": "2026-09-26T08:10:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -46095,7 +46095,7 @@
       "dateStr": "2026-09-26",
       "timestamp": "2026-09-26T18:21:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -47767,7 +47767,7 @@
       "dateStr": "2026-09-25",
       "timestamp": "2026-09-25T16:32:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -49423,7 +49423,7 @@
       "dateStr": "2026-09-24",
       "timestamp": "2026-09-24T14:43:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -51095,7 +51095,7 @@
       "dateStr": "2026-09-23",
       "timestamp": "2026-09-23T11:54:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -52751,7 +52751,7 @@
       "dateStr": "2026-09-22",
       "timestamp": "2026-09-22T09:05:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -54423,7 +54423,7 @@
       "dateStr": "2026-09-22",
       "timestamp": "2026-09-22T20:16:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -56079,7 +56079,7 @@
       "dateStr": "2026-09-21",
       "timestamp": "2026-09-21T17:27:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -57751,7 +57751,7 @@
       "dateStr": "2026-09-20",
       "timestamp": "2026-09-20T15:38:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -59407,7 +59407,7 @@
       "dateStr": "2026-09-19",
       "timestamp": "2026-09-19T12:49:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -61079,7 +61079,7 @@
       "dateStr": "2026-09-19",
       "timestamp": "2026-09-19T10:00:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -62735,7 +62735,7 @@
       "dateStr": "2026-09-18",
       "timestamp": "2026-09-18T08:11:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -64407,7 +64407,7 @@
       "dateStr": "2026-09-17",
       "timestamp": "2026-09-17T18:22:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -66063,7 +66063,7 @@
       "dateStr": "2026-09-16",
       "timestamp": "2026-09-16T16:33:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -67735,7 +67735,7 @@
       "dateStr": "2026-09-15",
       "timestamp": "2026-09-15T14:44:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -69391,7 +69391,7 @@
       "dateStr": "2026-09-15",
       "timestamp": "2026-09-15T11:55:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -71063,7 +71063,7 @@
       "dateStr": "2026-09-14",
       "timestamp": "2026-09-14T09:06:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -72719,7 +72719,7 @@
       "dateStr": "2026-09-13",
       "timestamp": "2026-09-13T20:17:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -74391,7 +74391,7 @@
       "dateStr": "2026-09-12",
       "timestamp": "2026-09-12T17:28:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -76047,7 +76047,7 @@
       "dateStr": "2026-09-11",
       "timestamp": "2026-09-11T15:39:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -77719,7 +77719,7 @@
       "dateStr": "2026-09-11",
       "timestamp": "2026-09-11T12:50:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -79375,7 +79375,7 @@
       "dateStr": "2026-09-10",
       "timestamp": "2026-09-10T10:01:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -81047,7 +81047,7 @@
       "dateStr": "2026-09-09",
       "timestamp": "2026-09-09T08:12:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -82703,7 +82703,7 @@
       "dateStr": "2026-09-08",
       "timestamp": "2026-09-08T18:23:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -84375,7 +84375,7 @@
       "dateStr": "2026-09-08",
       "timestamp": "2026-09-08T16:34:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -86031,7 +86031,7 @@
       "dateStr": "2026-09-07",
       "timestamp": "2026-09-07T14:45:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -87703,7 +87703,7 @@
       "dateStr": "2026-09-06",
       "timestamp": "2026-09-06T11:56:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -89359,7 +89359,7 @@
       "dateStr": "2026-09-05",
       "timestamp": "2026-09-05T09:07:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -91031,7 +91031,7 @@
       "dateStr": "2026-09-04",
       "timestamp": "2026-09-04T20:18:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -92687,7 +92687,7 @@
       "dateStr": "2026-09-04",
       "timestamp": "2026-09-04T17:29:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -94359,7 +94359,7 @@
       "dateStr": "2026-09-03",
       "timestamp": "2026-09-03T15:40:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -96015,7 +96015,7 @@
       "dateStr": "2026-09-02",
       "timestamp": "2026-09-02T12:51:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -97687,7 +97687,7 @@
       "dateStr": "2026-09-01",
       "timestamp": "2026-09-01T10:02:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -99343,7 +99343,7 @@
       "dateStr": "2026-09-01",
       "timestamp": "2026-09-01T08:13:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -99599,7 +99599,7 @@
       "dateStr": "2026-08-31",
       "timestamp": "2026-08-31T20:47:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -101063,7 +101063,7 @@
       "dateStr": "2026-08-30",
       "timestamp": "2026-08-30T17:58:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -102511,7 +102511,7 @@
       "dateStr": "2026-08-30",
       "timestamp": "2026-08-30T15:09:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -103975,7 +103975,7 @@
       "dateStr": "2026-08-29",
       "timestamp": "2026-08-29T12:20:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -105423,7 +105423,7 @@
       "dateStr": "2026-08-28",
       "timestamp": "2026-08-28T09:31:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -106887,7 +106887,7 @@
       "dateStr": "2026-08-27",
       "timestamp": "2026-08-27T19:42:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -108335,7 +108335,7 @@
       "dateStr": "2026-08-26",
       "timestamp": "2026-08-26T16:53:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -109799,7 +109799,7 @@
       "dateStr": "2026-08-25",
       "timestamp": "2026-08-25T14:04:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -111247,7 +111247,7 @@
       "dateStr": "2026-08-24",
       "timestamp": "2026-08-24T11:15:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -112711,7 +112711,7 @@
       "dateStr": "2026-08-23",
       "timestamp": "2026-08-23T08:26:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -114159,7 +114159,7 @@
       "dateStr": "2026-08-22",
       "timestamp": "2026-08-22T18:37:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -115623,7 +115623,7 @@
       "dateStr": "2026-08-21",
       "timestamp": "2026-08-21T15:48:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -117071,7 +117071,7 @@
       "dateStr": "2026-08-20",
       "timestamp": "2026-08-20T12:59:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -118535,7 +118535,7 @@
       "dateStr": "2026-08-19",
       "timestamp": "2026-08-19T10:10:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -119983,7 +119983,7 @@
       "dateStr": "2026-08-18",
       "timestamp": "2026-08-18T20:21:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -121447,7 +121447,7 @@
       "dateStr": "2026-08-17",
       "timestamp": "2026-08-17T17:32:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -122895,7 +122895,7 @@
       "dateStr": "2026-08-16",
       "timestamp": "2026-08-16T14:43:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -124359,7 +124359,7 @@
       "dateStr": "2026-08-15",
       "timestamp": "2026-08-15T11:54:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -125807,7 +125807,7 @@
       "dateStr": "2026-08-14",
       "timestamp": "2026-08-14T09:05:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -127271,7 +127271,7 @@
       "dateStr": "2026-08-13",
       "timestamp": "2026-08-13T19:16:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -128719,7 +128719,7 @@
       "dateStr": "2026-08-12",
       "timestamp": "2026-08-12T16:27:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -130183,7 +130183,7 @@
       "dateStr": "2026-08-11",
       "timestamp": "2026-08-11T13:38:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -131631,7 +131631,7 @@
       "dateStr": "2026-08-10",
       "timestamp": "2026-08-10T10:49:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -133095,7 +133095,7 @@
       "dateStr": "2026-08-09",
       "timestamp": "2026-08-09T08:00:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -134543,7 +134543,7 @@
       "dateStr": "2026-08-08",
       "timestamp": "2026-08-08T18:11:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -136007,7 +136007,7 @@
       "dateStr": "2026-08-07",
       "timestamp": "2026-08-07T15:22:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -137455,7 +137455,7 @@
       "dateStr": "2026-08-06",
       "timestamp": "2026-08-06T12:33:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -138919,7 +138919,7 @@
       "dateStr": "2026-08-06",
       "timestamp": "2026-08-06T09:44:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -140367,7 +140367,7 @@
       "dateStr": "2026-08-05",
       "timestamp": "2026-08-05T19:55:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -141831,7 +141831,7 @@
       "dateStr": "2026-08-04",
       "timestamp": "2026-08-04T17:06:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -143279,7 +143279,7 @@
       "dateStr": "2026-08-03",
       "timestamp": "2026-08-03T14:17:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -144743,7 +144743,7 @@
       "dateStr": "2026-08-02",
       "timestamp": "2026-08-02T11:28:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -146191,7 +146191,7 @@
       "dateStr": "2026-08-01",
       "timestamp": "2026-08-01T08:39:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -147599,7 +147599,7 @@
       "dateStr": "2026-07-30",
       "timestamp": "2026-07-30T18:17:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -148855,7 +148855,7 @@
       "dateStr": "2026-07-29",
       "timestamp": "2026-07-29T14:28:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -150095,7 +150095,7 @@
       "dateStr": "2026-07-28",
       "timestamp": "2026-07-28T11:39:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -151351,7 +151351,7 @@
       "dateStr": "2026-07-27",
       "timestamp": "2026-07-27T20:50:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -152591,7 +152591,7 @@
       "dateStr": "2026-07-26",
       "timestamp": "2026-07-26T17:01:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -153847,7 +153847,7 @@
       "dateStr": "2026-07-25",
       "timestamp": "2026-07-25T13:12:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -155087,7 +155087,7 @@
       "dateStr": "2026-07-23",
       "timestamp": "2026-07-23T10:23:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -156343,7 +156343,7 @@
       "dateStr": "2026-07-22",
       "timestamp": "2026-07-22T19:34:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -157583,7 +157583,7 @@
       "dateStr": "2026-07-21",
       "timestamp": "2026-07-21T16:45:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -158839,7 +158839,7 @@
       "dateStr": "2026-07-20",
       "timestamp": "2026-07-20T12:56:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -160079,7 +160079,7 @@
       "dateStr": "2026-07-19",
       "timestamp": "2026-07-19T09:07:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -161335,7 +161335,7 @@
       "dateStr": "2026-07-17",
       "timestamp": "2026-07-17T18:18:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -162575,7 +162575,7 @@
       "dateStr": "2026-07-16",
       "timestamp": "2026-07-16T15:29:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -163831,7 +163831,7 @@
       "dateStr": "2026-07-15",
       "timestamp": "2026-07-15T11:40:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -165071,7 +165071,7 @@
       "dateStr": "2026-07-14",
       "timestamp": "2026-07-14T08:51:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -166327,7 +166327,7 @@
       "dateStr": "2026-07-13",
       "timestamp": "2026-07-13T17:02:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -167567,7 +167567,7 @@
       "dateStr": "2026-07-12",
       "timestamp": "2026-07-12T14:13:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -168823,7 +168823,7 @@
       "dateStr": "2026-07-10",
       "timestamp": "2026-07-10T10:24:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -170063,7 +170063,7 @@
       "dateStr": "2026-07-09",
       "timestamp": "2026-07-09T20:35:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -171319,7 +171319,7 @@
       "dateStr": "2026-07-08",
       "timestamp": "2026-07-08T16:46:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -172559,7 +172559,7 @@
       "dateStr": "2026-07-07",
       "timestamp": "2026-07-07T13:57:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -173815,7 +173815,7 @@
       "dateStr": "2026-07-06",
       "timestamp": "2026-07-06T09:08:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -175055,7 +175055,7 @@
       "dateStr": "2026-07-04",
       "timestamp": "2026-07-04T19:19:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -176311,7 +176311,7 @@
       "dateStr": "2026-07-03",
       "timestamp": "2026-07-03T16:30:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -177551,7 +177551,7 @@
       "dateStr": "2026-07-02",
       "timestamp": "2026-07-02T12:41:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -178807,7 +178807,7 @@
       "dateStr": "2026-07-01",
       "timestamp": "2026-07-01T09:52:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -179279,7 +179279,7 @@
       "dateStr": "2026-06-30",
       "timestamp": "2026-06-30T20:22:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -180519,7 +180519,7 @@
       "dateStr": "2026-06-29",
       "timestamp": "2026-06-29T17:33:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -181775,7 +181775,7 @@
       "dateStr": "2026-06-28",
       "timestamp": "2026-06-28T13:44:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -183015,7 +183015,7 @@
       "dateStr": "2026-06-27",
       "timestamp": "2026-06-27T10:55:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -184271,7 +184271,7 @@
       "dateStr": "2026-06-26",
       "timestamp": "2026-06-26T19:06:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -185511,7 +185511,7 @@
       "dateStr": "2026-06-25",
       "timestamp": "2026-06-25T16:17:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -186767,7 +186767,7 @@
       "dateStr": "2026-06-23",
       "timestamp": "2026-06-23T12:28:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -188007,7 +188007,7 @@
       "dateStr": "2026-06-22",
       "timestamp": "2026-06-22T09:39:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -189263,7 +189263,7 @@
       "dateStr": "2026-06-21",
       "timestamp": "2026-06-21T18:50:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -190503,7 +190503,7 @@
       "dateStr": "2026-06-20",
       "timestamp": "2026-06-20T14:01:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -191759,7 +191759,7 @@
       "dateStr": "2026-06-19",
       "timestamp": "2026-06-19T11:12:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -192999,7 +192999,7 @@
       "dateStr": "2026-06-18",
       "timestamp": "2026-06-18T20:23:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -194255,7 +194255,7 @@
       "dateStr": "2026-06-16",
       "timestamp": "2026-06-16T17:34:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -195495,7 +195495,7 @@
       "dateStr": "2026-06-15",
       "timestamp": "2026-06-15T13:45:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -196751,7 +196751,7 @@
       "dateStr": "2026-06-14",
       "timestamp": "2026-06-14T10:56:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -197991,7 +197991,7 @@
       "dateStr": "2026-06-13",
       "timestamp": "2026-06-13T19:07:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -199247,7 +199247,7 @@
       "dateStr": "2026-06-12",
       "timestamp": "2026-06-12T16:18:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -200487,7 +200487,7 @@
       "dateStr": "2026-06-11",
       "timestamp": "2026-06-11T12:29:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -201743,7 +201743,7 @@
       "dateStr": "2026-06-09",
       "timestamp": "2026-06-09T09:40:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -202983,7 +202983,7 @@
       "dateStr": "2026-06-08",
       "timestamp": "2026-06-08T18:51:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -204239,7 +204239,7 @@
       "dateStr": "2026-06-07",
       "timestamp": "2026-06-07T15:02:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -205479,7 +205479,7 @@
       "dateStr": "2026-06-06",
       "timestamp": "2026-06-06T11:13:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -206735,7 +206735,7 @@
       "dateStr": "2026-06-05",
       "timestamp": "2026-06-05T08:24:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -207975,7 +207975,7 @@
       "dateStr": "2026-06-04",
       "timestamp": "2026-06-04T17:35:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -209231,7 +209231,7 @@
       "dateStr": "2026-06-02",
       "timestamp": "2026-06-02T13:46:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -210471,7 +210471,7 @@
       "dateStr": "2026-06-01",
       "timestamp": "2026-06-01T10:57:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -211431,7 +211431,7 @@
       "dateStr": "2026-05-31",
       "timestamp": "2026-05-31T20:32:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -212671,7 +212671,7 @@
       "dateStr": "2026-05-30",
       "timestamp": "2026-05-30T17:43:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -213927,7 +213927,7 @@
       "dateStr": "2026-05-29",
       "timestamp": "2026-05-29T13:54:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -215167,7 +215167,7 @@
       "dateStr": "2026-05-28",
       "timestamp": "2026-05-28T10:05:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -216423,7 +216423,7 @@
       "dateStr": "2026-05-27",
       "timestamp": "2026-05-27T20:16:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -217663,7 +217663,7 @@
       "dateStr": "2026-05-26",
       "timestamp": "2026-05-26T16:27:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -218919,7 +218919,7 @@
       "dateStr": "2026-05-24",
       "timestamp": "2026-05-24T13:38:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -220159,7 +220159,7 @@
       "dateStr": "2026-05-23",
       "timestamp": "2026-05-23T09:49:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -221415,7 +221415,7 @@
       "dateStr": "2026-05-22",
       "timestamp": "2026-05-22T19:00:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -222655,7 +222655,7 @@
       "dateStr": "2026-05-21",
       "timestamp": "2026-05-21T15:11:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -223911,7 +223911,7 @@
       "dateStr": "2026-05-20",
       "timestamp": "2026-05-20T12:22:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -225151,7 +225151,7 @@
       "dateStr": "2026-05-19",
       "timestamp": "2026-05-19T09:33:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -226407,7 +226407,7 @@
       "dateStr": "2026-05-17",
       "timestamp": "2026-05-17T18:44:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -227647,7 +227647,7 @@
       "dateStr": "2026-05-16",
       "timestamp": "2026-05-16T15:55:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -228903,7 +228903,7 @@
       "dateStr": "2026-05-15",
       "timestamp": "2026-05-15T11:06:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -230143,7 +230143,7 @@
       "dateStr": "2026-05-14",
       "timestamp": "2026-05-14T08:17:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -231399,7 +231399,7 @@
       "dateStr": "2026-05-13",
       "timestamp": "2026-05-13T17:28:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -232639,7 +232639,7 @@
       "dateStr": "2026-05-12",
       "timestamp": "2026-05-12T14:39:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -233895,7 +233895,7 @@
       "dateStr": "2026-05-10",
       "timestamp": "2026-05-10T11:50:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -235135,7 +235135,7 @@
       "dateStr": "2026-05-09",
       "timestamp": "2026-05-09T20:01:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -236391,7 +236391,7 @@
       "dateStr": "2026-05-08",
       "timestamp": "2026-05-08T17:12:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -237631,7 +237631,7 @@
       "dateStr": "2026-05-07",
       "timestamp": "2026-05-07T13:23:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -238887,7 +238887,7 @@
       "dateStr": "2026-05-06",
       "timestamp": "2026-05-06T10:34:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -240127,7 +240127,7 @@
       "dateStr": "2026-05-05",
       "timestamp": "2026-05-05T19:45:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -241383,7 +241383,7 @@
       "dateStr": "2026-05-03",
       "timestamp": "2026-05-03T16:56:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -242623,7 +242623,7 @@
       "dateStr": "2026-05-02",
       "timestamp": "2026-05-02T13:07:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -243879,7 +243879,7 @@
       "dateStr": "2026-05-01",
       "timestamp": "2026-05-01T09:18:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -245223,7 +245223,7 @@
       "dateStr": "2026-04-30",
       "timestamp": "2026-04-30T18:56:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -246463,7 +246463,7 @@
       "dateStr": "2026-04-29",
       "timestamp": "2026-04-29T15:07:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -247719,7 +247719,7 @@
       "dateStr": "2026-04-28",
       "timestamp": "2026-04-28T11:18:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -248959,7 +248959,7 @@
       "dateStr": "2026-04-26",
       "timestamp": "2026-04-26T08:29:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -250215,7 +250215,7 @@
       "dateStr": "2026-04-25",
       "timestamp": "2026-04-25T17:40:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -251455,7 +251455,7 @@
       "dateStr": "2026-04-24",
       "timestamp": "2026-04-24T14:51:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -252711,7 +252711,7 @@
       "dateStr": "2026-04-23",
       "timestamp": "2026-04-23T10:02:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -253951,7 +253951,7 @@
       "dateStr": "2026-04-22",
       "timestamp": "2026-04-22T20:13:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -255207,7 +255207,7 @@
       "dateStr": "2026-04-21",
       "timestamp": "2026-04-21T17:24:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -256447,7 +256447,7 @@
       "dateStr": "2026-04-19",
       "timestamp": "2026-04-19T13:35:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -257703,7 +257703,7 @@
       "dateStr": "2026-04-18",
       "timestamp": "2026-04-18T10:46:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -258943,7 +258943,7 @@
       "dateStr": "2026-04-17",
       "timestamp": "2026-04-17T19:57:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -260199,7 +260199,7 @@
       "dateStr": "2026-04-16",
       "timestamp": "2026-04-16T16:08:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -261439,7 +261439,7 @@
       "dateStr": "2026-04-15",
       "timestamp": "2026-04-15T12:19:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -262695,7 +262695,7 @@
       "dateStr": "2026-04-14",
       "timestamp": "2026-04-14T09:30:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -263935,7 +263935,7 @@
       "dateStr": "2026-04-13",
       "timestamp": "2026-04-13T18:41:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -265191,7 +265191,7 @@
       "dateStr": "2026-04-11",
       "timestamp": "2026-04-11T15:52:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -266431,7 +266431,7 @@
       "dateStr": "2026-04-10",
       "timestamp": "2026-04-10T11:03:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -267687,7 +267687,7 @@
       "dateStr": "2026-04-09",
       "timestamp": "2026-04-09T08:14:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -268927,7 +268927,7 @@
       "dateStr": "2026-04-08",
       "timestamp": "2026-04-08T17:25:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -270183,7 +270183,7 @@
       "dateStr": "2026-04-07",
       "timestamp": "2026-04-07T14:36:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -271423,7 +271423,7 @@
       "dateStr": "2026-04-06",
       "timestamp": "2026-04-06T10:47:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -272679,7 +272679,7 @@
       "dateStr": "2026-04-05",
       "timestamp": "2026-04-05T20:58:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -273919,7 +273919,7 @@
       "dateStr": "2026-04-03",
       "timestamp": "2026-04-03T16:09:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -275175,7 +275175,7 @@
       "dateStr": "2026-04-02",
       "timestamp": "2026-04-02T13:20:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -276415,7 +276415,7 @@
       "dateStr": "2026-04-01",
       "timestamp": "2026-04-01T09:31:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -278527,7 +278527,7 @@
       "dateStr": "2026-03-31",
       "timestamp": "2026-03-31T18:21:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -279991,7 +279991,7 @@
       "dateStr": "2026-03-30",
       "timestamp": "2026-03-30T15:32:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -281439,7 +281439,7 @@
       "dateStr": "2026-03-29",
       "timestamp": "2026-03-29T12:43:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -282903,7 +282903,7 @@
       "dateStr": "2026-03-28",
       "timestamp": "2026-03-28T09:54:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -284351,7 +284351,7 @@
       "dateStr": "2026-03-27",
       "timestamp": "2026-03-27T20:05:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -285815,7 +285815,7 @@
       "dateStr": "2026-03-26",
       "timestamp": "2026-03-26T17:16:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -287263,7 +287263,7 @@
       "dateStr": "2026-03-25",
       "timestamp": "2026-03-25T14:27:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -288727,7 +288727,7 @@
       "dateStr": "2026-03-24",
       "timestamp": "2026-03-24T11:38:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -290175,7 +290175,7 @@
       "dateStr": "2026-03-23",
       "timestamp": "2026-03-23T09:49:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -291639,7 +291639,7 @@
       "dateStr": "2026-03-22",
       "timestamp": "2026-03-22T19:00:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -293087,7 +293087,7 @@
       "dateStr": "2026-03-21",
       "timestamp": "2026-03-21T16:11:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -294551,7 +294551,7 @@
       "dateStr": "2026-03-20",
       "timestamp": "2026-03-20T13:22:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -295999,7 +295999,7 @@
       "dateStr": "2026-03-19",
       "timestamp": "2026-03-19T11:33:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -297463,7 +297463,7 @@
       "dateStr": "2026-03-18",
       "timestamp": "2026-03-18T08:44:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -298911,7 +298911,7 @@
       "dateStr": "2026-03-17",
       "timestamp": "2026-03-17T18:55:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -300375,7 +300375,7 @@
       "dateStr": "2026-03-17",
       "timestamp": "2026-03-17T15:06:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -301823,7 +301823,7 @@
       "dateStr": "2026-03-16",
       "timestamp": "2026-03-16T13:17:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -303287,7 +303287,7 @@
       "dateStr": "2026-03-15",
       "timestamp": "2026-03-15T10:28:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -304735,7 +304735,7 @@
       "dateStr": "2026-03-14",
       "timestamp": "2026-03-14T20:39:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -306199,7 +306199,7 @@
       "dateStr": "2026-03-13",
       "timestamp": "2026-03-13T17:50:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -307647,7 +307647,7 @@
       "dateStr": "2026-03-12",
       "timestamp": "2026-03-12T15:01:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -309111,7 +309111,7 @@
       "dateStr": "2026-03-11",
       "timestamp": "2026-03-11T12:12:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -310559,7 +310559,7 @@
       "dateStr": "2026-03-10",
       "timestamp": "2026-03-10T09:23:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -312023,7 +312023,7 @@
       "dateStr": "2026-03-09",
       "timestamp": "2026-03-09T19:34:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -313471,7 +313471,7 @@
       "dateStr": "2026-03-08",
       "timestamp": "2026-03-08T17:45:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -314935,7 +314935,7 @@
       "dateStr": "2026-03-07",
       "timestamp": "2026-03-07T14:56:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -316383,7 +316383,7 @@
       "dateStr": "2026-03-06",
       "timestamp": "2026-03-06T11:07:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -317847,7 +317847,7 @@
       "dateStr": "2026-03-05",
       "timestamp": "2026-03-05T08:18:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -319295,7 +319295,7 @@
       "dateStr": "2026-03-04",
       "timestamp": "2026-03-04T19:29:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -320759,7 +320759,7 @@
       "dateStr": "2026-03-03",
       "timestamp": "2026-03-03T16:40:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -322207,7 +322207,7 @@
       "dateStr": "2026-03-02",
       "timestamp": "2026-03-02T13:51:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -323671,7 +323671,7 @@
       "dateStr": "2026-03-02",
       "timestamp": "2026-03-02T10:02:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -325119,7 +325119,7 @@
       "dateStr": "2026-03-01",
       "timestamp": "2026-03-01T08:13:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -325535,7 +325535,7 @@
       "dateStr": "2026-02-28",
       "timestamp": "2026-02-28T20:41:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -326791,7 +326791,7 @@
       "dateStr": "2026-02-27",
       "timestamp": "2026-02-27T16:52:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -328031,7 +328031,7 @@
       "dateStr": "2026-02-26",
       "timestamp": "2026-02-26T12:03:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -329287,7 +329287,7 @@
       "dateStr": "2026-02-25",
       "timestamp": "2026-02-25T09:14:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -330527,7 +330527,7 @@
       "dateStr": "2026-02-24",
       "timestamp": "2026-02-24T18:25:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -331783,7 +331783,7 @@
       "dateStr": "2026-02-23",
       "timestamp": "2026-02-23T14:36:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -333023,7 +333023,7 @@
       "dateStr": "2026-02-21",
       "timestamp": "2026-02-21T10:47:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -334279,7 +334279,7 @@
       "dateStr": "2026-02-20",
       "timestamp": "2026-02-20T20:58:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -335519,7 +335519,7 @@
       "dateStr": "2026-02-19",
       "timestamp": "2026-02-19T16:09:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -336775,7 +336775,7 @@
       "dateStr": "2026-02-18",
       "timestamp": "2026-02-18T12:20:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -338015,7 +338015,7 @@
       "dateStr": "2026-02-17",
       "timestamp": "2026-02-17T09:31:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -339271,7 +339271,7 @@
       "dateStr": "2026-02-16",
       "timestamp": "2026-02-16T18:42:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -340511,7 +340511,7 @@
       "dateStr": "2026-02-15",
       "timestamp": "2026-02-15T14:53:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -341767,7 +341767,7 @@
       "dateStr": "2026-02-13",
       "timestamp": "2026-02-13T11:04:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -343007,7 +343007,7 @@
       "dateStr": "2026-02-12",
       "timestamp": "2026-02-12T20:15:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -344263,7 +344263,7 @@
       "dateStr": "2026-02-11",
       "timestamp": "2026-02-11T16:26:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -345503,7 +345503,7 @@
       "dateStr": "2026-02-10",
       "timestamp": "2026-02-10T12:37:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -346759,7 +346759,7 @@
       "dateStr": "2026-02-09",
       "timestamp": "2026-02-09T09:48:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -347999,7 +347999,7 @@
       "dateStr": "2026-02-08",
       "timestamp": "2026-02-08T18:59:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -349255,7 +349255,7 @@
       "dateStr": "2026-02-07",
       "timestamp": "2026-02-07T14:10:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -350495,7 +350495,7 @@
       "dateStr": "2026-02-05",
       "timestamp": "2026-02-05T11:21:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -351751,7 +351751,7 @@
       "dateStr": "2026-02-04",
       "timestamp": "2026-02-04T20:32:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -352991,7 +352991,7 @@
       "dateStr": "2026-02-03",
       "timestamp": "2026-02-03T16:43:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -354247,7 +354247,7 @@
       "dateStr": "2026-02-02",
       "timestamp": "2026-02-02T13:54:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -355487,7 +355487,7 @@
       "dateStr": "2026-02-01",
       "timestamp": "2026-02-01T09:05:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -356063,7 +356063,7 @@
       "dateStr": "2026-01-31",
       "timestamp": "2026-01-31T20:37:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -357319,7 +357319,7 @@
       "dateStr": "2026-01-30",
       "timestamp": "2026-01-30T17:48:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -358559,7 +358559,7 @@
       "dateStr": "2026-01-29",
       "timestamp": "2026-01-29T13:59:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -359815,7 +359815,7 @@
       "dateStr": "2026-01-28",
       "timestamp": "2026-01-28T10:10:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -361055,7 +361055,7 @@
       "dateStr": "2026-01-27",
       "timestamp": "2026-01-27T20:21:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -362311,7 +362311,7 @@
       "dateStr": "2026-01-26",
       "timestamp": "2026-01-26T16:32:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -363551,7 +363551,7 @@
       "dateStr": "2026-01-25",
       "timestamp": "2026-01-25T13:43:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -364807,7 +364807,7 @@
       "dateStr": "2026-01-23",
       "timestamp": "2026-01-23T10:54:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -366047,7 +366047,7 @@
       "dateStr": "2026-01-22",
       "timestamp": "2026-01-22T19:05:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -367303,7 +367303,7 @@
       "dateStr": "2026-01-21",
       "timestamp": "2026-01-21T16:16:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -368543,7 +368543,7 @@
       "dateStr": "2026-01-20",
       "timestamp": "2026-01-20T12:27:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -369799,7 +369799,7 @@
       "dateStr": "2026-01-19",
       "timestamp": "2026-01-19T09:38:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -371039,7 +371039,7 @@
       "dateStr": "2026-01-18",
       "timestamp": "2026-01-18T19:49:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -372295,7 +372295,7 @@
       "dateStr": "2026-01-16",
       "timestamp": "2026-01-16T15:00:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -373535,7 +373535,7 @@
       "dateStr": "2026-01-15",
       "timestamp": "2026-01-15T12:11:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -374791,7 +374791,7 @@
       "dateStr": "2026-01-14",
       "timestamp": "2026-01-14T09:22:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -376031,7 +376031,7 @@
       "dateStr": "2026-01-13",
       "timestamp": "2026-01-13T18:33:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -377287,7 +377287,7 @@
       "dateStr": "2026-01-12",
       "timestamp": "2026-01-12T15:44:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -378527,7 +378527,7 @@
       "dateStr": "2026-01-11",
       "timestamp": "2026-01-11T11:55:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -379783,7 +379783,7 @@
       "dateStr": "2026-01-10",
       "timestamp": "2026-01-10T08:06:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -381023,7 +381023,7 @@
       "dateStr": "2026-01-08",
       "timestamp": "2026-01-08T18:17:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -382279,7 +382279,7 @@
       "dateStr": "2026-01-07",
       "timestamp": "2026-01-07T14:28:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -383519,7 +383519,7 @@
       "dateStr": "2026-01-06",
       "timestamp": "2026-01-06T11:39:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -384775,7 +384775,7 @@
       "dateStr": "2026-01-05",
       "timestamp": "2026-01-05T08:50:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -386015,7 +386015,7 @@
       "dateStr": "2026-01-04",
       "timestamp": "2026-01-04T17:01:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -387271,7 +387271,7 @@
       "dateStr": "2026-01-03",
       "timestamp": "2026-01-03T14:12:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -388511,7 +388511,7 @@
       "dateStr": "2026-01-01",
       "timestamp": "2026-01-01T10:23:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -390679,7 +390679,7 @@
       "dateStr": "2025-12-31",
       "timestamp": "2025-12-31T18:10:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -392127,7 +392127,7 @@
       "dateStr": "2025-12-30",
       "timestamp": "2025-12-30T15:21:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -393591,7 +393591,7 @@
       "dateStr": "2025-12-29",
       "timestamp": "2025-12-29T12:32:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -395039,7 +395039,7 @@
       "dateStr": "2025-12-28",
       "timestamp": "2025-12-28T09:43:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -396503,7 +396503,7 @@
       "dateStr": "2025-12-26",
       "timestamp": "2025-12-26T19:54:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -397951,7 +397951,7 @@
       "dateStr": "2025-12-25",
       "timestamp": "2025-12-25T16:05:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -399415,7 +399415,7 @@
       "dateStr": "2025-12-24",
       "timestamp": "2025-12-24T12:16:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -400863,7 +400863,7 @@
       "dateStr": "2025-12-23",
       "timestamp": "2025-12-23T09:27:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -402327,7 +402327,7 @@
       "dateStr": "2025-12-22",
       "timestamp": "2025-12-22T19:38:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -403775,7 +403775,7 @@
       "dateStr": "2025-12-21",
       "timestamp": "2025-12-21T16:49:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -405239,7 +405239,7 @@
       "dateStr": "2025-12-20",
       "timestamp": "2025-12-20T13:00:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -406687,7 +406687,7 @@
       "dateStr": "2025-12-19",
       "timestamp": "2025-12-19T10:11:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -408151,7 +408151,7 @@
       "dateStr": "2025-12-18",
       "timestamp": "2025-12-18T20:22:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -409599,7 +409599,7 @@
       "dateStr": "2025-12-17",
       "timestamp": "2025-12-17T17:33:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -411063,7 +411063,7 @@
       "dateStr": "2025-12-16",
       "timestamp": "2025-12-16T14:44:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -412511,7 +412511,7 @@
       "dateStr": "2025-12-15",
       "timestamp": "2025-12-15T10:55:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -413975,7 +413975,7 @@
       "dateStr": "2025-12-14",
       "timestamp": "2025-12-14T20:06:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -415423,7 +415423,7 @@
       "dateStr": "2025-12-13",
       "timestamp": "2025-12-13T17:17:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -416887,7 +416887,7 @@
       "dateStr": "2025-12-12",
       "timestamp": "2025-12-12T14:28:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -418335,7 +418335,7 @@
       "dateStr": "2025-12-11",
       "timestamp": "2025-12-11T11:39:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -419799,7 +419799,7 @@
       "dateStr": "2025-12-09",
       "timestamp": "2025-12-09T08:50:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -421247,7 +421247,7 @@
       "dateStr": "2025-12-08",
       "timestamp": "2025-12-08T18:01:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -422711,7 +422711,7 @@
       "dateStr": "2025-12-07",
       "timestamp": "2025-12-07T15:12:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -424159,7 +424159,7 @@
       "dateStr": "2025-12-06",
       "timestamp": "2025-12-06T12:23:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -425623,7 +425623,7 @@
       "dateStr": "2025-12-05",
       "timestamp": "2025-12-05T08:34:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -427071,7 +427071,7 @@
       "dateStr": "2025-12-04",
       "timestamp": "2025-12-04T18:45:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -428535,7 +428535,7 @@
       "dateStr": "2025-12-03",
       "timestamp": "2025-12-03T15:56:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -429983,7 +429983,7 @@
       "dateStr": "2025-12-02",
       "timestamp": "2025-12-02T12:07:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -431447,7 +431447,7 @@
       "dateStr": "2025-12-01",
       "timestamp": "2025-12-01T09:18:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -432359,7 +432359,7 @@
       "dateStr": "2025-11-30",
       "timestamp": "2025-11-30T20:04:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -434015,7 +434015,7 @@
       "dateStr": "2025-11-30",
       "timestamp": "2025-11-30T18:15:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -435687,7 +435687,7 @@
       "dateStr": "2025-11-29",
       "timestamp": "2025-11-29T16:26:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -437343,7 +437343,7 @@
       "dateStr": "2025-11-28",
       "timestamp": "2025-11-28T13:37:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -439015,7 +439015,7 @@
       "dateStr": "2025-11-27",
       "timestamp": "2025-11-27T11:48:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -440671,7 +440671,7 @@
       "dateStr": "2025-11-27",
       "timestamp": "2025-11-27T09:59:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -442343,7 +442343,7 @@
       "dateStr": "2025-11-26",
       "timestamp": "2025-11-26T19:10:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -443999,7 +443999,7 @@
       "dateStr": "2025-11-25",
       "timestamp": "2025-11-25T17:21:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -445671,7 +445671,7 @@
       "dateStr": "2025-11-24",
       "timestamp": "2025-11-24T15:32:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -447327,7 +447327,7 @@
       "dateStr": "2025-11-24",
       "timestamp": "2025-11-24T12:43:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -448999,7 +448999,7 @@
       "dateStr": "2025-11-23",
       "timestamp": "2025-11-23T10:54:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -450655,7 +450655,7 @@
       "dateStr": "2025-11-22",
       "timestamp": "2025-11-22T08:05:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -452327,7 +452327,7 @@
       "dateStr": "2025-11-21",
       "timestamp": "2025-11-21T18:16:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -453983,7 +453983,7 @@
       "dateStr": "2025-11-20",
       "timestamp": "2025-11-20T16:27:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -455655,7 +455655,7 @@
       "dateStr": "2025-11-20",
       "timestamp": "2025-11-20T14:38:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -457311,7 +457311,7 @@
       "dateStr": "2025-11-19",
       "timestamp": "2025-11-19T11:49:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -458983,7 +458983,7 @@
       "dateStr": "2025-11-18",
       "timestamp": "2025-11-18T09:00:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -460639,7 +460639,7 @@
       "dateStr": "2025-11-17",
       "timestamp": "2025-11-17T20:11:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -462311,7 +462311,7 @@
       "dateStr": "2025-11-17",
       "timestamp": "2025-11-17T17:22:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -463967,7 +463967,7 @@
       "dateStr": "2025-11-16",
       "timestamp": "2025-11-16T15:33:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -465639,7 +465639,7 @@
       "dateStr": "2025-11-15",
       "timestamp": "2025-11-15T13:44:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -467295,7 +467295,7 @@
       "dateStr": "2025-11-14",
       "timestamp": "2025-11-14T10:55:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -468967,7 +468967,7 @@
       "dateStr": "2025-11-14",
       "timestamp": "2025-11-14T08:06:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -470623,7 +470623,7 @@
       "dateStr": "2025-11-13",
       "timestamp": "2025-11-13T19:17:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -472295,7 +472295,7 @@
       "dateStr": "2025-11-12",
       "timestamp": "2025-11-12T16:28:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -473951,7 +473951,7 @@
       "dateStr": "2025-11-11",
       "timestamp": "2025-11-11T14:39:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -475623,7 +475623,7 @@
       "dateStr": "2025-11-11",
       "timestamp": "2025-11-11T12:50:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -477279,7 +477279,7 @@
       "dateStr": "2025-11-10",
       "timestamp": "2025-11-10T10:01:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -478951,7 +478951,7 @@
       "dateStr": "2025-11-09",
       "timestamp": "2025-11-09T20:12:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -480607,7 +480607,7 @@
       "dateStr": "2025-11-08",
       "timestamp": "2025-11-08T18:23:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -482279,7 +482279,7 @@
       "dateStr": "2025-11-07",
       "timestamp": "2025-11-07T16:34:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -483935,7 +483935,7 @@
       "dateStr": "2025-11-07",
       "timestamp": "2025-11-07T13:45:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -485607,7 +485607,7 @@
       "dateStr": "2025-11-06",
       "timestamp": "2025-11-06T11:56:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -487263,7 +487263,7 @@
       "dateStr": "2025-11-05",
       "timestamp": "2025-11-05T09:07:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -488935,7 +488935,7 @@
       "dateStr": "2025-11-04",
       "timestamp": "2025-11-04T19:18:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -490591,7 +490591,7 @@
       "dateStr": "2025-11-04",
       "timestamp": "2025-11-04T17:29:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -492263,7 +492263,7 @@
       "dateStr": "2025-11-03",
       "timestamp": "2025-11-03T15:40:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -493919,7 +493919,7 @@
       "dateStr": "2025-11-02",
       "timestamp": "2025-11-02T12:51:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -495591,7 +495591,7 @@
       "dateStr": "2025-11-01",
       "timestamp": "2025-11-01T10:02:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -497247,7 +497247,7 @@
       "dateStr": "2025-11-01",
       "timestamp": "2025-11-01T08:13:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -498399,7 +498399,7 @@
       "dateStr": "2025-10-31",
       "timestamp": "2025-10-31T19:53:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -499863,7 +499863,7 @@
       "dateStr": "2025-10-30",
       "timestamp": "2025-10-30T16:04:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -501311,7 +501311,7 @@
       "dateStr": "2025-10-29",
       "timestamp": "2025-10-29T13:15:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -502775,7 +502775,7 @@
       "dateStr": "2025-10-28",
       "timestamp": "2025-10-28T10:26:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -504223,7 +504223,7 @@
       "dateStr": "2025-10-27",
       "timestamp": "2025-10-27T20:37:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -505687,7 +505687,7 @@
       "dateStr": "2025-10-26",
       "timestamp": "2025-10-26T17:48:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -507135,7 +507135,7 @@
       "dateStr": "2025-10-25",
       "timestamp": "2025-10-25T14:59:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -508599,7 +508599,7 @@
       "dateStr": "2025-10-24",
       "timestamp": "2025-10-24T11:10:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -510047,7 +510047,7 @@
       "dateStr": "2025-10-23",
       "timestamp": "2025-10-23T08:21:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -511511,7 +511511,7 @@
       "dateStr": "2025-10-22",
       "timestamp": "2025-10-22T19:32:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -512959,7 +512959,7 @@
       "dateStr": "2025-10-21",
       "timestamp": "2025-10-21T16:43:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -514423,7 +514423,7 @@
       "dateStr": "2025-10-20",
       "timestamp": "2025-10-20T13:54:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -515871,7 +515871,7 @@
       "dateStr": "2025-10-19",
       "timestamp": "2025-10-19T10:05:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -517335,7 +517335,7 @@
       "dateStr": "2025-10-18",
       "timestamp": "2025-10-18T20:16:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -518783,7 +518783,7 @@
       "dateStr": "2025-10-17",
       "timestamp": "2025-10-17T17:27:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -520247,7 +520247,7 @@
       "dateStr": "2025-10-16",
       "timestamp": "2025-10-16T14:38:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -521695,7 +521695,7 @@
       "dateStr": "2025-10-15",
       "timestamp": "2025-10-15T11:49:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -523159,7 +523159,7 @@
       "dateStr": "2025-10-14",
       "timestamp": "2025-10-14T08:00:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -524607,7 +524607,7 @@
       "dateStr": "2025-10-13",
       "timestamp": "2025-10-13T19:11:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -526071,7 +526071,7 @@
       "dateStr": "2025-10-12",
       "timestamp": "2025-10-12T16:22:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -527519,7 +527519,7 @@
       "dateStr": "2025-10-11",
       "timestamp": "2025-10-11T13:33:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -528983,7 +528983,7 @@
       "dateStr": "2025-10-10",
       "timestamp": "2025-10-10T10:44:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -530431,7 +530431,7 @@
       "dateStr": "2025-10-09",
       "timestamp": "2025-10-09T20:55:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -531895,7 +531895,7 @@
       "dateStr": "2025-10-08",
       "timestamp": "2025-10-08T17:06:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -533343,7 +533343,7 @@
       "dateStr": "2025-10-07",
       "timestamp": "2025-10-07T14:17:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -534807,7 +534807,7 @@
       "dateStr": "2025-10-06",
       "timestamp": "2025-10-06T11:28:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -536255,7 +536255,7 @@
       "dateStr": "2025-10-05",
       "timestamp": "2025-10-05T08:39:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -537719,7 +537719,7 @@
       "dateStr": "2025-10-04",
       "timestamp": "2025-10-04T19:50:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -539167,7 +539167,7 @@
       "dateStr": "2025-10-03",
       "timestamp": "2025-10-03T16:01:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -540631,7 +540631,7 @@
       "dateStr": "2025-10-02",
       "timestamp": "2025-10-02T13:12:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },
@@ -542079,7 +542079,7 @@
       "dateStr": "2025-10-01",
       "timestamp": "2025-10-01T10:23:00.000Z",
       "customer": {
-        "name": "Rahul Sharma (Regular Shopper)",
+        "name": "Rahul Verma (Regular Shopper)",
         "phone": "+91-98111-22334",
         "city": "Block B, Sector 15"
       },

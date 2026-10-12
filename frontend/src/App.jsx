@@ -174,7 +174,18 @@ export default function App() {
   const [registeredOwners, setRegisteredOwners] = useState(() => {
     try {
       const saved = localStorage.getItem('bizsmart_registered_owners');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map(o => {
+            let sName = o.storeName;
+            if (!sName || /sharma\s*kirana/i.test(sName)) sName = 'Damani Retails';
+            let oName = o.name;
+            if (!oName || /sharma/i.test(oName)) oName = 'Damani Retails Owner';
+            return { ...o, storeName: sName, name: oName };
+          });
+        }
+      }
     } catch (e) {
       console.warn('Failed to parse saved owners', e);
     }
@@ -217,7 +228,13 @@ export default function App() {
   const [business, setBusiness] = useState(() => {
     try {
       const saved = localStorage.getItem('bizsmart_active_store');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (!parsed.name || /sharma\s*kirana/i.test(parsed.name)) {
+          parsed.name = 'Damani Retails';
+        }
+        return parsed;
+      }
     } catch (e) {
       console.warn('Failed to parse active store', e);
     }
@@ -307,6 +324,34 @@ export default function App() {
     }
   }, [business]);
 
+  // One-time automatic cleanup to eradicate any stale 'Sharma Kirana' in browser localStorage
+  useEffect(() => {
+    try {
+      const activeStoreStr = localStorage.getItem('bizsmart_active_store');
+      if (activeStoreStr && /sharma\s*kirana/i.test(activeStoreStr)) {
+        const updated = JSON.parse(activeStoreStr);
+        updated.name = 'Damani Retails';
+        localStorage.setItem('bizsmart_active_store', JSON.stringify(updated));
+        setBusiness(updated);
+      }
+      const savedOwnersStr = localStorage.getItem('bizsmart_registered_owners');
+      if (savedOwnersStr && /sharma\s*kirana/i.test(savedOwnersStr)) {
+        const owners = JSON.parse(savedOwnersStr).map(o => ({
+          ...o,
+          storeName: /sharma\s*kirana/i.test(o.storeName || '') ? 'Damani Retails' : o.storeName,
+          name: /sharma/i.test(o.name || '') ? 'Damani Retails Owner' : o.name
+        }));
+        localStorage.setItem('bizsmart_registered_owners', JSON.stringify(owners));
+        setRegisteredOwners(owners);
+      }
+    } catch (e) {
+      console.warn('Migration cleanup error', e);
+    }
+  }, []);
+
+  // Dynamically resolved active store name for the current session & billing
+  const currentStoreName = (currentUser && currentUser.storeName) || (business && business.name) || 'Damani Retails';
+
 
   // -------------------------------------------------------------
   // SUPPLIERS STATE (Wholesale suppliers directory)
@@ -326,7 +371,7 @@ export default function App() {
   // PLATFORM STORES (Default ₹0 GMV)
   // -------------------------------------------------------------
   const [platformStores, setPlatformStores] = useState([
-    { id: 1, name: 'New Business Retail Store', owner: 'Rajesh Sharma', city: 'Delhi', phone: '+91-98100-22334', gmv: '₹0', skus: products.length, status: 'ACTIVE' }
+    { id: 1, name: 'Damani Retails', owner: 'Store Owner', city: 'Delhi', phone: '+91-98100-22334', gmv: '₹0', skus: products.length, status: 'ACTIVE' }
   ]);
 
   // -------------------------------------------------------------
@@ -336,7 +381,7 @@ export default function App() {
   // -------------------------------------------------------------
   const [customers, setCustomers] = useState([
     { id: 1, name: 'Walk-in Retail Customer', phone: '+91-98000-00000', balance: 0, limit: 5000, city: 'Local Area', lastBillDate: '-', loyaltyPoints: 40, totalVisits: 2, lifetimeSpent: 4000 },
-    { id: 2, name: 'Rahul Sharma (Regular Shopper)', phone: '+91-98111-22334', balance: 0, limit: 10000, city: 'Block B, Sector 15', lastBillDate: 'Yesterday', loyaltyPoints: 125, totalVisits: 6, lifetimeSpent: 12500 }
+    { id: 2, name: 'Rahul Verma (Regular Shopper)', phone: '+91-98111-22334', balance: 0, limit: 10000, city: 'Block B, Sector 15', lastBillDate: 'Yesterday', loyaltyPoints: 125, totalVisits: 6, lifetimeSpent: 12500 }
   ]);
 
   // -------------------------------------------------------------
@@ -958,7 +1003,8 @@ export default function App() {
       email: cleanEmail,
       name: `${newOwnerProfile.name} (Owner)`,
       role: 'OWNER',
-      roleTitle: 'Store Owner'
+      roleTitle: 'Store Owner',
+      storeName: newOwnerProfile.storeName
     });
     setIsAuthenticated(true);
     setActiveTab('dashboard'); // Takes owner directly to their store dashboard!
@@ -1063,8 +1109,9 @@ export default function App() {
         return;
       }
       // Load this owner's store profile
+      const loggedStoreName = ownerMatch.storeName || business.name || 'Damani Retails';
       setBusiness({
-        name: ownerMatch.storeName || business.name,
+        name: loggedStoreName,
         tagline: ownerMatch.tagline || business.tagline,
         address: ownerMatch.address || business.address,
         gstin: ownerMatch.gstin || business.gstin,
@@ -1074,7 +1121,8 @@ export default function App() {
         email: ownerMatch.email,
         name: `${ownerMatch.name} (Owner)`,
         role: 'OWNER',
-        roleTitle: 'Store Owner'
+        roleTitle: 'Store Owner',
+        storeName: loggedStoreName
       });
       setIsAuthenticated(true);
       setActiveTab('dashboard'); // Opens Owner Dashboard
@@ -1096,7 +1144,8 @@ export default function App() {
         name: `${empMatch.name} (${empMatch.role || (hasBilling ? 'Cashier' : 'Staff')})`,
         role: 'EMPLOYEE',
         roleTitle: empMatch.role || (hasBilling ? 'Cashier & POS Operator' : 'Inventory Associate'),
-        billingAccess: hasBilling
+        billingAccess: hasBilling,
+        storeName: empMatch.storeName || business.name || 'Damani Retails'
       });
       setIsAuthenticated(true);
       setActiveTab(hasBilling ? 'employee-dashboard' : 'inventory');
@@ -1322,6 +1371,7 @@ export default function App() {
       splitUpi: paymentMode === 'SPLIT' ? finalUpiPart : 0,
       tenderGiven: tenderGivenNum > 0 ? tenderGivenNum : finalCashPart,
       changeReturned: changeToReturn,
+      storeName: currentStoreName,
       cashier: currentUser ? currentUser.name : 'Amit Verma',
       shiftId: activeShift ? activeShift.id : 'SHIFT-101'
     };
@@ -3498,7 +3548,7 @@ export default function App() {
                 <div className="flex items-center">
                   <span className="text-xl font-black tracking-tight text-slate-900">Biz<span className="text-sky-600">Smart</span></span>
                 </div>
-                <p className="text-[11px] text-slate-500 font-medium truncate max-w-[170px] sm:max-w-none">{business.name}</p>
+                <p className="text-[11px] text-slate-500 font-medium truncate max-w-[170px] sm:max-w-none">{currentStoreName}</p>
               </div>
             </div>
           </div>
@@ -5019,7 +5069,7 @@ export default function App() {
                   </div>
                   <h2 className="text-xl font-black mt-2">Welcome, {currentUser.name}!</h2>
                   <p className="text-xs text-amber-100 mt-0.5">
-                    Active Shift: <span className="font-bold underline">{activeShift?.shiftName}</span> &bull; Shift ID: <span className="font-mono font-bold">{activeShift?.id}</span> &bull; Station #1
+                    Store: <span className="font-bold">{currentStoreName}</span> &bull; Active Shift: <span className="font-bold underline">{activeShift?.shiftName}</span> &bull; Shift ID: <span className="font-mono font-bold">{activeShift?.id}</span> &bull; Station #1
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -5267,7 +5317,8 @@ export default function App() {
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                   <div>
                     <h3 className="text-base font-bold text-slate-900 flex items-center">
-                      <Receipt className="w-5 h-5 mr-2 text-indigo-600" /> POS Billing Counter
+                      <Receipt className="w-5 h-5 mr-2 text-indigo-600" />
+                      <span>POS Billing Counter &bull; <span className="text-indigo-600 font-black">{currentStoreName}</span></span>
                     </h3>
                     <p className="text-xs text-slate-500">
                       {products.length === 0 ? 'Catalog initialized (0 items)' : `Tap items to bill (${filteredPosProducts.length} of ${products.length} products showing)`}
@@ -5372,8 +5423,13 @@ export default function App() {
               <div>
                 <div className="flex justify-between items-center pb-3 border-b border-slate-200 mb-3">
                   <div>
-                    <h3 className="text-base font-bold text-slate-900">Current Bill</h3>
-                    <div className="flex items-center space-x-2 text-[11px] text-slate-500">
+                    <div className="flex items-center space-x-2">
+                      <h3 className="text-base font-bold text-slate-900">Current Bill</h3>
+                      <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 truncate max-w-[160px]">
+                        {currentStoreName}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-[11px] text-slate-500 mt-0.5">
                       <span>Cashier: {currentUser.name}</span>
                       <span>&bull;</span>
                       <span className="font-bold text-emerald-700 flex items-center" title="Active physical cash expected in drawer till">
@@ -7350,7 +7406,7 @@ export default function App() {
                       Store Owner
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">{business.name} &bull; {currentUser.email}</p>
+                  <p className="text-xs text-slate-500 font-medium mt-0.5">{currentStoreName} &bull; {currentUser.email}</p>
                   <p className="text-[11px] text-slate-400 mt-1 font-mono">{business.address}</p>
                 </div>
               </div>
@@ -7951,7 +8007,7 @@ export default function App() {
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
             <div className="text-center pb-4 border-b border-slate-200">
-              <h2 className="text-lg font-black text-slate-900">{business.name}</h2>
+              <h2 className="text-lg font-black text-slate-900">{lastGeneratedBill.storeName || currentStoreName}</h2>
               <p className="text-[11px] text-slate-500">{business.address}</p>
               <p className="text-[10px] text-slate-400 font-mono">GSTIN: {business.gstin} &bull; Ph: {business.phone}</p>
               <div className="mt-2 inline-block px-3 py-1 bg-slate-100 rounded-full text-xs font-bold text-slate-800">
@@ -8102,7 +8158,7 @@ export default function App() {
                 onClick={() => {
                   const custPhone = (lastGeneratedBill.customer.phone || '').replace(/[^0-9]/g, '');
                   const itemsSummary = lastGeneratedBill.items.map(it => `• ${it.product.name} x ${it.quantity} = ₹${it.product.sellingPrice * it.quantity}`).join('\n');
-                  const msg = `🧾 *TAX INVOICE: ${lastGeneratedBill.billNo}*\n🏪 *${business.name}*\n----------------------------\n*Customer:* ${lastGeneratedBill.customer.name}\n*Date:* ${lastGeneratedBill.date}\n----------------------------\n${itemsSummary}\n----------------------------\n*Subtotal:* ₹${lastGeneratedBill.subtotal}\n*GST (5%):* ₹${lastGeneratedBill.gst}\n*Discount:* ₹${lastGeneratedBill.discount + (lastGeneratedBill.loyaltyDiscount || 0)}\n*Total Paid:* ₹${lastGeneratedBill.total} (${lastGeneratedBill.paymentMode})\n🌟 *Points Earned:* +${lastGeneratedBill.pointsEarned || 0} pts\n----------------------------\nThank you for shopping with us!`;
+                  const msg = `🧾 *TAX INVOICE: ${lastGeneratedBill.billNo}*\n🏪 *${lastGeneratedBill.storeName || currentStoreName}*\n----------------------------\n*Customer:* ${lastGeneratedBill.customer.name}\n*Date:* ${lastGeneratedBill.date}\n----------------------------\n${itemsSummary}\n----------------------------\n*Subtotal:* ₹${lastGeneratedBill.subtotal}\n*GST (5%):* ₹${lastGeneratedBill.gst}\n*Discount:* ₹${lastGeneratedBill.discount + (lastGeneratedBill.loyaltyDiscount || 0)}\n*Total Paid:* ₹${lastGeneratedBill.total} (${lastGeneratedBill.paymentMode})\n🌟 *Points Earned:* +${lastGeneratedBill.pointsEarned || 0} pts\n----------------------------\nThank you for shopping with us!`;
                   window.open(`https://api.whatsapp.com/send?phone=${custPhone}&text=${encodeURIComponent(msg)}`, '_blank');
                 }}
                 className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center space-x-1 shadow-sm"
