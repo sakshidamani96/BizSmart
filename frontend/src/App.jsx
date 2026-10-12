@@ -249,23 +249,31 @@ export default function App() {
   // -------------------------------------------------------------
   const [employees, setEmployees] = useState(() => {
     const defaultStaff = [
-      { id: 1, name: 'Ajay Sharma', role: 'Head Cashier & Shift Lead', phone: '+91-98122-33445', email: 'ajaysharma@gmail.com', password: 'password123', salary: 25000, shift: 'Morning (8 AM - 2 PM)', status: 'ACTIVE', joinedDate: '01 Jan 2026' },
-      { id: 2, name: 'Amit Verma', role: 'Cashier & POS Operator', phone: '+91-98234-55667', email: 'amitverma@gmail.com', password: 'password123', salary: 22000, shift: 'Evening (2 PM - 10 PM)', status: 'ACTIVE', joinedDate: '15 Jan 2026' },
-      { id: 3, name: 'Priya Sharma', role: 'Billing Specialist', phone: '+91-98345-66778', email: 'priyasharma@gmail.com', password: 'password123', salary: 21000, shift: 'Morning (8 AM - 2 PM)', status: 'ACTIVE', joinedDate: '01 Feb 2026' },
-      { id: 4, name: 'Rahul Mehta', role: 'Junior Cashier & Inventory', phone: '+91-98456-77889', email: 'rahulmehta@gmail.com', password: 'password123', salary: 18000, shift: 'Weekend Full Shift', status: 'ACTIVE', joinedDate: '10 Feb 2026' }
+      { id: 1, name: 'Amit Verma', role: 'Cashier & POS Operator', billingAccess: true, phone: '+91-98234-55667', email: 'amitverma@gmail.com', password: 'password123', salary: 22000, shift: 'Morning (8 AM - 4 PM)', status: 'ACTIVE', joinedDate: '15 Jan 2026' },
+      { id: 2, name: 'Sakshi', role: 'Inventory & Stock Associate', billingAccess: false, phone: '+91-98111-22334', email: 'sakshi@gmail.com', password: 'password123', salary: 20000, shift: 'Evening (2 PM - 10 PM)', status: 'ACTIVE', joinedDate: '01 Feb 2026' }
     ];
     try {
       const saved = localStorage.getItem('bizsmart_employees');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const merged = [...parsed];
-          defaultStaff.forEach(ds => {
-            if (!merged.some(e => e.name.toLowerCase() === ds.name.toLowerCase() || e.id === ds.id)) {
-              merged.push(ds);
-            }
+          // Strictly retain only Amit and Sakshi
+          const filtered = parsed.filter(e => {
+            const n = (e.name || '').toLowerCase();
+            return n.includes('amit') || n.includes('sakshi');
           });
-          return merged;
+          if (filtered.length > 0) {
+            const hasAmit = filtered.some(e => e.name.toLowerCase().includes('amit'));
+            const hasSakshi = filtered.some(e => e.name.toLowerCase().includes('sakshi'));
+            const result = filtered.map(e => {
+              if (e.name.toLowerCase().includes('amit')) return { ...e, billingAccess: true };
+              if (e.name.toLowerCase().includes('sakshi')) return { ...e, billingAccess: false };
+              return e;
+            });
+            if (!hasAmit) result.unshift(defaultStaff[0]);
+            if (!hasSakshi) result.push(defaultStaff[1]);
+            return result.slice(0, 2);
+          }
         }
       }
     } catch (e) {
@@ -369,17 +377,9 @@ export default function App() {
       rawBills = seedData1Year.bills || [];
     }
     // Sanitize: No credit/udhaar in system, strictly CASH or UPI
-    let sanitized = (rawBills || []).map((b, idx) => {
+    let sanitized = (rawBills || []).map(b => {
       let mode = b.paymentMode === 'CREDIT' ? 'UPI' : b.paymentMode;
-      let cashier = b.cashier;
-      if (!cashier || (cashier === 'Ajay Sharma' && !b.shiftId?.includes('AJAY'))) {
-        const mod = idx % 50;
-        if (mod < 21) cashier = 'Ajay Sharma';
-        else if (mod < 39) cashier = 'Amit Verma';
-        else if (mod < 47) cashier = 'Priya Sharma';
-        else cashier = 'Rahul Mehta';
-      }
-      return { ...b, paymentMode: mode, cashier };
+      return { ...b, paymentMode: mode, cashier: 'Amit Verma' };
     });
     
     // Ensure today has at least 19 bills as requested without altering September records
@@ -406,7 +406,7 @@ export default function App() {
           dateStr: todayStr,
           date: `${todayStr} ${t}`,
           timestamp: `${todayStr}T${t}:00.000Z`,
-          cashier: 'Ajay Sharma',
+          cashier: 'Amit Verma',
           shiftId: 'SHIFT-AJAY-M'
         });
       }
@@ -507,10 +507,10 @@ export default function App() {
       { id: 102, shiftId: 'SHIFT-102', type: 'CASH_OUT', amount: 150, reason: 'Store Petty Overhead', notes: 'Counter tea, snacks & cleaning supplies', cashier: 'Amit Verma', timestamp: '03:10 PM', date: todayStr },
       { id: 103, shiftId: 'SHIFT-101', type: 'CASH_IN', amount: 1000, reason: 'Change Refill (Small Notes)', notes: 'Bank coin & ₹10/₹20 change refill from store safe', cashier: 'Amit Verma', timestamp: '11:15 AM', date: todayStr },
       { id: 104, shiftId: 'SHIFT-101', type: 'CASH_OUT', amount: 450, reason: 'Vendor Payout (Milk/Bread)', notes: 'Morning Amul fresh milk delivery crate payout', cashier: 'Amit Verma', timestamp: '08:45 AM', date: todayStr },
-      { id: 105, shiftId: 'SHIFT-100', type: 'CASH_OUT', amount: 320, reason: 'Store Petty Overhead', notes: 'Cleaning liquid and tea for counter staff', cashier: 'Ajay Sharma', timestamp: '02:30 PM', date: yesterdayStr },
-      { id: 106, shiftId: 'SHIFT-100', type: 'CASH_OUT', amount: 1500, reason: 'Bank Cash Deposit', notes: 'Mid-day excess cash safe transfer', cashier: 'Ajay Sharma', timestamp: '05:00 PM', date: yesterdayStr },
-      { id: 107, shiftId: 'SHIFT-099', type: 'CASH_OUT', amount: 600, reason: 'Vendor Payout (Milk/Bread)', notes: 'Britannia bread & pav evening restock', cashier: 'Ajay Sharma', timestamp: '04:15 PM', date: twoDaysAgoStr },
-      { id: 108, shiftId: 'SHIFT-099', type: 'CASH_IN', amount: 500, reason: 'Change Refill (Small Notes)', notes: '₹10 & ₹20 note change pack', cashier: 'Ajay Sharma', timestamp: '09:00 AM', date: twoDaysAgoStr }
+      { id: 105, shiftId: 'SHIFT-100', type: 'CASH_OUT', amount: 320, reason: 'Store Petty Overhead', notes: 'Cleaning liquid and tea for counter staff', cashier: 'Amit Verma', timestamp: '02:30 PM', date: yesterdayStr },
+      { id: 106, shiftId: 'SHIFT-100', type: 'CASH_OUT', amount: 1500, reason: 'Bank Cash Deposit', notes: 'Mid-day excess cash safe transfer', cashier: 'Amit Verma', timestamp: '05:00 PM', date: yesterdayStr },
+      { id: 107, shiftId: 'SHIFT-099', type: 'CASH_OUT', amount: 600, reason: 'Vendor Payout (Milk/Bread)', notes: 'Britannia bread & pav evening restock', cashier: 'Amit Verma', timestamp: '04:15 PM', date: twoDaysAgoStr },
+      { id: 108, shiftId: 'SHIFT-099', type: 'CASH_IN', amount: 500, reason: 'Change Refill (Small Notes)', notes: '₹10 & ₹20 note change pack', cashier: 'Amit Verma', timestamp: '09:00 AM', date: twoDaysAgoStr }
     ];
 
     try {
@@ -569,7 +569,7 @@ export default function App() {
       },
       {
         id: 'SHIFT-100',
-        cashierName: 'Ajay Sharma',
+        cashierName: 'Amit Verma',
         shiftName: 'Full Day Shift (8 AM - 8 PM)',
         startDate: yesterdayStr,
         startTime: '08:00 AM',
@@ -591,7 +591,7 @@ export default function App() {
       },
       {
         id: 'SHIFT-099',
-        cashierName: 'Ajay Sharma',
+        cashierName: 'Amit Verma',
         shiftName: 'Full Day Shift (8 AM - 8 PM)',
         startDate: twoDaysAgoStr,
         startTime: '08:00 AM',
@@ -613,7 +613,7 @@ export default function App() {
       },
       {
         id: 'SHIFT-098',
-        cashierName: 'Ajay Sharma',
+        cashierName: 'Amit Verma',
         shiftName: 'Full Day Shift (8 AM - 8 PM)',
         startDate: threeDaysAgoStr,
         startTime: '08:00 AM',
@@ -1082,26 +1082,24 @@ export default function App() {
       return;
     }
 
-    // 2. Check Employees Added by Owner (Strict password check & Cashier role restriction)
+    // 2. Check Employees Added by Owner (Respect billingAccess permissions)
     const empMatch = employees.find(emp => emp.email && emp.email.toLowerCase() === cleanEmail);
     if (empMatch) {
       if (empMatch.password && empMatch.password !== cleanPassword) {
         setLoginError('Incorrect employee password. Please verify the password set by your Store Owner.');
         return;
       }
-      const roleLower = (empMatch.role || '').toLowerCase();
-      if (!roleLower.includes('cashier')) {
-        setLoginError('Access restricted: Only employees with the Cashier role are permitted to sign in to the terminal.');
-        return;
-      }
+      const hasBilling = empMatch.billingAccess === true || (empMatch.billingAccess !== false && (empMatch.role || '').toLowerCase().includes('cashier'));
       setCurrentUser({
+        id: empMatch.id,
         email: empMatch.email,
-        name: `${empMatch.name} (${empMatch.role || 'Cashier'})`,
+        name: `${empMatch.name} (${empMatch.role || (hasBilling ? 'Cashier' : 'Staff')})`,
         role: 'EMPLOYEE',
-        roleTitle: empMatch.role || 'Store Cashier'
+        roleTitle: empMatch.role || (hasBilling ? 'Cashier & POS Operator' : 'Inventory Associate'),
+        billingAccess: hasBilling
       });
       setIsAuthenticated(true);
-      setActiveTab('employee-dashboard'); // Opens dedicated Employee Interface!
+      setActiveTab(hasBilling ? 'employee-dashboard' : 'inventory');
       setLoginError('');
       return;
     }
@@ -1324,7 +1322,7 @@ export default function App() {
       splitUpi: paymentMode === 'SPLIT' ? finalUpiPart : 0,
       tenderGiven: tenderGivenNum > 0 ? tenderGivenNum : finalCashPart,
       changeReturned: changeToReturn,
-      cashier: currentUser ? currentUser.name : 'Ajay Sharma',
+      cashier: currentUser ? currentUser.name : 'Amit Verma',
       shiftId: activeShift ? activeShift.id : 'SHIFT-101'
     };
 
@@ -1844,31 +1842,21 @@ export default function App() {
   // -------------------------------------------------------------
   const cashierLeaderboard = useMemo(() => {
     return employees.map(emp => {
-      let empBills = bills.filter(b =>
-        b.cashier === emp.name ||
-        (b.cashier && emp.name && b.cashier.toLowerCase().includes(emp.name.toLowerCase().split(' ')[0])) ||
-        (b.cashierId && b.cashierId === emp.id)
-      );
-
-      // If an employee still has 0 bills (e.g. newly registered employee), allocate an active slice so they never show 0
-      if (empBills.length === 0 && bills.length > 0) {
-        const empSeedIndex = (emp.id || 1) % 4;
-        const targetCashier = ['Amit Verma', 'Ajay Sharma', 'Priya Sharma', 'Rahul Mehta'][empSeedIndex] || 'Amit Verma';
-        empBills = bills.filter(b => b.cashier === targetCashier);
-      }
-
+      const hasBilling = emp.billingAccess === true || (emp.billingAccess !== false && (emp.role || '').toLowerCase().includes('cashier'));
+      let empBills = hasBilling ? bills : [];
       const totalBills = empBills.length;
       const totalSales = empBills.reduce((acc, b) => acc + b.total, 0);
       const cashSales = empBills.filter(b => b.paymentMode === 'CASH' || (b.paymentMode === 'SPLIT' && b.splitCash > 0)).reduce((acc, b) => acc + (b.paymentMode === 'SPLIT' ? (b.splitCash || 0) : b.total), 0);
       const upiSales = empBills.filter(b => b.paymentMode === 'UPI' || (b.paymentMode === 'SPLIT' && b.splitUpi > 0)).reduce((acc, b) => acc + (b.paymentMode === 'SPLIT' ? (b.splitUpi || 0) : b.total), 0);
       const aov = totalBills > 0 ? Math.round(totalSales / totalBills) : 0;
-      const avgSpeedSeconds = totalBills > 0 ? Math.max(30, 48 - Math.min(15, totalBills * 2)) : 42;
+      const avgSpeedSeconds = totalBills > 0 ? Math.max(30, 48 - Math.min(15, totalBills * 2)) : 0;
 
       return {
         id: emp.id,
         name: emp.name,
         role: emp.role,
         shift: emp.shift,
+        billingAccess: hasBilling,
         totalBills,
         totalSales,
         cashSales,
@@ -3036,7 +3024,7 @@ export default function App() {
                 </div>
                 <h3 className="text-base font-extrabold text-slate-900 mb-2">Strict Owner &amp; Cashier Separation</h3>
                 <p className="text-xs text-slate-600 leading-relaxed mb-3">
-                  Store Owners manage overhead expenses, staff salaries (e.g. ₹25,000 for Ajay Sharma), and catalog pricing while Cashiers run focused POS billing desks.
+                  Store Owners manage overhead expenses, staff salaries (e.g. ₹22,000 for Amit Verma), and catalog pricing while Cashiers run focused POS billing desks.
                 </p>
                 <div className="text-[11px] text-sky-700 font-bold flex items-center">
                   <Check className="w-3.5 h-3.5 mr-1 text-sky-600" />
@@ -3711,7 +3699,7 @@ export default function App() {
             )}
 
             {/* 5. POS & BILLING */}
-            {(currentUser.role === 'OWNER' || currentUser.role === 'EMPLOYEE') && (
+            {(currentUser.role === 'OWNER' || (currentUser.role === 'EMPLOYEE' && currentUser.billingAccess !== false)) && (
               <button
                 onClick={() => { setActiveTab('pos'); setMobileSidebarOpen(false); }}
                 className={`w-full flex items-center rounded-xl transition group relative cursor-pointer ${
@@ -5256,6 +5244,23 @@ export default function App() {
         {/* VIEW 3: POS & BILLING */}
         {/* ============================================================== */}
         {activeTab === 'pos' && (
+          currentUser?.role === 'EMPLOYEE' && currentUser?.billingAccess === false ? (
+            <div className="bg-white rounded-2xl p-12 text-center border border-slate-200 max-w-lg mx-auto shadow-sm my-12">
+              <div className="w-16 h-16 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-4 border border-rose-100">
+                <Lock className="w-8 h-8" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 mb-2">Billing Access Restricted</h3>
+              <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+                You are signed in as <strong className="text-slate-800">{currentUser.name}</strong> ({currentUser.roleTitle || 'Store Associate'}). Your account has been assigned to Inventory &amp; Stock duties and does not have permission to access the billing counter.
+              </p>
+              <button
+                onClick={() => setActiveTab('inventory')}
+                className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm"
+              >
+                Go to Inventory &amp; Stock Management
+              </button>
+            </div>
+          ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
@@ -5727,6 +5732,7 @@ export default function App() {
               </button>
             </div>
           </div>
+          )
         )}
 
         {/* ============================================================== */}
@@ -6295,6 +6301,7 @@ export default function App() {
                   <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                     <th className="py-3 px-4">Employee Name</th>
                     <th className="py-3 px-4">Role</th>
+                    <th className="py-3 px-4 text-center">Billing Access</th>
                     <th className="py-3 px-4">Login Email &amp; Phone</th>
                     <th className="py-3 px-4">Shift</th>
                     <th className="py-3 px-4 text-right">Monthly Salary (₹)</th>
@@ -6314,6 +6321,19 @@ export default function App() {
                         <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-semibold text-[11px]">
                           {emp.role}
                         </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-center">
+                        {emp.billingAccess ? (
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 inline-flex items-center">
+                            <Receipt className="w-3 h-3 mr-1 text-emerald-600" />
+                            Granted (POS Access)
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 inline-flex items-center">
+                            <Lock className="w-3 h-3 mr-1 text-rose-500" />
+                            Restricted (No Billing)
+                          </span>
+                        )}
                       </td>
                       <td className="py-3.5 px-4">
                         <div className="font-semibold text-slate-800">{emp.email}</div>
@@ -6758,23 +6778,41 @@ export default function App() {
                           <div className="text-[11px] text-slate-400">{cashier.role} &bull; {cashier.shift}</div>
                         </td>
                         <td className="py-3 px-4 text-center font-bold text-slate-900">
-                          {cashier.totalBills} Bills
+                          {cashier.billingAccess ? (
+                            <span>{cashier.totalBills} Bills</span>
+                          ) : (
+                            <span className="text-slate-400 font-medium text-[11px]">No Billing Access</span>
+                          )}
                         </td>
                         <td className="py-3 px-4 text-right font-black text-indigo-600 text-sm">
-                          ₹{cashier.totalSales.toLocaleString('en-IN')}
+                          {cashier.billingAccess ? (
+                            <span>₹{cashier.totalSales.toLocaleString('en-IN')}</span>
+                          ) : (
+                            <span className="text-slate-400 font-medium text-xs">N/A (Stock Only)</span>
+                          )}
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <span className="text-[11px] font-semibold text-slate-600">
-                            ₹{cashier.cashSales.toLocaleString('en-IN')} (C) / ₹{cashier.upiSales.toLocaleString('en-IN')} (U)
-                          </span>
+                          {cashier.billingAccess ? (
+                            <span className="text-[11px] font-semibold text-slate-600">
+                              ₹{cashier.cashSales.toLocaleString('en-IN')} (C) / ₹{cashier.upiSales.toLocaleString('en-IN')} (U)
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-slate-400">—</span>
+                          )}
                         </td>
                         <td className="py-3 px-4 text-right font-black text-emerald-700">
-                          ₹{(employees.find(e => e.id === cashier.id)?.salary || 25000).toLocaleString('en-IN')}
+                          ₹{(employees.find(e => e.id === cashier.id)?.salary || 22000).toLocaleString('en-IN')}
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
-                            ACTIVE
-                          </span>
+                          {cashier.billingAccess ? (
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                              ACTIVE CASHIER
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                              INVENTORY ONLY
+                            </span>
+                          )}
                         </td>
                       </tr>
                     ))}
