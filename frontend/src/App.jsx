@@ -2282,6 +2282,61 @@ export default function App() {
   }, [products]);
 
   // -------------------------------------------------------------
+  // PRODUCT ANALYSIS DEDICATED VIEW FILTERED DATA & PROFIT METRICS
+  // -------------------------------------------------------------
+  const totalAllTimeExpenses = useMemo(() => {
+    return expenses.reduce((acc, e) => acc + (Number(e.amount) || 0), 0);
+  }, [expenses]);
+
+  const productAnalysisBillsList = useMemo(() => {
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0, 10);
+    if (productSalesPeriod === 'daily') {
+      return bills.filter(b => b.dateStr === todayStr);
+    }
+    if (productSalesPeriod === 'weekly') {
+      const past7 = new Date();
+      past7.setDate(today.getDate() - 6);
+      const past7Str = past7.toISOString().slice(0, 10);
+      return bills.filter(b => b.dateStr >= past7Str && b.dateStr <= todayStr);
+    }
+    if (productSalesPeriod === 'monthly') {
+      return bills.filter(b => b.dateStr && b.dateStr.startsWith(productSalesSelectedMonth));
+    }
+    if (productSalesPeriod === 'yearly') {
+      return bills.filter(b => b.dateStr && b.dateStr.startsWith(productSalesSelectedYear));
+    }
+    if (productSalesPeriod === 'custom') {
+      return bills.filter(b => (!productSalesStartDate || b.dateStr >= productSalesStartDate) && (!productSalesEndDate || b.dateStr <= productSalesEndDate));
+    }
+    return bills; // 'all'
+  }, [bills, productSalesPeriod, productSalesSelectedMonth, productSalesSelectedYear, productSalesStartDate, productSalesEndDate]);
+
+  const productAnalysisExpensesList = useMemo(() => {
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0, 10);
+    if (productSalesPeriod === 'daily') {
+      return expenses.filter(e => e.date === todayStr);
+    }
+    if (productSalesPeriod === 'weekly') {
+      const past7 = new Date();
+      past7.setDate(today.getDate() - 6);
+      const past7Str = past7.toISOString().slice(0, 10);
+      return expenses.filter(e => e.date >= past7Str && e.date <= todayStr);
+    }
+    if (productSalesPeriod === 'monthly') {
+      return expenses.filter(e => e.date && e.date.startsWith(productSalesSelectedMonth));
+    }
+    if (productSalesPeriod === 'yearly') {
+      return expenses.filter(e => e.date && e.date.startsWith(productSalesSelectedYear));
+    }
+    if (productSalesPeriod === 'custom') {
+      return expenses.filter(e => (!productSalesStartDate || e.date >= productSalesStartDate) && (!productSalesEndDate || e.date <= productSalesEndDate));
+    }
+    return expenses;
+  }, [expenses, productSalesPeriod, productSalesSelectedMonth, productSalesSelectedYear, productSalesStartDate, productSalesEndDate]);
+
+  // -------------------------------------------------------------
   // PER-PRODUCT SALES & PROFIT ANALYTICS (Aggregated across selected product analysis period)
   // -------------------------------------------------------------
   const productSalesAnalytics = useMemo(() => {
