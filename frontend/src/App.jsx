@@ -427,35 +427,45 @@ export default function App() {
       return { ...b, paymentMode: mode, cashier: 'Amit Verma' };
     });
     
-    // Ensure today has at least 19 bills as requested without altering September records
-    const todayStr = new Date().toISOString().slice(0, 10);
-    const todayBills = sanitized.filter(b => b.dateStr === todayStr);
-    if (todayBills.length < 19) {
-      const needed = 19 - todayBills.length;
-      const times = [
-        '08:15 AM', '08:42 AM', '09:05 AM', '09:28 AM', '09:55 AM',
-        '10:12 AM', '10:35 AM', '11:02 AM', '11:24 AM', '11:50 AM',
-        '12:15 PM', '12:45 PM', '01:10 PM', '01:38 PM', '02:05 PM',
-        '02:30 PM', '03:15 PM', '03:45 PM', '04:20 PM'
-      ];
-      let topId = Math.max(...sanitized.map(b => b.id || 0), 25000);
-      const newTodayBills = [];
-      for (let i = 0; i < needed; i++) {
-        topId++;
-        const sampleBill = sanitized[i % sanitized.length] || {};
-        const t = times[i % times.length] || '10:00 AM';
-        newTodayBills.push({
-          ...sampleBill,
-          id: topId,
-          billNo: `INV-${topId}`,
-          dateStr: todayStr,
-          date: `${todayStr} ${t}`,
-          timestamp: `${todayStr}T${t}:00.000Z`,
-          cashier: 'Amit Verma',
-          shiftId: 'SHIFT-AJAY-M'
-        });
+    // Ensure today and each of the past 7 days have at least 25 bills covering all catalog products
+    const times = [
+      '08:15 AM', '08:42 AM', '09:05 AM', '09:28 AM', '09:55 AM',
+      '10:12 AM', '10:35 AM', '11:02 AM', '11:24 AM', '11:50 AM',
+      '12:15 PM', '12:45 PM', '01:10 PM', '01:38 PM', '02:05 PM',
+      '02:30 PM', '03:15 PM', '03:45 PM', '04:20 PM', '05:05 PM',
+      '05:40 PM', '06:15 PM', '07:00 PM', '07:45 PM', '08:30 PM'
+    ];
+    let topId = Math.max(...sanitized.map(b => b.id || 0), 25000);
+    const generatedRecentBills = [];
+    const baseTemplateBills = (seedData1Year.bills && seedData1Year.bills.length > 0) ? seedData1Year.bills : sanitized;
+
+    for (let dayOffset = 0; dayOffset >= -6; dayOffset--) {
+      const d = new Date();
+      d.setDate(d.getDate() + dayOffset);
+      const dStr = d.toISOString().slice(0, 10);
+      const existingForDay = sanitized.filter(b => b.dateStr === dStr);
+      const minBillsTarget = dayOffset === 0 ? 25 : 20;
+      if (existingForDay.length < minBillsTarget && baseTemplateBills.length > 0) {
+        const needed = minBillsTarget - existingForDay.length;
+        for (let i = 0; i < needed; i++) {
+          topId++;
+          const sampleBill = baseTemplateBills[(i + Math.abs(dayOffset) * 5) % baseTemplateBills.length] || {};
+          const t = times[i % times.length] || '10:00 AM';
+          generatedRecentBills.push({
+            ...sampleBill,
+            id: topId,
+            billNo: `INV-${topId}`,
+            dateStr: dStr,
+            date: `${dStr} ${t}`,
+            timestamp: `${dStr}T${t}:00.000Z`,
+            cashier: 'Amit Verma',
+            shiftId: 'SHIFT-101'
+          });
+        }
       }
-      sanitized = [...newTodayBills, ...sanitized];
+    }
+    if (generatedRecentBills.length > 0) {
+      sanitized = [...generatedRecentBills, ...sanitized];
     }
     return sanitized;
   });
@@ -2619,9 +2629,30 @@ export default function App() {
   // -------------------------------------------------------------
   // PER-PRODUCT DRILL-DOWN HISTORICAL & MULTI-PERIOD SALES DEEP DIVE
   // -------------------------------------------------------------
+  const openProductBreakdown = (item, preferredPeriod = null) => {
+    if (!item) return;
+    setSelectedProductForBreakdown(item);
+    if (preferredPeriod) {
+      setDrilldownPeriod(preferredPeriod);
+    } else if (productSalesPeriod === 'daily') {
+      setDrilldownPeriod('today');
+    } else if (productSalesPeriod === 'weekly') {
+      setDrilldownPeriod('weekly');
+    } else if (productSalesPeriod === 'monthly') {
+      setDrilldownPeriod('this-month');
+    } else if (productSalesPeriod === 'yearly') {
+      setDrilldownPeriod('yearly');
+    } else if (productSalesPeriod === 'custom') {
+      setDrilldownPeriod('custom');
+    } else {
+      setDrilldownPeriod('today');
+    }
+    setShowPriceBreakdownModal(true);
+  };
+
   const productDrilldownStats = useMemo(() => {
     if (!selectedProductForBreakdown) return null;
-    const targetId = selectedProductForBreakdown.productId;
+    const targetId = selectedProductForBreakdown.productId ?? selectedProductForBreakdown.id;
     const sp = Number(selectedProductForBreakdown.sellingPrice) || 0;
     const cp = Number(selectedProductForBreakdown.purchasePrice) || Math.round(sp * 0.8);
     const basePrice = +(sp / 1.05).toFixed(2);
@@ -2636,35 +2667,55 @@ export default function App() {
     const d7 = new Date();
     d7.setDate(today.getDate() - 6);
     const past7Str = d7.toISOString().slice(0, 10);
-    const thisMonthKey = '2026-10';
+    const thisMonthKey = todayStr.slice(0, 7) || '2026-10';
     const lastMonthKey = '2026-09';
-    const thisYearKey = '2026';
+    const thisYearKey = todayStr.slice(0, 4) || '2026';
 
     const getProductStatsInBills = (billsSubset) => {
       let units = 0;
       let rev = 0;
       let cogs = 0;
       let billCount = 0;
+      const matchingInvoices = [];
       billsSubset.forEach(b => {
         let hasProd = false;
+        let billProdUnits = 0;
+        let billProdSub = 0;
         (b.items || []).forEach(it => {
           const matched = productLookup.resolve(it.product);
-          if (matched && matched.id === targetId) {
+          if (
+            (matched && String(matched.id) === String(targetId)) ||
+            isProductMatch(it.product, selectedProductForBreakdown)
+          ) {
             hasProd = true;
             const q = Number(it.quantity) || 1;
             const sub = Number(it.subtotal) || (sp * q);
             units += q;
             rev += sub;
             cogs += (cp * q);
+            billProdUnits += q;
+            billProdSub += sub;
           }
         });
-        if (hasProd) billCount++;
+        if (hasProd) {
+          billCount++;
+          if (matchingInvoices.length < 15) {
+            matchingInvoices.push({
+              billNo: b.billNo || `INV-${b.id}`,
+              date: b.date || b.dateStr,
+              customerName: b.customer?.name || 'Walk-in Retail Customer',
+              paymentMode: b.paymentMode || 'UPI',
+              units: billProdUnits,
+              subtotal: billProdSub
+            });
+          }
+        }
       });
       const base = +(rev / 1.05).toFixed(2);
       const gst = +(rev - base).toFixed(2);
       const grossProfit = base - cogs;
       const margin = rev > 0 ? ((grossProfit / rev) * 100).toFixed(1) : '0.0';
-      return { units, revenue: rev, base, gst, cogs, grossProfit, margin, billCount };
+      return { units, revenue: rev, base, gst, cogs, grossProfit, margin, billCount, matchingInvoices };
     };
 
     // Calculate for all standard periods
@@ -2684,8 +2735,23 @@ export default function App() {
     const allStats = getProductStatsInBills(allBills);
     const customStats = getProductStatsInBills(customBills);
 
+    // Stock runway & risk level forecast (fc)
+    const currentStock = Number(selectedProductForBreakdown.currentStock ?? selectedProductForBreakdown.quantity) || 0;
+    const minStock = Number(selectedProductForBreakdown.minStock) || 10;
+    const dailyVelocity = +(weeklyStats.units / 7).toFixed(1) || Number(selectedProductForBreakdown.dailySalesVelocity) || 1;
+    const daysToStockout = dailyVelocity > 0 ? Math.floor(currentStock / dailyVelocity) : 999;
+    const riskLevel = currentStock === 0 || daysToStockout <= 3
+      ? 'CRITICAL'
+      : currentStock <= minStock || daysToStockout <= 7
+      ? 'LOW_STOCK'
+      : 'SAFE';
+    const fc = {
+      riskLevel,
+      daysToStockout,
+      dailyVelocity
+    };
 
-    // 12-Month Historical Trend for this product
+    // 13-Month Historical Trend for this product
     const monthKeys = [
       '2025-10', '2025-11', '2025-12', '2026-01', '2026-02', '2026-03',
       '2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10'
@@ -2717,6 +2783,7 @@ export default function App() {
       sgst,
       unitProfit,
       marginPct,
+      fc,
       todayStats,
       weeklyStats,
       thisMonthStats,
@@ -4507,7 +4574,12 @@ export default function App() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {filteredProductSales.map(item => (
-                      <tr key={item.productId} className="hover:bg-sky-50/40 transition">
+                      <tr
+                        key={item.productId}
+                        onClick={() => openProductBreakdown(item)}
+                        className="hover:bg-sky-50/40 transition cursor-pointer"
+                        title="Click to view Today, Weekly, Monthly & Yearly sales breakdown"
+                      >
                         <td className="py-3 px-4">
                           <div className="font-bold text-slate-900">{item.name}</div>
                           <div className="text-[10px] text-slate-400 font-mono">{item.sku}</div>
@@ -4550,14 +4622,11 @@ export default function App() {
                         <td className="py-3 px-4 text-right font-black text-slate-900">
                           ₹{item.totalRevenue.toLocaleString('en-IN')}
                         </td>
-                        <td className="py-3 px-4 text-center">
+                        <td className="py-3 px-4 text-center" onClick={e => e.stopPropagation()}>
                           <button
-                            onClick={() => {
-                              setSelectedProductForBreakdown(item);
-                              setShowPriceBreakdownModal(true);
-                            }}
-                            className="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-lg text-[11px] font-bold transition flex items-center space-x-1 mx-auto"
-                            title="View comprehensive price & GST breakdown"
+                            onClick={() => openProductBreakdown(item)}
+                            className="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-lg text-[11px] font-bold transition flex items-center space-x-1 mx-auto cursor-pointer"
+                            title="View product sales over Today, Week, Month & Year"
                           >
                             <Eye className="w-3 h-3 text-sky-600" />
                             <span>Breakdown</span>
@@ -4796,14 +4865,15 @@ export default function App() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                {productSalesAnalytics.slice(0, 5).map((item, rank) => (
+                {[...productSalesAnalytics]
+                  .sort((a, b) => b.totalRevenue - a.totalRevenue || b.unitsSold - a.unitsSold)
+                  .slice(0, 5)
+                  .map((item, rank) => (
                   <div
                     key={item.productId}
-                    className="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-sky-50/50 transition cursor-pointer flex flex-col justify-between"
-                    onClick={() => {
-                      setSelectedProductForBreakdown(item);
-                      setShowPriceBreakdownModal(true);
-                    }}
+                    className="p-3.5 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-sky-50/70 hover:border-sky-300 transition cursor-pointer flex flex-col justify-between group"
+                    onClick={() => openProductBreakdown(item)}
+                    title="Click to view Today, Weekly, Monthly & Yearly sales for this product"
                   >
                     <div>
                       <div className="flex justify-between items-center mb-1.5">
@@ -4814,17 +4884,23 @@ export default function App() {
                           {item.unitsSold} Sold
                         </span>
                       </div>
-                      <div className="text-xs font-bold text-slate-900 line-clamp-1" title={item.name}>
+                      <div className="text-xs font-bold text-slate-900 group-hover:text-sky-700 line-clamp-1 transition" title={item.name}>
                         {item.name}
                       </div>
                       <div className="text-[10px] text-slate-400 font-mono mt-0.5">{item.category}</div>
                     </div>
-                    <div className="mt-3 pt-2 border-t border-slate-200 flex justify-between items-baseline">
-                      <div>
-                        <span className="text-[11px] font-black text-slate-900">₹{item.totalRevenue.toLocaleString('en-IN')}</span>
-                        <span className="text-[9px] text-slate-500 block">{item.unitsSold} units sold</span>
+                    <div className="mt-3 pt-2 border-t border-slate-200">
+                      <div className="flex justify-between items-baseline">
+                        <div>
+                          <span className="text-[11px] font-black text-slate-900">₹{item.totalRevenue.toLocaleString('en-IN')}</span>
+                          <span className="text-[9px] text-slate-500 block">{item.unitsSold} units sold</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-emerald-600">+{item.marginPct}%</span>
                       </div>
-                      <span className="text-[10px] font-bold text-emerald-600">+{item.marginPct}%</span>
+                      <div className="mt-1.5 text-[10px] font-bold text-sky-600 group-hover:text-sky-700 flex items-center justify-between">
+                        <span>View Sales Breakdown</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -4960,12 +5036,9 @@ export default function App() {
                       filteredProductSales.map(item => (
                       <tr
                         key={item.productId}
-                        onClick={() => {
-                          setSelectedProductForBreakdown(item);
-                          setShowPriceBreakdownModal(true);
-                        }}
+                        onClick={() => openProductBreakdown(item)}
                         className="hover:bg-sky-50/70 transition cursor-pointer group"
-                        title="Click to view full sales history and period breakdown"
+                        title="Click to view full sales history and period breakdown (Today, Week, Month, Year)"
                       >
                         <td className="py-3 px-4">
                           <div className="font-bold text-slate-900 group-hover:text-sky-700 transition">{item.name}</div>
@@ -5014,7 +5087,7 @@ export default function App() {
                         </td>
                         <td className="py-3 px-4 text-center">
                           <span className="font-mono font-bold text-slate-800">
-                            {item.projectedDailyVelocity} /day
+                            {item.dailySalesVelocity} /day
                           </span>
                         </td>
                         <td className="py-3 px-4 text-center">
@@ -5030,12 +5103,9 @@ export default function App() {
                         </td>
                         <td className="py-3 px-4 text-center" onClick={e => e.stopPropagation()}>
                           <button
-                            onClick={() => {
-                              setSelectedProductForBreakdown(item);
-                              setShowPriceBreakdownModal(true);
-                            }}
-                            className="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-lg text-[11px] font-bold transition flex items-center space-x-1 mx-auto shadow-2xs"
-                            title="View comprehensive price & GST breakdown"
+                            onClick={() => openProductBreakdown(item)}
+                            className="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-lg text-[11px] font-bold transition flex items-center space-x-1 mx-auto shadow-2xs cursor-pointer"
+                            title="View product sales over Today, Week, Month & Year"
                           >
                             <Eye className="w-3 h-3 text-sky-600" />
                             <span>Breakdown</span>
@@ -9202,19 +9272,19 @@ export default function App() {
             {/* Modal Header */}
             <div className="flex justify-between items-start pb-3 border-b border-slate-100">
               <div>
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-[10px] font-black uppercase tracking-wider text-sky-700 bg-sky-100 px-2.5 py-0.5 rounded-full border border-sky-200">
                     Product Pricing &amp; Sales Analysis
                   </span>
                   <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                    Stock: {selectedProductForBreakdown.currentStock} units
+                    Stock: {selectedProductForBreakdown.currentStock ?? selectedProductForBreakdown.quantity ?? 0} units
                   </span>
                   <span className={`text-[10px] font-black px-2 py-0.5 rounded-full uppercase ${
-                    productDrilldownStats.fc.riskLevel === 'CRITICAL' ? 'bg-rose-100 text-rose-800 border border-rose-200 animate-pulse' :
-                    productDrilldownStats.fc.riskLevel === 'LOW_STOCK' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                    productDrilldownStats.fc?.riskLevel === 'CRITICAL' ? 'bg-rose-100 text-rose-800 border border-rose-200 animate-pulse' :
+                    productDrilldownStats.fc?.riskLevel === 'LOW_STOCK' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
                     'bg-emerald-100 text-emerald-800'
                   }`}>
-                    {productDrilldownStats.fc.daysToStockout >= 999 ? 'Safe Stock' : `${productDrilldownStats.fc.daysToStockout}d Runway`}
+                    {(productDrilldownStats.fc?.daysToStockout ?? 999) >= 999 ? 'Safe Stock' : `${productDrilldownStats.fc?.daysToStockout}d Runway`}
                   </span>
                 </div>
                 <h3 className="text-lg font-black text-slate-900 mt-1">
@@ -9226,18 +9296,92 @@ export default function App() {
               </div>
               <button
                 onClick={() => setShowPriceBreakdownModal(false)}
-                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition"
+                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* SECTION 1: GOVERNMENT GST & PRE-TAX BASE PRICE ARCHITECTURE */}
+            {/* SECTION 1: MULTI-PERIOD PRODUCT SALES AT A GLANCE (TODAY, WEEK, MONTH, YEAR) */}
+            <div className="p-4 rounded-2xl bg-slate-900 text-white space-y-3 shadow-md">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
+                <div className="flex items-center space-x-2">
+                  <BarChart3 className="w-4 h-4 text-sky-400" />
+                  <span className="text-xs font-black uppercase tracking-wider text-sky-300">
+                    Product Sales Over Time (Today &bull; Week &bull; Month &bull; Year)
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400">
+                  Tap any period card below to inspect detailed tax &amp; profit breakdown
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                {[
+                  {
+                    id: 'today',
+                    title: 'Today (Daily)',
+                    subtitle: 'Current Day Sales',
+                    stats: productDrilldownStats.todayStats,
+                    accent: 'from-sky-500/20 to-sky-600/10 border-sky-400/40 text-sky-300'
+                  },
+                  {
+                    id: 'weekly',
+                    title: 'This Week (7 Days)',
+                    subtitle: 'Past 7 Days Sales',
+                    stats: productDrilldownStats.weeklyStats,
+                    accent: 'from-indigo-500/20 to-indigo-600/10 border-indigo-400/40 text-indigo-300'
+                  },
+                  {
+                    id: 'this-month',
+                    title: 'This Month (Oct)',
+                    subtitle: 'Monthly Sales',
+                    stats: productDrilldownStats.thisMonthStats,
+                    accent: 'from-amber-500/20 to-amber-600/10 border-amber-400/40 text-amber-300'
+                  },
+                  {
+                    id: 'all',
+                    title: 'Yearly (1-Year)',
+                    subtitle: 'Full Year Sales',
+                    stats: productDrilldownStats.allStats,
+                    accent: 'from-emerald-500/20 to-emerald-600/10 border-emerald-400/40 text-emerald-300'
+                  }
+                ].map(card => (
+                  <div
+                    key={card.id}
+                    onClick={() => setDrilldownPeriod(card.id)}
+                    className={`p-3 rounded-xl border bg-gradient-to-br cursor-pointer transition ${
+                      drilldownPeriod === card.id
+                        ? 'ring-2 ring-sky-400 bg-white/15 border-sky-300'
+                        : `${card.accent} hover:bg-white/10`
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-200">{card.title}</span>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/15 text-white">
+                        {card.stats.units} sold
+                      </span>
+                    </div>
+                    <div className="text-lg font-black text-white mt-1 font-mono">
+                      ₹{card.stats.revenue.toLocaleString('en-IN')}
+                    </div>
+                    <div className="flex justify-between items-center mt-1 text-[10px] text-slate-300">
+                      <span>{card.stats.billCount} bills</span>
+                      <span className="font-bold text-emerald-300">
+                        Profit: ₹{Math.round(card.stats.grossProfit).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* SECTION 2: GOVERNMENT GST & PRE-TAX BASE PRICE ARCHITECTURE */}
             <div className="p-4 rounded-2xl bg-gradient-to-br from-sky-50/80 via-indigo-50/40 to-slate-50 border border-sky-200/80 space-y-3">
               <div className="flex justify-between items-center pb-2 border-b border-sky-200/60">
                 <div>
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-800">
-                    Government Pre-Tax Pricing Architecture
+                    Unit Pricing &amp; 5% GST Architecture
                   </span>
                   <div className="text-xs text-slate-600 font-medium">Base Price = Consumer MRP / 1.05 (Pre-tax shop catalog price before 5% GST)</div>
                 </div>
@@ -9281,27 +9425,27 @@ export default function App() {
               </div>
             </div>
 
-            {/* SECTION 2: MULTI-PERIOD SALES DEEP DIVE (Daily, Weekly, This Month, Last Month, Yearly, Specific Period) */}
+            {/* SECTION 3: DETAILED PERIOD SALES BREAKDOWN (Daily, Weekly, Monthly, Yearly, Specific Period) */}
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center">
-                  <BarChart3 className="w-4 h-4 mr-1.5 text-sky-600" /> Sales Velocity Across Time Horizons
+                  <BarChart3 className="w-4 h-4 mr-1.5 text-sky-600" /> Detailed Period Sales Breakdown
                 </h4>
                 {/* Period Selector Tabs */}
                 <div className="flex flex-wrap items-center gap-1 p-1 bg-slate-100 rounded-xl text-xs font-bold">
                   {[
-                    { id: 'all', label: 'All Time' },
                     { id: 'today', label: 'Today (Day)' },
                     { id: 'weekly', label: 'Past 7 Days (Week)' },
-                    { id: 'this-month', label: 'This Month (Sep)' },
-                    { id: 'last-month', label: 'Last Month (Aug)' },
-                    { id: 'yearly', label: 'FY 2026' },
+                    { id: 'this-month', label: 'This Month (Oct)' },
+                    { id: 'last-month', label: 'Last Month (Sep)' },
+                    { id: 'yearly', label: 'FY 2026 (Year)' },
+                    { id: 'all', label: 'All Time (12M)' },
                     { id: 'custom', label: 'Specific Period' }
                   ].map(tab => (
                     <button
                       key={tab.id}
                       onClick={() => setDrilldownPeriod(tab.id)}
-                      className={`px-2.5 py-1 rounded-lg transition text-[11px] font-bold ${
+                      className={`px-2.5 py-1 rounded-lg transition text-[11px] font-bold cursor-pointer ${
                         drilldownPeriod === tab.id
                           ? 'bg-sky-600 text-white shadow-xs'
                           : 'text-slate-600 hover:text-slate-900 hover:bg-white'
@@ -9377,7 +9521,7 @@ export default function App() {
               })()}
             </div>
 
-            {/* SECTION 4: 12-MONTH HISTORICAL SALES VELOCITY & FESTIVAL SEASONS */}
+            {/* SECTION 4: 13-MONTH HISTORICAL SALES VELOCITY & FESTIVAL SEASONS */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <h4 className="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center">
@@ -9428,7 +9572,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setShowPriceBreakdownModal(false)}
-                className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition shadow-sm"
+                className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition shadow-sm cursor-pointer"
               >
                 Close Analysis
               </button>
